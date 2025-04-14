@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,44 +8,44 @@ import { Badge } from "@/components/ui/badge";
 const products = [
   {
     id: 1,
-    name: "Rose Glow Serum",
-    price: 89,
+    name: "Vitamin C Face Serum",
+    price: 599,
     rating: 4.8,
-    reviews: 124,
-    image: "https://images.unsplash.com/photo-1571875257727-256c39da42af?auto=format&fit=crop&w=800&q=80",
+    reviews: 1244,
+    image: "https://images.mamaearth.in/catalog/product/v/i/vit-c-serum-1.jpg",
     badgeText: "Bestseller",
     category: "skincare",
     isNew: false
   },
   {
     id: 2,
-    name: "Hydrating Cream",
-    price: 65,
-    rating: 4.6,
-    reviews: 89,
-    image: "https://images.unsplash.com/photo-1570194065650-d707c41c4754?auto=format&fit=crop&w=800&q=80",
+    name: "Ubtan Face Wash",
+    price: 259,
+    rating: 4.7,
+    reviews: 892,
+    image: "https://images.mamaearth.in/catalog/product/u/b/ubtan-face-wash_1.jpg",
     badgeText: "",
     category: "skincare",
     isNew: true
   },
   {
     id: 3,
-    name: "Crystal Essence",
-    price: 120,
+    name: "Onion Hair Oil",
+    price: 399,
     rating: 4.9,
-    reviews: 56,
-    image: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?auto=format&fit=crop&w=800&q=80",
+    reviews: 2156,
+    image: "https://images.mamaearth.in/catalog/product/o/n/onion-hair-oil-250ml.jpg",
     badgeText: "Limited",
-    category: "skincare",
+    category: "haircare",
     isNew: false
   },
   {
     id: 4,
-    name: "Renewal Oil",
-    price: 95,
+    name: "Tea Tree Face Wash",
+    price: 249,
     rating: 4.7,
-    reviews: 72,
-    image: "https://images.unsplash.com/photo-1611930022073-84f39e061afd?auto=format&fit=crop&w=800&q=80",
+    reviews: 723,
+    image: "https://images.mamaearth.in/catalog/product/t/e/tea-tree-face-wash.jpg",
     badgeText: "",
     category: "skincare",
     isNew: false
