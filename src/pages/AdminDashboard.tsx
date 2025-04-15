@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import Navbar from "@/components/Navbar";
@@ -23,11 +22,47 @@ import {
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { Search, Download, Eye, ArrowUpDown, Clock, CheckCircle, XCircle, AlertCircle, LogOut } from "lucide-react";
+import { Search, Download, Eye } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
+
+interface Order {
+  id: string;
+  user_id: string;
+  status: string;
+  total_amount: number;
+  shipping_address: string | null;
+  created_at: string;
+  order_items?: OrderItem[];
+}
+
+interface OrderItem {
+  id: string;
+  order_id: string;
+  product_id: string;
+  quantity: number;
+  price_at_time: number;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  price: number;
+  category: string | null;
+  stock: number;
+}
+
+interface Payment {
+  id: string;
+  order_id: string;
+  amount: number;
+  status: string;
+  payment_method: string | null;
+  transaction_id: string | null;
+  created_at: string;
+}
 
 const AdminDashboard = () => {
   // Auth-related state
@@ -36,9 +71,9 @@ const AdminDashboard = () => {
   const { toast } = useToast();
 
   // Data-related state
-  const [orders, setOrders] = useState<any[]>([]);
-  const [products, setProducts] = useState<any[]>([]);
-  const [payments, setPayments] = useState<any[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [payments, setPayments] = useState<Payment[]>([]);
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,
@@ -61,30 +96,27 @@ const AdminDashboard = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      // Fetch orders
+      // Fetch orders with order items
       const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
         .select(`
           *,
           order_items(*)
-        `)
-        .order('created_at', { ascending: false });
+        `);
 
       if (ordersError) throw ordersError;
       
       // Fetch products
       const { data: productsData, error: productsError } = await supabase
         .from('products')
-        .select('*')
-        .order('name');
+        .select();
 
       if (productsError) throw productsError;
 
       // Fetch payments
       const { data: paymentsData, error: paymentsError } = await supabase
         .from('payments')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select();
 
       if (paymentsError) throw paymentsError;
 

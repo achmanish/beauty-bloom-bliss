@@ -30,9 +30,9 @@ const Auth = () => {
       
       // Check if the user is an admin
       const { data: adminData, error: adminError } = await supabase
-        .from("admins")
-        .select("*")
-        .eq("id", data.user.id)
+        .from('admins')
+        .select()
+        .eq('id', data.user.id)
         .single();
       
       if (adminError || !adminData) {
@@ -61,33 +61,6 @@ const Auth = () => {
     }
   };
 
-  const handleSignUp = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-      
-      if (error) throw error;
-      
-      toast({
-        title: "Registration successful",
-        description: "Please check your email for verification instructions.",
-      });
-    } catch (error: any) {
-      toast({
-        title: "Registration failed",
-        description: error.message || "An error occurred during registration",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12">
       <div className="w-full max-w-md">
@@ -98,79 +71,36 @@ const Auth = () => {
               Enter your credentials to access the admin dashboard
             </CardDescription>
           </CardHeader>
-          <Tabs defaultValue="login" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="login">Login</TabsTrigger>
-              <TabsTrigger value="register">Register</TabsTrigger>
-            </TabsList>
-            <TabsContent value="login">
-              <form onSubmit={handleLogin}>
-                <CardContent className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="name@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                </CardContent>
-                <CardFooter>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Logging in..." : "Login"}
-                  </Button>
-                </CardFooter>
-              </form>
-            </TabsContent>
-            <TabsContent value="register">
-              <form onSubmit={handleSignUp}>
-                <CardContent className="space-y-4 pt-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="name@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                    />
-                  </div>
-                  <p className="text-xs text-gray-500">
-                    Note: New registrations require admin approval.
-                  </p>
-                </CardContent>
-                <CardFooter>
-                  <Button type="submit" className="w-full" disabled={loading}>
-                    {loading ? "Creating account..." : "Create account"}
-                  </Button>
-                </CardFooter>
-              </form>
-            </TabsContent>
-          </Tabs>
+          <form onSubmit={handleLogin}>
+            <CardContent className="space-y-4 pt-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="name@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+            </CardContent>
+            <CardFooter>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Logging in..." : "Login"}
+              </Button>
+            </CardFooter>
+          </form>
         </Card>
       </div>
     </div>
