@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
@@ -10,6 +9,9 @@ import Testimonials from "@/components/Testimonials";
 import BenefitsBanner from "@/components/BenefitsBanner";
 
 const Index = () => {
+  // Added state for wishlist items to keep track globally
+  const [wishlistItems, setWishlistItems] = useState<number[]>([]);
+
   return (
     <div className="min-h-screen bg-white">
       <Navbar />

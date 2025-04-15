@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { ShoppingBag, User, Search, Menu, X } from "lucide-react";
+import { ShoppingBag, User, Search, Menu, X, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/input";
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
+  const [wishlistCount, setWishlistCount] = useState(0);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -69,6 +70,17 @@ const Navbar = () => {
             <Link to="/account" className="text-burgundy hover:text-burgundy-light">
               <User className="h-5 w-5" />
             </Link>
+            
+            {/* Wishlist Icon */}
+            <Link to="/wishlist" className="text-burgundy hover:text-burgundy-light relative">
+              <Heart className="h-5 w-5" />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-burgundy text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                  {wishlistCount}
+                </span>
+              )}
+            </Link>
+            
             <Link to="/cart" className="text-burgundy hover:text-burgundy-light relative">
               <ShoppingBag className="h-5 w-5" />
               {cartCount > 0 && (
@@ -110,6 +122,9 @@ const Navbar = () => {
               <Link to="/about" className="text-burgundy hover:text-burgundy-light transition-colors">
                 About
               </Link>
+              <Link to="/wishlist" className="text-burgundy hover:text-burgundy-light transition-colors">
+                Wishlist
+              </Link>
               
               {/* Mobile search */}
               <div className="relative">
@@ -125,3 +140,4 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
