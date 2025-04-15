@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -22,231 +22,141 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Search, Download, Eye, ArrowUpDown, Clock, CheckCircle, XCircle, AlertCircle } from "lucide-react";
-
-// Mock orders data
-const orders = [
-  {
-    id: "#ORD-9385",
-    customer: "Rahul Sharma",
-    email: "rahul.s@example.com",
-    date: "2023-03-22",
-    status: "completed",
-    total: 5997,
-    items: [
-      { id: 1, name: "Vitamin C Face Serum", quantity: 1, price: 599 },
-      { id: 23, name: "Onion Hair Serum", quantity: 2, price: 449 },
-      { id: 62, name: "Vitamin C & SPF 50 Sunscreen", quantity: 1, price: 599 }
-    ],
-    paymentMethod: "Razorpay",
-    paymentStatus: "paid"
-  },
-  {
-    id: "#ORD-6295",
-    customer: "Priya Patel",
-    email: "priyap@example.com",
-    date: "2023-03-21",
-    status: "processing",
-    total: 1547,
-    items: [
-      { id: 7, name: "Rice Water Shampoo", quantity: 1, price: 349 },
-      { id: 14, name: "Onion Conditioner", quantity: 1, price: 349 },
-      { id: 20, name: "Tea Tree & Neem Face Serum", quantity: 1, price: 599 }
-    ],
-    paymentMethod: "Credit Card",
-    paymentStatus: "paid"
-  },
-  {
-    id: "#ORD-7845",
-    customer: "Ananya Singh",
-    email: "ananya@example.com",
-    date: "2023-03-20",
-    status: "shipped",
-    total: 1797,
-    items: [
-      { id: 3, name: "Onion Hair Oil", quantity: 1, price: 399 },
-      { id: 16, name: "Onion Hair Mask", quantity: 1, price: 499 },
-      { id: 23, name: "Onion Hair Serum", quantity: 2, price: 449 }
-    ],
-    paymentMethod: "UPI",
-    paymentStatus: "paid"
-  },
-  {
-    id: "#ORD-2354",
-    customer: "Arvind Kumar",
-    email: "arvind.k@example.com",
-    date: "2023-03-19",
-    status: "cancelled",
-    total: 897,
-    items: [
-      { id: 2, name: "Ubtan Face Wash", quantity: 1, price: 259 },
-      { id: 5, name: "Aloe Vera Gel", quantity: 1, price: 299 },
-      { id: 27, name: "Tea Tree Face Toner", quantity: 1, price: 349 }
-    ],
-    paymentMethod: "COD",
-    paymentStatus: "refunded"
-  },
-  {
-    id: "#ORD-1122",
-    customer: "Neha Verma",
-    email: "nehav@example.com",
-    date: "2023-03-18",
-    status: "completed",
-    total: 2396,
-    items: [
-      { id: 10, name: "Ubtan Face Mask", quantity: 1, price: 499 },
-      { id: 20, name: "Tea Tree & Neem Face Serum", quantity: 1, price: 599 },
-      { id: 28, name: "Vitamin C Day Cream", quantity: 1, price: 499 },
-      { id: 37, name: "Vitamin C Night Cream", quantity: 1, price: 549 }
-    ],
-    paymentMethod: "Credit Card",
-    paymentStatus: "paid"
-  },
-  {
-    id: "#ORD-5662",
-    customer: "Vikram Mehra",
-    email: "vikram@example.com",
-    date: "2023-03-17",
-    status: "pending",
-    total: 998,
-    items: [
-      { id: 5, name: "Aloe Vera Gel", quantity: 1, price: 299 },
-      { id: 11, name: "Tea Tree Body Wash", quantity: 1, price: 299 },
-      { id: 12, name: "Vitamin C Body Lotion", quantity: 1, price: 399 }
-    ],
-    paymentMethod: "COD",
-    paymentStatus: "pending"
-  },
-  {
-    id: "#ORD-8975",
-    customer: "Divya Joshi",
-    email: "divya.j@example.com",
-    date: "2023-03-16",
-    status: "shipped",
-    total: 1798,
-    items: [
-      { id: 1, name: "Vitamin C Face Serum", quantity: 1, price: 599 },
-      { id: 19, name: "Aloe Vera Sunscreen SPF 50", quantity: 1, price: 399 },
-      { id: 62, name: "Vitamin C & SPF 50 Sunscreen", quantity: 1, price: 599 },
-      { id: 41, name: "Vitamin C Lip Balm", quantity: 1, price: 199 }
-    ],
-    paymentMethod: "UPI",
-    paymentStatus: "paid"
-  },
-  {
-    id: "#ORD-3201",
-    customer: "Ravi Gupta",
-    email: "ravi.g@example.com",
-    date: "2023-03-15",
-    status: "completed",
-    total: 2694,
-    items: [
-      { id: 60, name: "Tea Tree & Neem Anti-Acne Kit", quantity: 1, price: 999 },
-      { id: 67, name: "Vitamin C & Niacinamide Serum", quantity: 1, price: 699 },
-      { id: 70, name: "Tea Tree & Salicylic Acid Spot Gel", quantity: 1, price: 349 },
-      { id: 45, name: "Tea Tree Face Scrub", quantity: 1, price: 349 },
-      { id: 27, name: "Tea Tree Face Toner", quantity: 1, price: 349 }
-    ],
-    paymentMethod: "Credit Card",
-    paymentStatus: "paid"
-  }
-];
-
-// Mock payment data
-const payments = [
-  {
-    id: "PAY-9385",
-    orderId: "#ORD-9385",
-    customer: "Rahul Sharma",
-    date: "2023-03-22",
-    amount: 5997,
-    method: "Razorpay",
-    status: "successful",
-    transactionId: "razp_12356789"
-  },
-  {
-    id: "PAY-6295",
-    orderId: "#ORD-6295",
-    customer: "Priya Patel",
-    date: "2023-03-21",
-    amount: 1547,
-    method: "Credit Card",
-    status: "successful",
-    transactionId: "cc_98765432"
-  },
-  {
-    id: "PAY-7845",
-    orderId: "#ORD-7845",
-    customer: "Ananya Singh",
-    date: "2023-03-20",
-    amount: 1797,
-    method: "UPI",
-    status: "successful",
-    transactionId: "upi_87654321"
-  },
-  {
-    id: "PAY-2354",
-    orderId: "#ORD-2354",
-    customer: "Arvind Kumar",
-    date: "2023-03-19",
-    amount: 897,
-    method: "COD",
-    status: "refunded",
-    transactionId: "cod_76543210"
-  },
-  {
-    id: "PAY-1122",
-    orderId: "#ORD-1122",
-    customer: "Neha Verma",
-    date: "2023-03-18",
-    amount: 2396,
-    method: "Credit Card",
-    status: "successful",
-    transactionId: "cc_65432109"
-  },
-  {
-    id: "PAY-5662",
-    orderId: "#ORD-5662",
-    customer: "Vikram Mehra",
-    date: "2023-03-17",
-    amount: 998,
-    method: "COD",
-    status: "pending",
-    transactionId: "cod_54321098"
-  },
-  {
-    id: "PAY-8975",
-    orderId: "#ORD-8975",
-    customer: "Divya Joshi",
-    date: "2023-03-16",
-    amount: 1798,
-    method: "UPI",
-    status: "successful",
-    transactionId: "upi_43210987"
-  },
-  {
-    id: "PAY-3201",
-    orderId: "#ORD-3201",
-    customer: "Ravi Gupta",
-    date: "2023-03-15",
-    amount: 2694,
-    method: "Credit Card",
-    status: "successful",
-    transactionId: "cc_32109876"
-  }
-];
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
+import { Search, Download, Eye, ArrowUpDown, Clock, CheckCircle, XCircle, AlertCircle, LogOut } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const AdminDashboard = () => {
+  // Auth-related state
+  const { user, signOut } = useAuth();
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  // Data-related state
+  const [orders, setOrders] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [payments, setPayments] = useState<any[]>([]);
+  const [stats, setStats] = useState({
+    totalOrders: 0,
+    totalRevenue: 0,
+    completedOrders: 0,
+    pendingPayments: 0,
+  });
+
+  // UI state
   const [searchOrder, setSearchOrder] = useState("");
   const [searchPayment, setSearchPayment] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [paymentFilter, setPaymentFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      // Fetch orders
+      const { data: ordersData, error: ordersError } = await supabase
+        .from('orders')
+        .select(`
+          *,
+          order_items(*)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (ordersError) throw ordersError;
+      
+      // Fetch products
+      const { data: productsData, error: productsError } = await supabase
+        .from('products')
+        .select('*')
+        .order('name');
+
+      if (productsError) throw productsError;
+
+      // Fetch payments
+      const { data: paymentsData, error: paymentsError } = await supabase
+        .from('payments')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (paymentsError) throw paymentsError;
+
+      // Update state with fetched data
+      setOrders(ordersData || []);
+      setProducts(productsData || []);
+      setPayments(paymentsData || []);
+
+      // Calculate stats
+      const totalRevenue = paymentsData?.reduce((sum, payment) => 
+        payment.status === 'successful' ? sum + Number(payment.amount) : sum, 0) || 0;
+      
+      setStats({
+        totalOrders: ordersData?.length || 0,
+        totalRevenue,
+        completedOrders: ordersData?.filter(order => order.status === 'completed').length || 0,
+        pendingPayments: paymentsData?.filter(payment => payment.status === 'pending').length || 0,
+      });
+
+    } catch (error) {
+      console.error("Error fetching data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load data. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await signOut();
+    navigate("/auth");
+    toast({
+      title: "Logged out",
+      description: "You have been logged out successfully",
+    });
+  };
+
+  const updateOrderStatus = async (orderId: string, status: string) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status })
+        .eq('id', orderId);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setOrders(orders.map(order => 
+        order.id === orderId ? { ...order, status } : order
+      ));
+      
+      toast({
+        title: "Order updated",
+        description: `Order ${orderId} status changed to ${status}`,
+      });
+    } catch (error) {
+      console.error("Error updating order:", error);
+      toast({
+        title: "Update failed",
+        description: "Failed to update order status. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Filter orders based on search and status
   const filteredOrders = orders.filter(order => {
     const matchesSearch = order.id.toLowerCase().includes(searchOrder.toLowerCase()) || 
-                         order.customer.toLowerCase().includes(searchOrder.toLowerCase()) || 
-                         order.email.toLowerCase().includes(searchOrder.toLowerCase());
+                         (order.user_id && order.user_id.toLowerCase().includes(searchOrder.toLowerCase()));
     const matchesStatus = statusFilter === "all" || order.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -254,8 +164,7 @@ const AdminDashboard = () => {
   // Filter payments based on search and payment status
   const filteredPayments = payments.filter(payment => {
     const matchesSearch = payment.id.toLowerCase().includes(searchPayment.toLowerCase()) || 
-                         payment.customer.toLowerCase().includes(searchPayment.toLowerCase()) || 
-                         payment.orderId.toLowerCase().includes(searchPayment.toLowerCase());
+                         (payment.order_id && payment.order_id.toLowerCase().includes(searchPayment.toLowerCase()));
     const matchesStatus = paymentFilter === "all" || payment.status === paymentFilter;
     return matchesSearch && matchesStatus;
   });
@@ -313,221 +222,328 @@ const AdminDashboard = () => {
       <Navbar />
       
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold text-burgundy mb-6">Admin Dashboard</h1>
-        
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Total Orders</CardTitle>
-              <CardDescription>Last 30 days</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold">{orders.length}</p>
-              <p className="text-sm text-green-600">+12% from last month</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Total Revenue</CardTitle>
-              <CardDescription>Last 30 days</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold">₹{payments.reduce((sum, payment) => sum + payment.amount, 0).toLocaleString()}</p>
-              <p className="text-sm text-green-600">+8% from last month</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Completed Orders</CardTitle>
-              <CardDescription>Last 30 days</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold">{orders.filter(order => order.status === "completed").length}</p>
-              <p className="text-sm text-green-600">+15% from last month</p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle className="text-lg">Pending Payments</CardTitle>
-              <CardDescription>Last 30 days</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-3xl font-bold">{payments.filter(payment => payment.status === "pending").length}</p>
-              <p className="text-sm text-red-600">-5% from last month</p>
-            </CardContent>
-          </Card>
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
+          <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
         </div>
         
-        <Tabs defaultValue="orders" className="w-full">
-          <TabsList className="mb-6">
-            <TabsTrigger value="orders">Orders</TabsTrigger>
-            <TabsTrigger value="payments">Payments</TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="orders" className="space-y-4">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-              <div className="flex-1 w-full md:w-auto">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    placeholder="Search orders..."
-                    className="pl-10 w-full"
-                    value={searchOrder}
-                    onChange={(e) => setSearchOrder(e.target.value)}
-                  />
-                </div>
-              </div>
+        {loading ? (
+          <div className="flex items-center justify-center h-64">
+            <p className="text-lg">Loading data...</p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Total Orders</CardTitle>
+                  <CardDescription>All Time</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold">{stats.totalOrders}</p>
+                </CardContent>
+              </Card>
               
-              <div className="flex flex-col md:flex-row items-center gap-4">
-                <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="processing">Processing</SelectItem>
-                    <SelectItem value="shipped">Shipped</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-                
-                <Button variant="outline" className="gap-2">
-                  <Download className="h-4 w-4" />
-                  Export
-                </Button>
-              </div>
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Total Revenue</CardTitle>
+                  <CardDescription>All Time</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold">₹{stats.totalRevenue.toLocaleString()}</p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Completed Orders</CardTitle>
+                  <CardDescription>All Time</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold">{stats.completedOrders}</p>
+                </CardContent>
+              </Card>
+              
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-lg">Pending Payments</CardTitle>
+                  <CardDescription>All Time</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-3xl font-bold">{stats.pendingPayments}</p>
+                </CardContent>
+              </Card>
             </div>
             
-            <div className="rounded-md border bg-white">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">Order ID</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Total</TableHead>
-                    <TableHead>Payment</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredOrders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-medium">{order.id}</TableCell>
-                      <TableCell>
-                        <div>
-                          <p className="font-medium">{order.customer}</p>
-                          <p className="text-sm text-gray-500">{order.email}</p>
-                        </div>
-                      </TableCell>
-                      <TableCell>{new Date(order.date).toLocaleDateString()}</TableCell>
-                      <TableCell>{getStatusBadge(order.status)}</TableCell>
-                      <TableCell>₹{order.total}</TableCell>
-                      <TableCell>{getPaymentStatusBadge(order.paymentStatus)}</TableCell>
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm">
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+            <Tabs defaultValue="orders" className="w-full">
+              <TabsList className="mb-6">
+                <TabsTrigger value="orders">Orders</TabsTrigger>
+                <TabsTrigger value="payments">Payments</TabsTrigger>
+                <TabsTrigger value="products">Products</TabsTrigger>
+              </TabsList>
               
-              {filteredOrders.length === 0 && (
-                <div className="py-12 text-center">
-                  <p className="text-gray-500">No orders found</p>
+              <TabsContent value="orders" className="space-y-4">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                  <div className="flex-1 w-full md:w-auto">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        placeholder="Search orders..."
+                        className="pl-10 w-full"
+                        value={searchOrder}
+                        onChange={(e) => setSearchOrder(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col md:flex-row items-center gap-4">
+                    <Select value={statusFilter} onValueChange={setStatusFilter}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Filter by status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="processing">Processing</SelectItem>
+                        <SelectItem value="shipped">Shipped</SelectItem>
+                        <SelectItem value="completed">Completed</SelectItem>
+                        <SelectItem value="cancelled">Cancelled</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    <Button variant="outline" className="gap-2">
+                      <Download className="h-4 w-4" />
+                      Export
+                    </Button>
+                  </div>
                 </div>
-              )}
-            </div>
-          </TabsContent>
-          
-          <TabsContent value="payments" className="space-y-4">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-              <div className="flex-1 w-full md:w-auto">
-                <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-                  <Input
-                    placeholder="Search payments..."
-                    className="pl-10 w-full"
-                    value={searchPayment}
-                    onChange={(e) => setSearchPayment(e.target.value)}
-                  />
-                </div>
-              </div>
-              
-              <div className="flex flex-col md:flex-row items-center gap-4">
-                <Select value={paymentFilter} onValueChange={setPaymentFilter}>
-                  <SelectTrigger className="w-[180px]">
-                    <SelectValue placeholder="Filter by status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="successful">Successful</SelectItem>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="refunded">Refunded</SelectItem>
-                    <SelectItem value="failed">Failed</SelectItem>
-                  </SelectContent>
-                </Select>
                 
-                <Button variant="outline" className="gap-2">
-                  <Download className="h-4 w-4" />
-                  Export
-                </Button>
-              </div>
-            </div>
-            
-            <div className="rounded-md border bg-white">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">Payment ID</TableHead>
-                    <TableHead>Order ID</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Method</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Transaction ID</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredPayments.map((payment) => (
-                    <TableRow key={payment.id}>
-                      <TableCell className="font-medium">{payment.id}</TableCell>
-                      <TableCell>{payment.orderId}</TableCell>
-                      <TableCell>{payment.customer}</TableCell>
-                      <TableCell>{new Date(payment.date).toLocaleDateString()}</TableCell>
-                      <TableCell>₹{payment.amount}</TableCell>
-                      <TableCell>
-                        <span className="inline-flex items-center gap-1">
-                          <span>{getPaymentIcon(payment.method)}</span>
-                          <span>{payment.method}</span>
-                        </span>
-                      </TableCell>
-                      <TableCell>{getPaymentStatusBadge(payment.status)}</TableCell>
-                      <TableCell className="text-right font-mono text-xs">
-                        {payment.transactionId}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-              
-              {filteredPayments.length === 0 && (
-                <div className="py-12 text-center">
-                  <p className="text-gray-500">No payments found</p>
+                <div className="rounded-md border bg-white">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[100px]">Order ID</TableHead>
+                        <TableHead>Customer</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Total</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredOrders.map((order) => (
+                        <TableRow key={order.id}>
+                          <TableCell className="font-medium">{order.id.substring(0, 8)}</TableCell>
+                          <TableCell>
+                            <div>
+                              <p className="font-medium">{order.user_id ? order.user_id.substring(0, 8) : 'Guest'}</p>
+                            </div>
+                          </TableCell>
+                          <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
+                          <TableCell>{getStatusBadge(order.status)}</TableCell>
+                          <TableCell>₹{Number(order.total_amount).toLocaleString()}</TableCell>
+                          <TableCell className="text-right">
+                            <Sheet>
+                              <SheetTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </SheetTrigger>
+                              <SheetContent className="w-[400px] sm:w-[540px] overflow-y-auto">
+                                <SheetHeader>
+                                  <SheetTitle>Order Details</SheetTitle>
+                                  <SheetDescription>
+                                    Order ID: {order.id.substring(0, 8)}
+                                  </SheetDescription>
+                                </SheetHeader>
+                                <div className="py-4">
+                                  <div className="space-y-4">
+                                    <div>
+                                      <h3 className="font-medium">Status</h3>
+                                      <div className="flex items-center gap-2 mt-1">
+                                        <Select 
+                                          defaultValue={order.status}
+                                          onValueChange={(value) => updateOrderStatus(order.id, value)}
+                                        >
+                                          <SelectTrigger>
+                                            <SelectValue />
+                                          </SelectTrigger>
+                                          <SelectContent>
+                                            <SelectItem value="pending">Pending</SelectItem>
+                                            <SelectItem value="processing">Processing</SelectItem>
+                                            <SelectItem value="shipped">Shipped</SelectItem>
+                                            <SelectItem value="completed">Completed</SelectItem>
+                                            <SelectItem value="cancelled">Cancelled</SelectItem>
+                                          </SelectContent>
+                                        </Select>
+                                      </div>
+                                    </div>
+                                    
+                                    <div>
+                                      <h3 className="font-medium">Order Items</h3>
+                                      <div className="mt-1 space-y-2">
+                                        {order.order_items && order.order_items.map((item: any) => (
+                                          <div key={item.id} className="flex justify-between border-b pb-2">
+                                            <div>
+                                              <p>{products.find(p => p.id === item.product_id)?.name || 'Unknown Product'}</p>
+                                              <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                                            </div>
+                                            <p>₹{Number(item.price_at_time).toLocaleString()}</p>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    </div>
+                                    
+                                    <div>
+                                      <h3 className="font-medium">Shipping Address</h3>
+                                      <p className="mt-1 text-gray-700">{order.shipping_address || 'No address provided'}</p>
+                                    </div>
+                                    
+                                    <div className="flex justify-between pt-2 border-t">
+                                      <p className="font-medium">Total Amount:</p>
+                                      <p className="font-bold">₹{Number(order.total_amount).toLocaleString()}</p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </SheetContent>
+                            </Sheet>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  
+                  {filteredOrders.length === 0 && (
+                    <div className="py-12 text-center">
+                      <p className="text-gray-500">No orders found</p>
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          </TabsContent>
-        </Tabs>
+              </TabsContent>
+              
+              <TabsContent value="payments" className="space-y-4">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                  <div className="flex-1 w-full md:w-auto">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                      <Input
+                        placeholder="Search payments..."
+                        className="pl-10 w-full"
+                        value={searchPayment}
+                        onChange={(e) => setSearchPayment(e.target.value)}
+                      />
+                    </div>
+                  </div>
+                  
+                  <div className="flex flex-col md:flex-row items-center gap-4">
+                    <Select value={paymentFilter} onValueChange={setPaymentFilter}>
+                      <SelectTrigger className="w-[180px]">
+                        <SelectValue placeholder="Filter by status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">All Statuses</SelectItem>
+                        <SelectItem value="successful">Successful</SelectItem>
+                        <SelectItem value="pending">Pending</SelectItem>
+                        <SelectItem value="refunded">Refunded</SelectItem>
+                        <SelectItem value="failed">Failed</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    
+                    <Button variant="outline" className="gap-2">
+                      <Download className="h-4 w-4" />
+                      Export
+                    </Button>
+                  </div>
+                </div>
+                
+                <div className="rounded-md border bg-white">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[100px]">Payment ID</TableHead>
+                        <TableHead>Order ID</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>Method</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Transaction ID</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredPayments.map((payment) => (
+                        <TableRow key={payment.id}>
+                          <TableCell className="font-medium">{payment.id.substring(0, 8)}</TableCell>
+                          <TableCell>{payment.order_id ? payment.order_id.substring(0, 8) : 'N/A'}</TableCell>
+                          <TableCell>{new Date(payment.created_at).toLocaleDateString()}</TableCell>
+                          <TableCell>₹{Number(payment.amount).toLocaleString()}</TableCell>
+                          <TableCell>
+                            <span className="inline-flex items-center gap-1">
+                              <span>{getPaymentIcon(payment.payment_method || 'Unknown')}</span>
+                              <span>{payment.payment_method || 'Unknown'}</span>
+                            </span>
+                          </TableCell>
+                          <TableCell>{getPaymentStatusBadge(payment.status)}</TableCell>
+                          <TableCell className="text-right font-mono text-xs">
+                            {payment.transaction_id || 'N/A'}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  
+                  {filteredPayments.length === 0 && (
+                    <div className="py-12 text-center">
+                      <p className="text-gray-500">No payments found</p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+              
+              <TabsContent value="products" className="space-y-4">
+                <div className="flex justify-between items-center mb-6">
+                  <h2 className="text-xl font-semibold">Product Management</h2>
+                  <Button>Add New Product</Button>
+                </div>
+                
+                <div className="rounded-md border bg-white">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Product Name</TableHead>
+                        <TableHead>Category</TableHead>
+                        <TableHead>Price</TableHead>
+                        <TableHead>Stock</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {products.map((product) => (
+                        <TableRow key={product.id}>
+                          <TableCell className="font-medium">{product.name}</TableCell>
+                          <TableCell>{product.category || 'Uncategorized'}</TableCell>
+                          <TableCell>₹{Number(product.price).toLocaleString()}</TableCell>
+                          <TableCell>{product.stock}</TableCell>
+                          <TableCell className="text-right">
+                            <Button variant="ghost" size="sm">Edit</Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                  
+                  {products.length === 0 && (
+                    <div className="py-12 text-center">
+                      <p className="text-gray-500">No products found</p>
+                    </div>
+                  )}
+                </div>
+              </TabsContent>
+            </Tabs>
+          </>
+        )}
       </div>
       
       <Footer />
