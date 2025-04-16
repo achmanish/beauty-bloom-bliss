@@ -45,7 +45,7 @@ import {
   ExternalLink,
   MapPin,
   ShoppingBag,
-  Clock
+  X
 } from "lucide-react";
 
 // Mock data types
@@ -931,3 +931,4 @@ const Account = () => {
 };
 
 export default Account;
+
