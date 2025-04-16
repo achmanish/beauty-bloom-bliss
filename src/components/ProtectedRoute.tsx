@@ -15,9 +15,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
-  // If not authenticated, redirect to login
+  // If not authenticated, redirect to admin login
   if (!user) {
-    return <Navigate to="/auth" replace />;
+    return <Navigate to="/admin-login" replace />;
   }
 
   // If authenticated but not admin, redirect to home with error

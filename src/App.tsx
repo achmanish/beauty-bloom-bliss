@@ -43,12 +43,12 @@ const App = () => (
             <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
+            <Route path="/admin-login" element={<Auth />} />
             <Route path="/admin" element={
               <ProtectedRoute>
                 <AdminDashboard />
               </ProtectedRoute>
             } />
-            <Route path="/auth" element={<Auth />} />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>

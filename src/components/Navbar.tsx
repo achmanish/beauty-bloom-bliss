@@ -8,6 +8,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
@@ -15,7 +16,7 @@ import { useAuth } from "@/context/AuthContext";
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
-  const { wishlistCount, isLoggedIn } = useAuth();
+  const { wishlistCount, isLoggedIn, isAdmin, signOut } = useAuth();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -58,6 +59,9 @@ const Navbar = () => {
             <Link to="/about" className="text-burgundy hover:text-burgundy-light transition-colors">
               About
             </Link>
+            <Link to="/contact" className="text-burgundy hover:text-burgundy-light transition-colors">
+              Contact
+            </Link>
           </div>
 
           {/* Search Bar - Desktop */}
@@ -68,9 +72,45 @@ const Navbar = () => {
 
           {/* Right side icons */}
           <div className="flex items-center space-x-4">
-            <Link to="/account" className="text-burgundy hover:text-burgundy-light">
-              <User className="h-5 w-5" />
-            </Link>
+            {/* User Account Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger className="text-burgundy hover:text-burgundy-light focus:outline-none">
+                <User className="h-5 w-5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-48">
+                {isLoggedIn ? (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/account" className="w-full cursor-pointer">My Account</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/orders" className="w-full cursor-pointer">My Orders</Link>
+                    </DropdownMenuItem>
+                    {isAdmin && (
+                      <DropdownMenuItem asChild>
+                        <Link to="/admin" className="w-full cursor-pointer">Admin Dashboard</Link>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem 
+                      onClick={() => signOut()}
+                      className="cursor-pointer text-red-600 hover:bg-red-50"
+                    >
+                      Sign Out
+                    </DropdownMenuItem>
+                  </>
+                ) : (
+                  <>
+                    <DropdownMenuItem asChild>
+                      <Link to="/account" className="w-full cursor-pointer">Sign In</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link to="/account" className="w-full cursor-pointer">Register</Link>
+                    </DropdownMenuItem>
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
             
             {/* Wishlist Icon */}
             <Link to="/wishlist" className="text-burgundy hover:text-burgundy-light relative">
@@ -92,7 +132,7 @@ const Navbar = () => {
             </Link>
             
             {/* Mobile menu button */}
-            <button className="md:hidden text-burgundy" onClick={toggleMenu}>
+            <button className="md:hidden text-burgundy" onClick={toggleMenu} aria-label="Toggle menu">
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
@@ -122,6 +162,9 @@ const Navbar = () => {
               </Link>
               <Link to="/about" className="text-burgundy hover:text-burgundy-light transition-colors">
                 About
+              </Link>
+              <Link to="/contact" className="text-burgundy hover:text-burgundy-light transition-colors">
+                Contact
               </Link>
               <Link to="/wishlist" className="text-burgundy hover:text-burgundy-light transition-colors">
                 Wishlist
