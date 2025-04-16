@@ -16,6 +16,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import Auth from "./pages/Auth";
 import About from "./pages/About";
 import Contact from "./pages/Contact";
+import Wishlist from "./pages/Wishlist";
 import { AuthProvider } from "./context/AuthContext";
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -39,7 +40,7 @@ const App = () => (
             <Route path="/order-confirmation" element={<OrderConfirmation />} />
             <Route path="/account" element={<Account />} />
             <Route path="/orders" element={<Account />} />
-            <Route path="/wishlist" element={<Account />} />
+            <Route path="/wishlist" element={<Wishlist />} />
             <Route path="/about" element={<About />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/admin" element={

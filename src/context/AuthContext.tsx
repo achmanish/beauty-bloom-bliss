@@ -7,7 +7,9 @@ type AuthContextType = {
   session: Session | null;
   user: User | null;
   isAdmin: boolean;
+  isLoggedIn: boolean;
   loading: boolean;
+  wishlistCount: number;
   signOut: () => Promise<void>;
 };
 
@@ -18,6 +20,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
+  // Adding wishlist count state
+  const [wishlistCount, setWishlistCount] = useState(0);
 
   useEffect(() => {
     // Set up auth state listener
@@ -31,8 +35,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setTimeout(() => {
             checkAdminStatus(session.user.id);
           }, 0);
+          
+          // Load wishlist count when user logs in
+          fetchWishlistCount();
         } else {
           setIsAdmin(false);
+          setWishlistCount(0);
         }
       }
     );
@@ -44,6 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (session?.user) {
         checkAdminStatus(session.user.id);
+        fetchWishlistCount();
       }
       
       setLoading(false);
@@ -53,6 +62,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscription.unsubscribe();
     };
   }, []);
+
+  const fetchWishlistCount = () => {
+    // In a real implementation, this would fetch from Supabase
+    // For now, we'll use a mock value for demonstration
+    setWishlistCount(3);
+  };
 
   const checkAdminStatus = async (userId: string) => {
     try {
@@ -80,7 +95,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ session, user, isAdmin, loading, signOut }}>
+    <AuthContext.Provider value={{ 
+      session, 
+      user, 
+      isAdmin, 
+      isLoggedIn: !!user, 
+      loading, 
+      wishlistCount,
+      signOut 
+    }}>
       {children}
     </AuthContext.Provider>
   );
