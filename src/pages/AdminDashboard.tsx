@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -214,37 +213,27 @@ const AdminDashboard = () => {
             <>
               <StatsCards stats={stats} />
               
-              {/* Mobile Tabs */}
+              {/* Mobile Tabs - FIXED: Wrapped in Tabs component */}
               <div className="block md:hidden mb-6">
-                <TabsList className="w-full">
-                  <TabsTrigger 
-                    value="orders" 
-                    className={`flex-1 ${activeTab === "orders" ? "bg-gray-100" : ""}`}
-                    onClick={() => setActiveTab("orders")}
-                  >
-                    <ShoppingBag className="h-4 w-4 mr-2" />
-                    Orders
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="payments" 
-                    className={`flex-1 ${activeTab === "payments" ? "bg-gray-100" : ""}`}
-                    onClick={() => setActiveTab("payments")}
-                  >
-                    <CreditCard className="h-4 w-4 mr-2" />
-                    Payments
-                  </TabsTrigger>
-                  <TabsTrigger 
-                    value="products" 
-                    className={`flex-1 ${activeTab === "products" ? "bg-gray-100" : ""}`}
-                    onClick={() => setActiveTab("products")}
-                  >
-                    <Package className="h-4 w-4 mr-2" />
-                    Products
-                  </TabsTrigger>
-                </TabsList>
+                <Tabs value={activeTab} onValueChange={setActiveTab}>
+                  <TabsList className="w-full">
+                    <TabsTrigger value="orders" className="flex-1">
+                      <ShoppingBag className="h-4 w-4 mr-2" />
+                      Orders
+                    </TabsTrigger>
+                    <TabsTrigger value="payments" className="flex-1">
+                      <CreditCard className="h-4 w-4 mr-2" />
+                      Payments
+                    </TabsTrigger>
+                    <TabsTrigger value="products" className="flex-1">
+                      <Package className="h-4 w-4 mr-2" />
+                      Products
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
               </div>
               
-              <Tabs value={activeTab} className="w-full">
+              <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                 <TabsContent value="orders" className="mt-6 space-y-4">
                   <OrdersTab orders={orders} products={products} />
                 </TabsContent>
