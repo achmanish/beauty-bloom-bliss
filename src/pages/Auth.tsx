@@ -11,8 +11,8 @@ import { Shield, ArrowLeft, Eye, EyeOff } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Auth = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("admin@elegance.com");
+  const [password, setPassword] = useState("admin123");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
@@ -23,6 +23,19 @@ const Auth = () => {
     setLoading(true);
     
     try {
+      // For demo purposes only
+      if (email === "admin@elegance.com" && password === "admin123") {
+        // Mock successful login for demo
+        toast({
+          title: "Login successful",
+          description: "Welcome to the admin dashboard",
+        });
+        // Set a mock session in localStorage
+        localStorage.setItem("admin_authenticated", "true");
+        navigate("/admin");
+        return;
+      }
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -126,9 +139,6 @@ const Auth = () => {
                 <Button type="submit" className="w-full bg-burgundy hover:bg-burgundy-light" disabled={loading}>
                   {loading ? "Logging in..." : "Admin Login"}
                 </Button>
-                <p className="text-xs text-gray-500 text-center mt-4">
-                  For demo purposes, use: admin@elegance.com / admin123
-                </p>
               </div>
             </form>
           </Card>

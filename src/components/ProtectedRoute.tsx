@@ -1,5 +1,5 @@
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
 
@@ -9,9 +9,18 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { user, isAdmin, loading } = useAuth();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  useEffect(() => {
+    // Check for both real Supabase auth and our mock demo auth
+    const adminAuthenticated = localStorage.getItem("admin_authenticated") === "true";
+    setIsAuthenticated(!!user || adminAuthenticated);
+    setCheckingAuth(false);
+  }, [user]);
 
   // If still loading, show a better loading indicator
-  if (loading) {
+  if (loading || checkingAuth) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="flex flex-col items-center">
@@ -23,11 +32,16 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   }
 
   // If not authenticated, redirect to admin login
-  if (!user) {
+  if (!isAuthenticated) {
     return <Navigate to="/admin-login" replace />;
   }
 
-  // If authenticated but not admin, redirect to home with error
+  // For demo purposes, we'll allow access if they're authenticated with our mock
+  if (localStorage.getItem("admin_authenticated") === "true") {
+    return <>{children}</>;
+  }
+
+  // For real Supabase auth, check admin role
   if (!isAdmin) {
     return <Navigate to="/" replace />;
   }
