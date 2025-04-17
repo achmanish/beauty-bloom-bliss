@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingBag, User, Search, Menu, X, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,13 +12,82 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
+import { useCartContext } from "@/pages/AdminDashboard"; // Import the cart context
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [cartCount, setCartCount] = useState(0);
   const { wishlistCount, isLoggedIn, isAdmin, signOut } = useAuth();
+  
+  // Use the cart context if available, otherwise use local state
+  const cartContext = useCartContext();
+  const [localCartCount, setLocalCartCount] = useState(0);
+  
+  // Get cart count from context or local state
+  const cartCount = cartContext?.cartCount ?? localCartCount;
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  // Initialize cart count from localStorage
+  useEffect(() => {
+    const savedCart = localStorage.getItem('cartItems');
+    if (savedCart) {
+      try {
+        const count = JSON.parse(savedCart).length;
+        setLocalCartCount(count);
+        // Also update context if available
+        if (cartContext?.updateCartCount) {
+          cartContext.updateCartCount(count);
+        }
+      } catch (e) {
+        console.error("Error parsing cart data", e);
+      }
+    }
+  }, []);
+
+  // Listen for changes to localStorage
+  useEffect(() => {
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'cartItems') {
+        if (e.newValue) {
+          try {
+            const count = JSON.parse(e.newValue).length;
+            setLocalCartCount(count);
+            // Also update context if available
+            if (cartContext?.updateCartCount) {
+              cartContext.updateCartCount(count);
+            }
+          } catch (error) {
+            console.error("Error parsing cart data", error);
+          }
+        } else {
+          setLocalCartCount(0);
+          // Also update context if available
+          if (cartContext?.updateCartCount) {
+            cartContext.updateCartCount(0);
+          }
+        }
+      }
+    };
+
+    // We need to handle custom events for updates from the same tab
+    const handleCustomEvent = (e: CustomEvent) => {
+      if (e.detail && typeof e.detail === 'number') {
+        setLocalCartCount(e.detail);
+        // Also update context if available
+        if (cartContext?.updateCartCount) {
+          cartContext.updateCartCount(e.detail);
+        }
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('cartUpdated', handleCustomEvent as EventListener);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('cartUpdated', handleCustomEvent as EventListener);
+    };
+  }, [cartContext]);
 
   return (
     <nav className="bg-cream py-4 sticky top-0 z-50 shadow-sm">
@@ -74,7 +143,7 @@ const Navbar = () => {
           <div className="flex items-center space-x-4">
             {/* User Account Dropdown */}
             <DropdownMenu>
-              <DropdownMenuTrigger className="text-burgundy hover:text-burgundy-light focus:outline-none">
+              <DropdownMenuTrigger className="text-burgundy hover:text-burgundy-light focus:outline-none transition-colors">
                 <User className="h-5 w-5" />
               </DropdownMenuTrigger>
               <DropdownMenuContent className="w-48">
@@ -113,7 +182,7 @@ const Navbar = () => {
             </DropdownMenu>
             
             {/* Wishlist Icon */}
-            <Link to="/wishlist" className="text-burgundy hover:text-burgundy-light relative">
+            <Link to="/wishlist" className="text-burgundy hover:text-burgundy-light relative transition-colors">
               <Heart className="h-5 w-5" />
               {wishlistCount > 0 && (
                 <span className="absolute -top-2 -right-2 bg-burgundy text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
@@ -122,10 +191,10 @@ const Navbar = () => {
               )}
             </Link>
             
-            <Link to="/cart" className="text-burgundy hover:text-burgundy-light relative">
+            <Link to="/cart" className="text-burgundy hover:text-burgundy-light relative transition-transform hover:scale-110">
               <ShoppingBag className="h-5 w-5" />
               {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-burgundy text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                <span className="absolute -top-2 -right-2 bg-burgundy text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-scale-in">
                   {cartCount}
                 </span>
               )}

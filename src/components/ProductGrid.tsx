@@ -1,11 +1,12 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
+import { useCartContext } from "@/pages/AdminDashboard"; // Import the cart context
 
 // Import a large selection of products (first 100)
 import { allProducts } from "@/data/productData";
@@ -20,6 +21,21 @@ interface ProductGridProps {
 const ProductGrid = ({ limit = 100, showTitle = true, title = "Our Products", category }: ProductGridProps) => {
   const [wishlist, setWishlist] = useState<number[]>([]);
   const { toast } = useToast();
+  const cartContext = useCartContext();
+
+  // Function to update cart in localStorage and dispatch event
+  const updateCart = (items: any[]) => {
+    localStorage.setItem('cartItems', JSON.stringify(items));
+    
+    // Dispatch a custom event for the same tab
+    const event = new CustomEvent('cartUpdated', { detail: items.length });
+    window.dispatchEvent(event);
+    
+    // Update context if available
+    if (cartContext?.updateCartCount) {
+      cartContext.updateCartCount(items.length);
+    }
+  };
 
   const toggleWishlist = (productId: number) => {
     if (wishlist.includes(productId)) {
@@ -37,7 +53,35 @@ const ProductGrid = ({ limit = 100, showTitle = true, title = "Our Products", ca
     }
   };
 
-  const addToCart = () => {
+  const addToCart = (product: any) => {
+    // Get current cart items
+    const cartItems = localStorage.getItem('cartItems') 
+      ? JSON.parse(localStorage.getItem('cartItems') || '[]') 
+      : [];
+    
+    // Check if product is already in cart
+    const existingItem = cartItems.find((item: any) => item.id === product.id);
+    
+    if (existingItem) {
+      // Update quantity
+      const updatedItems = cartItems.map((item: any) => 
+        item.id === product.id 
+          ? { ...item, quantity: item.quantity + 1 } 
+          : item
+      );
+      updateCart(updatedItems);
+    } else {
+      // Add new item
+      const newItem = {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image: product.image,
+        quantity: 1
+      };
+      updateCart([...cartItems, newItem]);
+    }
+    
     toast({
       title: "Added to cart",
       description: "Product has been added to your cart",
@@ -126,9 +170,9 @@ const ProductGrid = ({ limit = 100, showTitle = true, title = "Our Products", ca
                   </div>
                   
                   <Button 
-                    onClick={addToCart} 
+                    onClick={() => addToCart(product)} 
                     size="sm" 
-                    className="mt-auto w-full bg-burgundy hover:bg-burgundy-light text-white text-xs"
+                    className="mt-auto w-full bg-burgundy hover:bg-burgundy-light text-white text-xs transition-all duration-200 hover:scale-105"
                   >
                     <ShoppingBag className="h-3 w-3 mr-1" />
                     Add to Cart
