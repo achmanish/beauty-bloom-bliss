@@ -6,22 +6,29 @@ import { Button } from "@/components/ui/button";
 import { ShoppingBag, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
-import { useCartContext } from "@/context/CartContext"; // Updated import
+import { useCartContext } from "@/context/CartContext";
 
 // Import a large selection of products (first 100)
-import { allProducts } from "@/data/productData";
+import { allProducts, Product } from "@/data/productData";
 
 interface ProductGridProps {
   limit?: number;
   showTitle?: boolean;
   title?: string;
   category?: string;
+  customProducts?: Product[];
 }
 
-const ProductGrid = ({ limit = 100, showTitle = true, title = "Our Products", category }: ProductGridProps) => {
+const ProductGrid = ({ 
+  limit = 100, 
+  showTitle = true, 
+  title = "Our Products", 
+  category,
+  customProducts
+}: ProductGridProps) => {
   const [wishlist, setWishlist] = useState<number[]>([]);
   const { toast } = useToast();
-  const cartContext = useCartContext(); // Use the new context
+  const cartContext = useCartContext();
 
   // Function to update cart in localStorage and dispatch event
   const updateCart = (items: any[]) => {
@@ -88,10 +95,13 @@ const ProductGrid = ({ limit = 100, showTitle = true, title = "Our Products", ca
     });
   };
   
-  // Filter products by category if provided
-  let displayProducts = category 
-    ? allProducts.filter(p => p.category === category) 
-    : allProducts;
+  // Determine which products to display
+  let displayProducts: Product[] = customProducts || allProducts;
+  
+  // Apply category filter if provided and custom products not provided
+  if (!customProducts && category) {
+    displayProducts = displayProducts.filter(p => p.category === category);
+  }
   
   // Apply limit to number of products displayed
   displayProducts = displayProducts.slice(0, limit);
@@ -182,6 +192,13 @@ const ProductGrid = ({ limit = 100, showTitle = true, title = "Our Products", ca
             </Card>
           ))}
         </div>
+        
+        {displayProducts.length === 0 && (
+          <div className="py-20 text-center">
+            <p className="text-gray-500 text-lg">No products match your filters</p>
+            <p className="text-gray-400 mt-2">Try adjusting your filter criteria</p>
+          </div>
+        )}
       </div>
     </section>
   );

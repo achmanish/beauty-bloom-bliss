@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Product } from "@/types/admin";
@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ProductsTabProps {
   products: Product[];
@@ -18,18 +19,45 @@ const ProductsTab = ({ products }: ProductsTabProps) => {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [priceRange, setPriceRange] = useState([0, 10000]);
   const [showFilters, setShowFilters] = useState(false);
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(products);
+  const { toast } = useToast();
 
   // Get unique categories from products
   const categories = ["all", ...new Set(products.map(p => p.category || "uncategorized"))];
   
-  // Filter products based on search, category, and price range
-  const filteredProducts = products.filter(product => {
-    const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = categoryFilter === "all" || product.category === categoryFilter;
-    const matchesPrice = Number(product.price) >= priceRange[0] && Number(product.price) <= priceRange[1];
+  // Apply filters when products, searchTerm, categoryFilter, or priceRange changes
+  useEffect(() => {
+    applyFilters();
+  }, [products]); // Only re-run when products array changes, not on every filter change
+  
+  // Apply filters function
+  const applyFilters = () => {
+    let results = [...products];
     
-    return matchesSearch && matchesCategory && matchesPrice;
-  });
+    // Filter by search term
+    if (searchTerm.trim() !== "") {
+      results = results.filter(product => 
+        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+    
+    // Filter by category
+    if (categoryFilter !== "all") {
+      results = results.filter(product => product.category === categoryFilter);
+    }
+    
+    // Filter by price range
+    results = results.filter(product => 
+      Number(product.price) >= priceRange[0] && Number(product.price) <= priceRange[1]
+    );
+    
+    setFilteredProducts(results);
+    
+    toast({
+      title: `Filters Applied`,
+      description: `Found ${results.length} product${results.length !== 1 ? 's' : ''}`,
+    });
+  };
 
   return (
     <div className="space-y-4">
@@ -94,6 +122,15 @@ const ProductsTab = ({ products }: ProductsTabProps) => {
                 onValueChange={setPriceRange}
                 className="mt-2"
               />
+            </div>
+            
+            <div className="col-span-1 md:col-span-3 flex justify-end">
+              <Button 
+                onClick={applyFilters}
+                className="bg-burgundy hover:bg-burgundy/90 transition-colors"
+              >
+                Apply Filters
+              </Button>
             </div>
           </div>
         </div>

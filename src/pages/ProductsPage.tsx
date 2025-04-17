@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Slider } from "@/components/ui/slider";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -12,7 +12,7 @@ import {
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import ProductGrid from "@/components/ProductGrid";
-import { allProducts } from "@/data/productData";
+import { allProducts, Product } from "@/data/productData";
 import { Button } from "@/components/ui/button";
 
 const categories = [
@@ -23,10 +23,10 @@ const categories = [
 ];
 
 const concerns = [
-  { name: "Anti-Aging", count: 25 },
-  { name: "Hydration", count: 40 },
-  { name: "Brightening", count: 30 },
-  { name: "Acne Control", count: 15 }
+  { name: "Anti-Aging", value: "anti-aging", count: 25 },
+  { name: "Hydration", value: "hydration", count: 40 },
+  { name: "Brightening", value: "brightening", count: 30 },
+  { name: "Acne Control", value: "acne-control", count: 15 }
 ];
 
 const ProductsPage = () => {
@@ -34,8 +34,11 @@ const ProductsPage = () => {
   const [priceRange, setPriceRange] = useState([0, 1000]);
   const [sortBy, setSortBy] = useState("featured");
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedConcerns, setSelectedConcerns] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>(allProducts);
   
+  // Toggle category selection
   const toggleCategory = (category: string) => {
     if (selectedCategories.includes(category)) {
       setSelectedCategories(selectedCategories.filter(c => c !== category));
@@ -44,11 +47,79 @@ const ProductsPage = () => {
     }
   };
   
+  // Toggle concern selection
+  const toggleConcern = (concern: string) => {
+    if (selectedConcerns.includes(concern)) {
+      setSelectedConcerns(selectedConcerns.filter(c => c !== concern));
+    } else {
+      setSelectedConcerns([...selectedConcerns, concern]);
+    }
+  };
+  
+  // Reset all filters
   const resetFilters = () => {
     setPriceRange([0, 1000]);
     setSelectedCategories([]);
+    setSelectedConcerns([]);
     setSearchQuery("");
     setSortBy("featured");
+    setFilteredProducts(allProducts);
+  };
+  
+  // Apply filters to products
+  const applyFilters = () => {
+    let results = [...allProducts];
+    
+    // Filter by search query
+    if (searchQuery.trim() !== "") {
+      results = results.filter(product => 
+        product.name.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    // Filter by selected categories
+    if (selectedCategories.length > 0) {
+      results = results.filter(product => 
+        selectedCategories.includes(product.category)
+      );
+    }
+    
+    // Filter by selected concerns
+    if (selectedConcerns.length > 0) {
+      results = results.filter(product => 
+        // Check if any of the product's tags match the selected concerns
+        product.tags?.some(tag => 
+          selectedConcerns.includes(tag) || 
+          selectedConcerns.some(concern => tag.includes(concern))
+        )
+      );
+    }
+    
+    // Filter by price range
+    results = results.filter(product => 
+      (product.price / 100) >= priceRange[0] && 
+      (product.price / 100) <= priceRange[1]
+    );
+    
+    // Apply sorting
+    switch (sortBy) {
+      case "price-low":
+        results.sort((a, b) => a.price - b.price);
+        break;
+      case "price-high":
+        results.sort((a, b) => b.price - a.price);
+        break;
+      case "rating":
+        results.sort((a, b) => b.rating - a.rating);
+        break;
+      case "newest":
+        results.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+        break;
+      default: // "featured"
+        results.sort((a, b) => (b.isBestseller ? 1 : 0) - (a.isBestseller ? 1 : 0));
+    }
+    
+    setFilteredProducts(results);
   };
   
   return (
@@ -163,9 +234,13 @@ const ProductsPage = () => {
                 <div className="space-y-2">
                   {concerns.map((concern) => (
                     <div key={concern.name} className="flex items-center">
-                      <Checkbox id={`concern-${concern.name.toLowerCase()}`} />
+                      <Checkbox 
+                        id={`concern-${concern.value}`}
+                        checked={selectedConcerns.includes(concern.value)}
+                        onCheckedChange={() => toggleConcern(concern.value)}
+                      />
                       <label
-                        htmlFor={`concern-${concern.name.toLowerCase()}`}
+                        htmlFor={`concern-${concern.value}`}
                         className="ml-2 text-sm text-gray-700"
                       >
                         {concern.name} ({concern.count})
@@ -178,6 +253,7 @@ const ProductsPage = () => {
               <div className="flex space-x-2">
                 <Button
                   className="bg-burgundy hover:bg-burgundy-light text-white flex-grow"
+                  onClick={applyFilters}
                 >
                   Apply Filters
                 </Button>
@@ -261,9 +337,13 @@ const ProductsPage = () => {
                 <CollapsibleContent className="space-y-2">
                   {concerns.map((concern) => (
                     <div key={concern.name} className="flex items-center">
-                      <Checkbox id={`desktop-concern-${concern.name.toLowerCase()}`} />
+                      <Checkbox 
+                        id={`desktop-concern-${concern.value}`}
+                        checked={selectedConcerns.includes(concern.value)}
+                        onCheckedChange={() => toggleConcern(concern.value)}
+                      />
                       <label
-                        htmlFor={`desktop-concern-${concern.name.toLowerCase()}`}
+                        htmlFor={`desktop-concern-${concern.value}`}
                         className="ml-2 text-sm text-gray-700"
                       >
                         {concern.name} ({concern.count})
@@ -276,6 +356,7 @@ const ProductsPage = () => {
               <div className="flex space-x-2">
                 <Button
                   className="bg-burgundy hover:bg-burgundy-light text-white flex-grow"
+                  onClick={applyFilters}
                 >
                   Apply Filters
                 </Button>
@@ -294,7 +375,7 @@ const ProductsPage = () => {
           <div className="md:w-3/4">
             {/* Desktop Sort Options */}
             <div className="hidden md:flex justify-between items-center mb-6">
-              <p className="text-gray-500">{allProducts.length} products</p>
+              <p className="text-gray-500">{filteredProducts.length} products</p>
               
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-600">Sort by:</span>
@@ -315,7 +396,8 @@ const ProductsPage = () => {
               </div>
             </div>
             
-            <ProductGrid showTitle={false} />
+            {/* Modified ProductGrid component usage with our filtered products */}
+            <ProductGrid showTitle={false} customProducts={filteredProducts} />
           </div>
         </div>
       </div>
