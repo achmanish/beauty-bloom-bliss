@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingBag, User, Search, Menu, X, Heart } from "lucide-react";
@@ -12,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
-import { useCartContext } from "@/pages/AdminDashboard"; // Import the cart context
+import { useCartContext } from "@/context/CartContext"; // Fixed import path
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

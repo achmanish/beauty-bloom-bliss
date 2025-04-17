@@ -3,12 +3,12 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Product } from "@/types/admin";
-import { Search, Filter, Edit, Plus } from "lucide-react";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Slider } from "@/components/ui/slider";
+import { Filter, Edit, Plus } from "lucide-react";
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card";
 import { useToast } from "@/components/ui/use-toast";
+import AdminSearchFilter from "./filters/AdminSearchFilter";
+import AdminCategoryFilter from "./filters/AdminCategoryFilter";
+import AdminPriceRangeFilter from "./filters/AdminPriceRangeFilter";
 
 interface ProductsTabProps {
   products: Product[];
@@ -25,10 +25,10 @@ const ProductsTab = ({ products }: ProductsTabProps) => {
   // Get unique categories from products
   const categories = ["all", ...new Set(products.map(p => p.category || "uncategorized"))];
   
-  // Apply filters when products, searchTerm, categoryFilter, or priceRange changes
+  // Apply filters when products change
   useEffect(() => {
-    applyFilters();
-  }, [products]); // Only re-run when products array changes, not on every filter change
+    setFilteredProducts(products);
+  }, [products]);
   
   // Apply filters function
   const applyFilters = () => {
@@ -63,15 +63,10 @@ const ProductsTab = ({ products }: ProductsTabProps) => {
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
         <div className="flex-1 w-full md:w-auto">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              placeholder="Search products..."
-              className="pl-10 w-full"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+          <AdminSearchFilter 
+            searchTerm={searchTerm} 
+            setSearchTerm={setSearchTerm} 
+          />
         </div>
         
         <div className="flex items-center gap-2">
@@ -94,35 +89,16 @@ const ProductsTab = ({ products }: ProductsTabProps) => {
       {showFilters && (
         <div className="bg-gray-50 p-4 rounded-md border mb-4 animate-fade-in">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="text-sm font-medium mb-1 block">Category</label>
-              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories.map(category => (
-                    <SelectItem key={category} value={category}>
-                      {category === "all" ? "All Categories" : category.charAt(0).toUpperCase() + category.slice(1)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <AdminCategoryFilter 
+              categoryFilter={categoryFilter}
+              setCategoryFilter={setCategoryFilter}
+              categories={categories}
+            />
             
-            <div className="col-span-1 md:col-span-2">
-              <label className="text-sm font-medium mb-1 block">
-                Price Range: ₹{priceRange[0]} - ₹{priceRange[1]}
-              </label>
-              <Slider
-                defaultValue={[0, 10000]}
-                max={10000}
-                step={100}
-                value={priceRange}
-                onValueChange={setPriceRange}
-                className="mt-2"
-              />
-            </div>
+            <AdminPriceRangeFilter 
+              priceRange={priceRange}
+              setPriceRange={setPriceRange}
+            />
             
             <div className="col-span-1 md:col-span-3 flex justify-end">
               <Button 
@@ -160,12 +136,11 @@ const ProductsTab = ({ products }: ProductsTabProps) => {
                         <div className="space-y-1">
                           <h4 className="text-sm font-semibold">{product.name}</h4>
                           <p className="text-sm">
-                            {/* Use optional chaining to prevent errors if description doesn't exist */}
                             No detailed description available.
                           </p>
                           <div className="flex items-center pt-2">
                             <span className="text-xs text-gray-500">
-                              ID: {product.id.substring(0, 8)}
+                              ID: {product.id.toString().substring(0, 8)}
                             </span>
                           </div>
                         </div>
