@@ -1,12 +1,12 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
-import { useCartContext } from "@/pages/AdminDashboard"; // Import the cart context
+import { useCartContext } from "@/context/CartContext"; // Updated import
 
 // Import a large selection of products (first 100)
 import { allProducts } from "@/data/productData";
@@ -21,7 +21,7 @@ interface ProductGridProps {
 const ProductGrid = ({ limit = 100, showTitle = true, title = "Our Products", category }: ProductGridProps) => {
   const [wishlist, setWishlist] = useState<number[]>([]);
   const { toast } = useToast();
-  const cartContext = useCartContext();
+  const cartContext = useCartContext(); // Use the new context
 
   // Function to update cart in localStorage and dispatch event
   const updateCart = (items: any[]) => {

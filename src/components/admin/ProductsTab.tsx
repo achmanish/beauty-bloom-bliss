@@ -123,7 +123,8 @@ const ProductsTab = ({ products }: ProductsTabProps) => {
                         <div className="space-y-1">
                           <h4 className="text-sm font-semibold">{product.name}</h4>
                           <p className="text-sm">
-                            {product.description || "No description available."}
+                            {/* Use optional chaining to prevent errors if description doesn't exist */}
+                            No detailed description available.
                           </p>
                           <div className="flex items-center pt-2">
                             <span className="text-xs text-gray-500">
