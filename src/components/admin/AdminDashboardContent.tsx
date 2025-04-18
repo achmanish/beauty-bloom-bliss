@@ -5,7 +5,7 @@ import OrdersTab from "@/components/admin/OrdersTab";
 import PaymentsTab from "@/components/admin/PaymentsTab";
 import ProductsTab from "@/components/admin/ProductsTab";
 import { Order, Product, Payment } from "@/types/admin";
-import { LogOut } from "lucide-react";
+import { LogOut, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -23,6 +23,7 @@ interface AdminDashboardContentProps {
   products: Product[];
   payments: Payment[];
   handleLogout: () => void;
+  refreshData?: () => void;
 }
 
 const AdminDashboardContent = ({
@@ -33,7 +34,8 @@ const AdminDashboardContent = ({
   orders,
   products,
   payments,
-  handleLogout
+  handleLogout,
+  refreshData
 }: AdminDashboardContentProps) => {
   
   // Render active tab content based on the selected tab
@@ -67,14 +69,26 @@ const AdminDashboardContent = ({
       {/* Page Header for desktop */}
       <div className="hidden md:flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
-        <Button 
-          variant="outline" 
-          onClick={handleLogout} 
-          className="flex items-center gap-2 hover:bg-gray-100 transition-colors"
-        >
-          <LogOut className="h-4 w-4" />
-          Logout
-        </Button>
+        <div className="flex gap-2">
+          {refreshData && (
+            <Button 
+              variant="outline" 
+              onClick={refreshData} 
+              className="flex items-center gap-2 hover:bg-gray-100 transition-colors"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Refresh Data
+            </Button>
+          )}
+          <Button 
+            variant="outline" 
+            onClick={handleLogout} 
+            className="flex items-center gap-2 hover:bg-gray-100 transition-colors"
+          >
+            <LogOut className="h-4 w-4" />
+            Logout
+          </Button>
+        </div>
       </div>
       
       {loading ? (

@@ -9,11 +9,13 @@ import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminMobileHeader from "@/components/admin/AdminMobileHeader";
 import AdminDashboardContent from "@/components/admin/AdminDashboardContent";
 import { CartProvider } from "@/context/CartContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const AdminDashboard = () => {
   const { signOut, user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
@@ -26,6 +28,12 @@ const AdminDashboard = () => {
   });
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("orders");
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  // Function to trigger a refresh of data
+  const refreshData = () => {
+    setRefreshTrigger(prev => prev + 1);
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -79,7 +87,7 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [refreshTrigger]);
 
   const handleLogout = async () => {
     await signOut();
@@ -93,7 +101,7 @@ const AdminDashboard = () => {
   return (
     <CartProvider>
       <div className="min-h-screen bg-gray-50 flex">
-        {/* Admin Sidebar Component */}
+        {/* Admin Sidebar Component - Hidden on mobile */}
         <AdminSidebar 
           activeTab={activeTab} 
           setActiveTab={setActiveTab} 
@@ -101,7 +109,7 @@ const AdminDashboard = () => {
           onLogout={handleLogout} 
         />
         
-        {/* Mobile Header Component */}
+        {/* Mobile Header Component - Visible only on mobile */}
         <AdminMobileHeader onLogout={handleLogout} />
         
         {/* Main Content */}
@@ -115,6 +123,7 @@ const AdminDashboard = () => {
             products={products}
             payments={payments}
             handleLogout={handleLogout}
+            refreshData={refreshData}
           />
         </div>
       </div>
