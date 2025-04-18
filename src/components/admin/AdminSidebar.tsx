@@ -6,7 +6,10 @@ import {
   CreditCard, 
   Package, 
   Users, 
-  Settings 
+  Settings,
+  Tags,
+  Ticket,
+  Zap
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -67,6 +70,42 @@ const AdminSidebar = ({ activeTab, setActiveTab, user, onLogout }: AdminSidebarP
             >
               <Package className="h-5 w-5 mr-3" />
               Products
+            </Button>
+            <Button 
+              variant={activeTab === "categories" ? "default" : "ghost"} 
+              className={`w-full justify-start transition-all duration-200 ${
+                activeTab === "categories" 
+                  ? "bg-burgundy text-white hover:bg-burgundy/90" 
+                  : "hover:bg-gray-100"
+              }`}
+              onClick={() => setActiveTab("categories")}
+            >
+              <Tags className="h-5 w-5 mr-3" />
+              Categories
+            </Button>
+            <Button 
+              variant={activeTab === "coupons" ? "default" : "ghost"} 
+              className={`w-full justify-start transition-all duration-200 ${
+                activeTab === "coupons" 
+                  ? "bg-burgundy text-white hover:bg-burgundy/90" 
+                  : "hover:bg-gray-100"
+              }`}
+              onClick={() => setActiveTab("coupons")}
+            >
+              <Ticket className="h-5 w-5 mr-3" />
+              Coupons
+            </Button>
+            <Button 
+              variant={activeTab === "flash-sales" ? "default" : "ghost"} 
+              className={`w-full justify-start transition-all duration-200 ${
+                activeTab === "flash-sales" 
+                  ? "bg-burgundy text-white hover:bg-burgundy/90" 
+                  : "hover:bg-gray-100"
+              }`}
+              onClick={() => setActiveTab("flash-sales")}
+            >
+              <Zap className="h-5 w-5 mr-3" />
+              Flash Sales
             </Button>
             <Button 
               variant={activeTab === "customers" ? "default" : "ghost"} 

@@ -1,10 +1,12 @@
-
 import { useState } from "react";
 import StatsCards from "@/components/admin/StatsCards";
 import OrdersTab from "@/components/admin/OrdersTab";
 import PaymentsTab from "@/components/admin/PaymentsTab";
 import ProductsTab from "@/components/admin/ProductsTab";
-import { Order, Product, Payment } from "@/types/admin";
+import CategoriesTab from "@/components/admin/CategoriesTab";
+import CouponsTab from "@/components/admin/CouponsTab";
+import FlashSalesTab from "@/components/admin/FlashSalesTab";
+import { Order, Product, Payment, Category, Coupon, FlashSale } from "@/types/admin";
 import { LogOut, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -22,6 +24,9 @@ interface AdminDashboardContentProps {
   orders: Order[];
   products: Product[];
   payments: Payment[];
+  categories: Category[];
+  coupons: Coupon[];
+  flashSales: FlashSale[];
   handleLogout: () => void;
   refreshData?: () => void;
 }
@@ -34,11 +39,13 @@ const AdminDashboardContent = ({
   orders,
   products,
   payments,
+  categories = [],
+  coupons = [],
+  flashSales = [],
   handleLogout,
   refreshData
 }: AdminDashboardContentProps) => {
   
-  // Render active tab content based on the selected tab
   const renderActiveTabContent = () => {
     switch (activeTab) {
       case "orders":
@@ -47,6 +54,12 @@ const AdminDashboardContent = ({
         return <PaymentsTab payments={payments} />;
       case "products":
         return <ProductsTab products={products} refreshData={refreshData} />;
+      case "categories":
+        return <CategoriesTab categories={categories} refreshData={refreshData} />;
+      case "coupons":
+        return <CouponsTab coupons={coupons} refreshData={refreshData} />;
+      case "flash-sales":
+        return <FlashSalesTab flashSales={flashSales} refreshData={refreshData} />;
       case "customers":
         return (
           <div className="p-6 bg-white rounded-md border">
@@ -66,7 +79,6 @@ const AdminDashboardContent = ({
 
   return (
     <div className="container mx-auto px-4 py-8 mt-12 md:mt-0">
-      {/* Page Header for desktop */}
       <div className="hidden md:flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold text-gray-800">Admin Dashboard</h1>
         <div className="flex gap-2">
@@ -102,24 +114,19 @@ const AdminDashboardContent = ({
         <>
           <StatsCards stats={stats} />
           
-          {/* Mobile Tabs */}
           <div className="block md:hidden mb-6">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="w-full">
-                <TabsTrigger value="orders" className="flex-1">
-                  <span className="flex items-center">Orders</span>
-                </TabsTrigger>
-                <TabsTrigger value="payments" className="flex-1">
-                  <span className="flex items-center">Payments</span>
-                </TabsTrigger>
-                <TabsTrigger value="products" className="flex-1">
-                  <span className="flex items-center">Products</span>
-                </TabsTrigger>
+                <TabsTrigger value="orders">Orders</TabsTrigger>
+                <TabsTrigger value="payments">Payments</TabsTrigger>
+                <TabsTrigger value="products">Products</TabsTrigger>
+                <TabsTrigger value="categories">Categories</TabsTrigger>
+                <TabsTrigger value="coupons">Coupons</TabsTrigger>
+                <TabsTrigger value="flash-sales">Flash Sales</TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
           
-          {/* Tab Content */}
           <div className="mt-6 space-y-4">
             {renderActiveTabContent()}
           </div>

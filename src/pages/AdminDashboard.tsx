@@ -4,13 +4,12 @@ import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { Order, Product, Payment } from "@/types/admin";
+import { Order, Product, Payment, Category, Coupon, FlashSale } from "@/types/admin";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminMobileHeader from "@/components/admin/AdminMobileHeader";
 import AdminDashboardContent from "@/components/admin/AdminDashboardContent";
 import { CartProvider } from "@/context/CartContext";
 import { useIsMobile } from "@/hooks/use-mobile";
-import CustomersTab from "@/components/admin/CustomersTab";
 
 const AdminDashboard = () => {
   const { signOut, user } = useAuth();
@@ -21,6 +20,9 @@ const AdminDashboard = () => {
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [coupons, setCoupons] = useState<Coupon[]>([]);
+  const [flashSales, setFlashSales] = useState<FlashSale[]>([]);
   const [stats, setStats] = useState({
     totalOrders: 0,
     totalRevenue: 0,
@@ -39,6 +41,7 @@ const AdminDashboard = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
+      // Fetch existing data
       const { data: ordersData, error: ordersError } = await supabase
         .from('orders')
         .select(`
@@ -60,9 +63,31 @@ const AdminDashboard = () => {
 
       if (paymentsError) throw paymentsError;
 
+      // Fetch new data
+      const { data: categoriesData, error: categoriesError } = await supabase
+        .from('categories')
+        .select();
+
+      if (categoriesError) throw categoriesError;
+
+      const { data: couponsData, error: couponsError } = await supabase
+        .from('coupons')
+        .select();
+
+      if (couponsError) throw couponsError;
+
+      const { data: flashSalesData, error: flashSalesError } = await supabase
+        .from('flash_sales')
+        .select();
+
+      if (flashSalesError) throw flashSalesError;
+
       setOrders(ordersData || []);
       setProducts(productsData || []);
       setPayments(paymentsData || []);
+      setCategories(categoriesData || []);
+      setCoupons(couponsData || []);
+      setFlashSales(flashSalesData || []);
 
       const totalRevenue = paymentsData?.reduce((sum, payment) => 
         payment.status === 'successful' ? sum + Number(payment.amount) : sum, 0) || 0;
@@ -99,26 +124,6 @@ const AdminDashboard = () => {
     });
   };
 
-  const renderContent = () => {
-    if (activeTab === "customers") {
-      return <CustomersTab />;
-    } else {
-      return (
-        <AdminDashboardContent
-          loading={loading}
-          stats={stats}
-          activeTab={activeTab}
-          setActiveTab={setActiveTab}
-          orders={orders}
-          products={products}
-          payments={payments}
-          handleLogout={handleLogout}
-          refreshData={refreshData}
-        />
-      );
-    }
-  };
-
   return (
     <CartProvider>
       <div className="min-h-screen bg-gray-50 flex">
@@ -135,7 +140,20 @@ const AdminDashboard = () => {
         
         {/* Main Content */}
         <div className="flex-1 md:ml-64 pt-4 md:pt-0">
-          {renderContent()}
+          <AdminDashboardContent
+            loading={loading}
+            stats={stats}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            orders={orders}
+            products={products}
+            payments={payments}
+            categories={categories}
+            coupons={coupons}
+            flashSales={flashSales}
+            handleLogout={handleLogout}
+            refreshData={refreshData}
+          />
         </div>
       </div>
     </CartProvider>
