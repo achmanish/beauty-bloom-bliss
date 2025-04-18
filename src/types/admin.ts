@@ -1,3 +1,4 @@
+
 export interface OrderItem {
   id: string;
   order_id: string;
@@ -73,4 +74,11 @@ export interface UserRoleEntry {
   user_id: string;
   role: UserRole;
   created_at: string;
+}
+
+export interface User {
+  id: string;
+  email: string;
+  created_at: string;
+  role?: UserRole;
 }

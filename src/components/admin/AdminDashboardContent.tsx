@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import StatsCards from "@/components/admin/StatsCards";
 import OrdersTab from "@/components/admin/OrdersTab";
@@ -10,6 +11,7 @@ import { Order, Product, Payment, Category, Coupon, FlashSale } from "@/types/ad
 import { LogOut, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 interface AdminDashboardContentProps {
   loading: boolean;
@@ -30,6 +32,84 @@ interface AdminDashboardContentProps {
   handleLogout: () => void;
   refreshData?: () => void;
 }
+
+// Settings Tab Component
+const SettingsTab = () => {
+  return (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold">Settings</h2>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Store Information</CardTitle>
+            <CardDescription>Manage your store details</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-2">
+            <p className="text-gray-500">Store settings functionality will be implemented soon.</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Email Notifications</CardTitle>
+            <CardDescription>Configure automated emails</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-2">
+            <p className="text-gray-500">Email notification settings will be implemented soon.</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Payment Methods</CardTitle>
+            <CardDescription>Configure payment options</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-2">
+            <p className="text-gray-500">Payment method configuration will be implemented soon.</p>
+          </CardContent>
+        </Card>
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Shipping Options</CardTitle>
+            <CardDescription>Manage shipping methods and rates</CardDescription>
+          </CardHeader>
+          <CardContent className="pt-2">
+            <p className="text-gray-500">Shipping configuration will be implemented soon.</p>
+          </CardContent>
+        </Card>
+      </div>
+    </div>
+  );
+};
+
+// Customers Tab Component
+const CustomersTab = () => {
+  return (
+    <div className="space-y-6">
+      <h2 className="text-2xl font-bold">Customers</h2>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Customer Management</CardTitle>
+          <CardDescription>View and manage customer accounts</CardDescription>
+        </CardHeader>
+        <CardContent className="pt-2">
+          <p className="text-gray-500">Customer management functionality will be implemented soon.</p>
+          <div className="mt-4">
+            <ul className="list-disc pl-5 space-y-2 text-gray-600">
+              <li>View customer profiles and purchase history</li>
+              <li>Manage customer groups and segments</li>
+              <li>Create and manage loyalty programs</li>
+              <li>Handle customer support requests</li>
+            </ul>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
 
 const AdminDashboardContent = ({
   loading,
@@ -61,17 +141,9 @@ const AdminDashboardContent = ({
       case "flash-sales":
         return <FlashSalesTab flashSales={flashSales} refreshData={refreshData} />;
       case "customers":
-        return (
-          <div className="p-6 bg-white rounded-md border">
-            <p className="text-center text-gray-500">Customers management coming soon</p>
-          </div>
-        );
+        return <CustomersTab />;
       case "settings":
-        return (
-          <div className="p-6 bg-white rounded-md border">
-            <p className="text-center text-gray-500">Settings panel coming soon</p>
-          </div>
-        );
+        return <SettingsTab />;
       default:
         return <OrdersTab orders={orders} products={products} />;
     }
