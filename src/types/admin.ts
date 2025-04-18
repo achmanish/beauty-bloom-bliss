@@ -23,6 +23,7 @@ export interface Product {
   price: number;
   category: string | null;
   stock: number;
+  description?: string | null;
 }
 
 export interface Payment {

@@ -46,7 +46,7 @@ const AdminDashboardContent = ({
       case "payments":
         return <PaymentsTab payments={payments} />;
       case "products":
-        return <ProductsTab products={products} />;
+        return <ProductsTab products={products} refreshData={refreshData} />;
       case "customers":
         return (
           <div className="p-6 bg-white rounded-md border">
