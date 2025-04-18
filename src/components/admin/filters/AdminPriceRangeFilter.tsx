@@ -23,7 +23,7 @@ const AdminPriceRangeFilter = ({ priceRange, setPriceRange }: AdminPriceRangeFil
   return (
     <div className="col-span-1 md:col-span-2">
       <label className="text-sm font-medium mb-1 block">
-        Price Range: ₹{localRange[0]} - ₹{localRange[1]}
+        Price Range: ₹{localRange[0].toLocaleString('ne-NP')} - ₹{localRange[1].toLocaleString('ne-NP')}
       </label>
       <Slider
         defaultValue={[0, 10000]}

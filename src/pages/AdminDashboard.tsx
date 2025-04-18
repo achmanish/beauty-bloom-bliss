@@ -10,6 +10,7 @@ import AdminMobileHeader from "@/components/admin/AdminMobileHeader";
 import AdminDashboardContent from "@/components/admin/AdminDashboardContent";
 import { CartProvider } from "@/context/CartContext";
 import { useIsMobile } from "@/hooks/use-mobile";
+import CustomersTab from "@/components/admin/CustomersTab";
 
 const AdminDashboard = () => {
   const { signOut, user } = useAuth();
@@ -98,6 +99,26 @@ const AdminDashboard = () => {
     });
   };
 
+  const renderContent = () => {
+    if (activeTab === "customers") {
+      return <CustomersTab />;
+    } else {
+      return (
+        <AdminDashboardContent
+          loading={loading}
+          stats={stats}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          orders={orders}
+          products={products}
+          payments={payments}
+          handleLogout={handleLogout}
+          refreshData={refreshData}
+        />
+      );
+    }
+  };
+
   return (
     <CartProvider>
       <div className="min-h-screen bg-gray-50 flex">
@@ -114,17 +135,7 @@ const AdminDashboard = () => {
         
         {/* Main Content */}
         <div className="flex-1 md:ml-64 pt-4 md:pt-0">
-          <AdminDashboardContent
-            loading={loading}
-            stats={stats}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            orders={orders}
-            products={products}
-            payments={payments}
-            handleLogout={handleLogout}
-            refreshData={refreshData}
-          />
+          {renderContent()}
         </div>
       </div>
     </CartProvider>
