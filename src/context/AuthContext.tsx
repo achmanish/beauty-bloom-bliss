@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,7 +9,6 @@ type AuthContextType = {
   isAdmin: boolean;
   isLoggedIn: boolean;
   loading: boolean;
-  wishlistCount: number;
   userRole: UserRole | null;
   signOut: () => Promise<void>;
   updateProfile: (data: { firstName?: string; lastName?: string }) => Promise<{error: any | null}>;
@@ -25,7 +23,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [loading, setLoading] = useState(true);
-  const [wishlistCount, setWishlistCount] = useState(0);
 
   useEffect(() => {
     // Set up auth state listener
@@ -39,13 +36,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setTimeout(() => {
             checkUserRole(session.user.id);
           }, 0);
-          
-          // Load wishlist count when user logs in
-          fetchWishlistCount(session.user.id);
         } else {
           setIsAdmin(false);
           setUserRole(null);
-          setWishlistCount(0);
         }
       }
     );
@@ -57,7 +50,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       if (session?.user) {
         checkUserRole(session.user.id);
-        fetchWishlistCount(session.user.id);
       }
       
       setLoading(false);
@@ -179,8 +171,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user, 
       isAdmin, 
       isLoggedIn: !!user, 
-      loading, 
-      wishlistCount,
+      loading,
       userRole,
       signOut,
       updateProfile,

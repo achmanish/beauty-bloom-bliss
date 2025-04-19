@@ -11,29 +11,26 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
-import { useCartContext } from "@/context/CartContext"; // Fixed import path
+import { useCartContext } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { wishlistCount, isLoggedIn, isAdmin, signOut } = useAuth();
   
-  // Use the cart context if available, otherwise use local state
   const cartContext = useCartContext();
   const [localCartCount, setLocalCartCount] = useState(0);
   
-  // Get cart count from context or local state
   const cartCount = cartContext?.cartCount ?? localCartCount;
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  // Initialize cart count from localStorage
   useEffect(() => {
     const savedCart = localStorage.getItem('cartItems');
     if (savedCart) {
       try {
         const count = JSON.parse(savedCart).length;
         setLocalCartCount(count);
-        // Also update context if available
         if (cartContext?.updateCartCount) {
           cartContext.updateCartCount(count);
         }
@@ -43,7 +40,6 @@ const Navbar = () => {
     }
   }, []);
 
-  // Listen for changes to localStorage
   useEffect(() => {
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'cartItems') {
@@ -51,7 +47,6 @@ const Navbar = () => {
           try {
             const count = JSON.parse(e.newValue).length;
             setLocalCartCount(count);
-            // Also update context if available
             if (cartContext?.updateCartCount) {
               cartContext.updateCartCount(count);
             }
@@ -60,7 +55,6 @@ const Navbar = () => {
           }
         } else {
           setLocalCartCount(0);
-          // Also update context if available
           if (cartContext?.updateCartCount) {
             cartContext.updateCartCount(0);
           }
@@ -68,11 +62,9 @@ const Navbar = () => {
       }
     };
 
-    // We need to handle custom events for updates from the same tab
     const handleCustomEvent = (e: CustomEvent) => {
       if (e.detail && typeof e.detail === 'number') {
         setLocalCartCount(e.detail);
-        // Also update context if available
         if (cartContext?.updateCartCount) {
           cartContext.updateCartCount(e.detail);
         }
@@ -92,12 +84,10 @@ const Navbar = () => {
     <nav className="bg-cream py-4 sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between">
-          {/* Logo */}
           <Link to="/" className="font-playfair text-2xl font-bold text-burgundy">
             Élégance
           </Link>
 
-          {/* Desktop Navigation */}
           <div className="hidden md:flex space-x-8">
             <Link to="/products" className="text-burgundy hover:text-burgundy-light transition-colors">
               Shop All
@@ -132,15 +122,12 @@ const Navbar = () => {
             </Link>
           </div>
 
-          {/* Search Bar - Desktop */}
           <div className="hidden md:flex items-center relative w-1/3">
             <Input type="text" placeholder="Search products..." className="pr-8" />
             <Search className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
           </div>
 
-          {/* Right side icons */}
           <div className="flex items-center space-x-4">
-            {/* User Account Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger className="text-burgundy hover:text-burgundy-light focus:outline-none transition-colors">
                 <User className="h-5 w-5" />
@@ -180,7 +167,6 @@ const Navbar = () => {
               </DropdownMenuContent>
             </DropdownMenu>
             
-            {/* Wishlist Icon */}
             <Link to="/wishlist" className="text-burgundy hover:text-burgundy-light relative transition-colors">
               <Heart className="h-5 w-5" />
               {wishlistCount > 0 && (
@@ -199,14 +185,12 @@ const Navbar = () => {
               )}
             </Link>
             
-            {/* Mobile menu button */}
             <button className="md:hidden text-burgundy" onClick={toggleMenu} aria-label="Toggle menu">
               {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden mt-4 bg-cream-light p-4 rounded-lg animate-fade-in">
             <div className="flex flex-col space-y-4">
@@ -238,7 +222,6 @@ const Navbar = () => {
                 Wishlist
               </Link>
               
-              {/* Mobile search */}
               <div className="relative">
                 <Input type="text" placeholder="Search products..." className="w-full pr-8" />
                 <Search className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
