@@ -1,8 +1,8 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./AuthContext";
 import { toast } from "@/components/ui/sonner";
+import { Tables, TablesInsert } from "@/integrations/supabase/types";
 
 export interface CartProduct {
   id: string;
