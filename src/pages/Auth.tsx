@@ -1,13 +1,13 @@
 
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Shield, ArrowLeft, Eye, EyeOff } from "lucide-react";
+import { Shield, ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const Auth = () => {
@@ -17,6 +17,10 @@ const Auth = () => {
   const [showPassword, setShowPassword] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get the redirectTo path from location state or default to /admin
+  const from = location.state?.from || "/admin";
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -50,7 +54,14 @@ const Auth = () => {
         .eq('id', data.user.id)
         .maybeSingle();
       
-      if (adminError || !adminData) {
+      // Then check user_roles table for more granular role
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', data.user.id)
+        .maybeSingle();
+      
+      if ((adminError || !adminData) && (!roleData || roleData.role !== 'admin')) {
         // If not an admin, sign them out
         await supabase.auth.signOut();
         toast({
@@ -137,7 +148,14 @@ const Auth = () => {
               </CardContent>
               <div className="px-6 pb-6">
                 <Button type="submit" className="w-full bg-burgundy hover:bg-burgundy-light" disabled={loading}>
-                  {loading ? "Logging in..." : "Admin Login"}
+                  {loading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Logging in...
+                    </>
+                  ) : (
+                    "Admin Login"
+                  )}
                 </Button>
               </div>
             </form>

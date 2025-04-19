@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { 
@@ -11,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { toast } from "@/components/ui/sonner";
 import { 
   Table,
   TableBody,
@@ -29,9 +27,20 @@ import {
   CardContent,
   CardFooter
 } from "@/components/ui/card";
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { toast } from "@/components/ui/sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 import { 
   UserRound, 
   Package, 
@@ -45,153 +54,336 @@ import {
   ExternalLink,
   MapPin,
   ShoppingBag,
-  X
+  X,
+  AlertCircle,
+  Key,
+  Save
 } from "lucide-react";
+import { Order } from "@/types/admin";
 
-// Mock data types
-interface Order {
-  id: string;
-  date: string;
-  status: 'Delivered' | 'Processing' | 'Shipped' | 'Cancelled';
-  total: string;
-  items: number;
-}
-
+// Updated types to match our actual database
 interface WishlistItem {
   id: string;
-  name: string;
-  image: string;
-  price: string;
-  inStock: boolean;
+  product_id: string;
+  user_id: string;
+  created_at: string;
+  product: {
+    id: string;
+    name: string;
+    price: number;
+    image_url: string;
+    stock: number;
+  };
 }
 
 interface Address {
   id: string;
+  user_id: string;
   name: string;
   street: string;
   city: string;
   state: string;
   zip: string;
   country: string;
-  isDefault: boolean;
+  is_default: boolean;
+  created_at: string;
 }
 
 interface PaymentMethod {
   id: string;
+  user_id: string;
   type: 'Credit Card' | 'PayPal';
-  lastFour?: string;
-  expiryDate?: string;
-  cardName?: string;
+  last_four?: string;
+  expiry_date?: string;
+  card_name?: string;
   email?: string;
-  isDefault: boolean;
+  is_default: boolean;
+  created_at: string;
 }
 
 const Account = () => {
   const navigate = useNavigate();
-  const { user, isLoggedIn, signOut } = useAuth();
+  const { user, isLoggedIn, signOut, updateProfile, changePassword } = useAuth();
   const [activeTab, setActiveTab] = useState("account");
   
-  // Mock data
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      id: "#ORD-12345",
-      date: "March 15, 2023",
-      status: "Delivered",
-      total: "$154.00",
-      items: 2
-    },
-    {
-      id: "#ORD-12346",
-      date: "April 2, 2023",
-      status: "Processing",
-      total: "$89.00",
-      items: 1
-    }
-  ]);
+  // User data state
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [email, setEmail] = useState("");
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
   
-  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([
-    {
-      id: "1",
-      name: "Hydrating Face Cream",
-      image: "/placeholder.svg",
-      price: "$49.99",
-      inStock: true
-    },
-    {
-      id: "2",
-      name: "Vitamin C Serum",
-      image: "/placeholder.svg",
-      price: "$39.99",
-      inStock: true
-    },
-    {
-      id: "3",
-      name: "Rose Water Toner",
-      image: "/placeholder.svg",
-      price: "$24.99",
-      inStock: false
-    }
-  ]);
+  // Password change state
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   
-  const [addresses, setAddresses] = useState<Address[]>([
-    {
-      id: "1",
-      name: "Home",
-      street: "123 Main Street",
-      city: "New York",
-      state: "NY",
-      zip: "10001",
-      country: "United States",
-      isDefault: true
-    }
-  ]);
-  
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([
-    {
-      id: "1",
-      type: "Credit Card",
-      lastFour: "4242",
-      expiryDate: "09/25",
-      cardName: "John Doe",
-      isDefault: true
-    }
-  ]);
+  // Data states
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [isLoadingOrders, setIsLoadingOrders] = useState(false);
+  const [wishlistItems, setWishlistItems] = useState<WishlistItem[]>([]);
+  const [isLoadingWishlist, setIsLoadingWishlist] = useState(false);
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
+  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+  const [isLoadingPayments, setIsLoadingPayments] = useState(false);
   
   // Login form state
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
   
   // Register form state
   const [registerEmail, setRegisterEmail] = useState("");
   const [registerPassword, setRegisterPassword] = useState("");
-  const [registerName, setRegisterName] = useState("");
+  const [registerFirstName, setRegisterFirstName] = useState("");
+  const [registerLastName, setRegisterLastName] = useState("");
+  const [isRegistering, setIsRegistering] = useState(false);
   
   useEffect(() => {
     // If user logs out or is not logged in, we should show the login tab
     if (!isLoggedIn) {
       setActiveTab("login");
-    }
-  }, [isLoggedIn]);
-  
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Mock login functionality
-    if (loginEmail && loginPassword) {
-      toast.success("Successfully logged in");
-      setActiveTab("account");
     } else {
-      toast.error("Please fill in all fields");
+      // Load user data
+      loadUserData();
+      
+      // Load data based on active tab to minimize unnecessary API calls
+      if (activeTab === "orders") {
+        fetchOrders();
+      } else if (activeTab === "wishlist") {
+        fetchWishlist();
+      } else if (activeTab === "addresses") {
+        fetchAddresses();
+      } else if (activeTab === "payment") {
+        fetchPaymentMethods();
+      }
+    }
+  }, [isLoggedIn, activeTab]);
+  
+  const loadUserData = () => {
+    if (user?.user_metadata) {
+      setFirstName(user.user_metadata.first_name || "");
+      setLastName(user.user_metadata.last_name || "");
+      setEmail(user.email || "");
     }
   };
   
-  const handleRegister = (e: React.FormEvent) => {
+  const fetchOrders = async () => {
+    if (!user) return;
+    
+    setIsLoadingOrders(true);
+    try {
+      const { data, error } = await supabase
+        .from('orders')
+        .select(`
+          id,
+          user_id,
+          status,
+          total_amount,
+          shipping_address,
+          created_at,
+          order_items (
+            id,
+            order_id,
+            product_id,
+            quantity,
+            price_at_time
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      
+      setOrders(data || []);
+    } catch (error) {
+      console.error("Error fetching orders:", error);
+      toast.error("Failed to load your orders");
+    } finally {
+      setIsLoadingOrders(false);
+    }
+  };
+  
+  const fetchWishlist = async () => {
+    if (!user) return;
+    
+    setIsLoadingWishlist(true);
+    try {
+      const { data, error } = await supabase
+        .from('wishlists')
+        .select(`
+          id,
+          user_id,
+          product_id,
+          created_at,
+          product:products (
+            id,
+            name,
+            price,
+            image_url,
+            stock
+          )
+        `)
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      setWishlistItems(data || []);
+    } catch (error) {
+      console.error("Error fetching wishlist:", error);
+      toast.error("Failed to load your wishlist");
+    } finally {
+      setIsLoadingWishlist(false);
+    }
+  };
+  
+  const fetchAddresses = async () => {
+    if (!user) return;
+    
+    setIsLoadingAddresses(true);
+    try {
+      const { data, error } = await supabase
+        .from('addresses')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      setAddresses(data || []);
+    } catch (error) {
+      console.error("Error fetching addresses:", error);
+      toast.error("Failed to load your addresses");
+    } finally {
+      setIsLoadingAddresses(false);
+    }
+  };
+  
+  const fetchPaymentMethods = async () => {
+    if (!user) return;
+    
+    setIsLoadingPayments(true);
+    try {
+      const { data, error } = await supabase
+        .from('payment_methods')
+        .select('*')
+        .eq('user_id', user.id);
+      
+      if (error) throw error;
+      
+      setPaymentMethods(data || []);
+    } catch (error) {
+      console.error("Error fetching payment methods:", error);
+      toast.error("Failed to load your payment methods");
+    } finally {
+      setIsLoadingPayments(false);
+    }
+  };
+  
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Mock registration functionality
-    if (registerEmail && registerPassword && registerName) {
-      toast.success("Account created successfully");
-      setActiveTab("account");
-    } else {
+    
+    if (!loginEmail || !loginPassword) {
       toast.error("Please fill in all fields");
+      return;
+    }
+    
+    setIsLoggingIn(true);
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: loginPassword
+      });
+      
+      if (error) throw error;
+      
+      toast.success("Successfully logged in");
+      setActiveTab("account");
+    } catch (error: any) {
+      console.error("Login error:", error);
+      toast.error(error.message || "Failed to log in");
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+  
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!registerEmail || !registerPassword || !registerFirstName) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+    
+    setIsRegistering(true);
+    
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: registerEmail,
+        password: registerPassword,
+        options: {
+          data: {
+            first_name: registerFirstName,
+            last_name: registerLastName
+          }
+        }
+      });
+      
+      if (error) throw error;
+      
+      toast.success("Account created successfully. Please check your email for verification.");
+      setActiveTab("login");
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      toast.error(error.message || "Failed to create account");
+    } finally {
+      setIsRegistering(false);
+    }
+  };
+  
+  const handleUpdateProfile = async () => {
+    setIsUpdatingProfile(true);
+    
+    try {
+      const { error } = await updateProfile({
+        firstName,
+        lastName
+      });
+      
+      if (error) throw error;
+      
+      toast.success("Profile updated successfully");
+    } catch (error: any) {
+      console.error("Profile update error:", error);
+      toast.error(error.message || "Failed to update profile");
+    } finally {
+      setIsUpdatingProfile(false);
+    }
+  };
+  
+  const handleChangePassword = async () => {
+    if (newPassword !== confirmPassword) {
+      toast.error("New passwords don't match");
+      return;
+    }
+    
+    setIsChangingPassword(true);
+    
+    try {
+      const { error } = await changePassword(newPassword);
+      
+      if (error) throw error;
+      
+      toast.success("Password changed successfully");
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (error: any) {
+      console.error("Password change error:", error);
+      toast.error(error.message || "Failed to change password");
+    } finally {
+      setIsChangingPassword(false);
     }
   };
   
@@ -202,44 +394,163 @@ const Account = () => {
   };
   
   const handleViewOrder = (orderId: string) => {
-    toast.info(`Viewing order details for ${orderId}`);
     // In a real app, navigate to order detail page
-    // navigate(`/orders/${orderId}`);
+    navigate(`/order/${orderId}`);
   };
   
-  const handleAddToCart = (itemId: string) => {
-    toast.success("Item added to cart");
+  const handleCancelOrder = async (orderId: string) => {
+    try {
+      const { error } = await supabase
+        .from('orders')
+        .update({ status: 'Cancelled' })
+        .eq('id', orderId)
+        .eq('user_id', user?.id);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setOrders(orders.map(order => 
+        order.id === orderId ? { ...order, status: 'Cancelled' } : order
+      ));
+      
+      toast.success("Order cancelled successfully");
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+      toast.error("Failed to cancel order");
+    }
   };
   
-  const handleRemoveWishlistItem = (itemId: string) => {
-    setWishlistItems(wishlistItems.filter(item => item.id !== itemId));
-    toast.success("Item removed from wishlist");
+  const handleAddToCart = async (productId: string) => {
+    if (!user) {
+      toast.error("Please log in to add items to cart");
+      return;
+    }
+    
+    try {
+      // In a real app, you would add to cart table
+      // For now, just show success message
+      toast.success("Item added to cart");
+    } catch (error) {
+      console.error("Error adding to cart:", error);
+      toast.error("Failed to add item to cart");
+    }
   };
   
-  const handleSetDefaultAddress = (addressId: string) => {
-    setAddresses(addresses.map(address => ({
-      ...address,
-      isDefault: address.id === addressId
-    })));
-    toast.success("Default address updated");
+  const handleRemoveWishlistItem = async (itemId: string) => {
+    try {
+      const { error } = await supabase
+        .from('wishlists')
+        .delete()
+        .eq('id', itemId)
+        .eq('user_id', user?.id);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setWishlistItems(wishlistItems.filter(item => item.id !== itemId));
+      toast.success("Item removed from wishlist");
+    } catch (error) {
+      console.error("Error removing wishlist item:", error);
+      toast.error("Failed to remove item from wishlist");
+    }
   };
   
-  const handleRemoveAddress = (addressId: string) => {
-    setAddresses(addresses.filter(address => address.id !== addressId));
-    toast.success("Address removed");
+  const handleSetDefaultAddress = async (addressId: string) => {
+    try {
+      // First set all addresses to non-default
+      await supabase
+        .from('addresses')
+        .update({ is_default: false })
+        .eq('user_id', user?.id);
+      
+      // Then set the selected one as default
+      const { error } = await supabase
+        .from('addresses')
+        .update({ is_default: true })
+        .eq('id', addressId)
+        .eq('user_id', user?.id);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setAddresses(addresses.map(address => ({
+        ...address,
+        is_default: address.id === addressId
+      })));
+      
+      toast.success("Default address updated");
+    } catch (error) {
+      console.error("Error setting default address:", error);
+      toast.error("Failed to update default address");
+    }
   };
   
-  const handleSetDefaultPayment = (paymentId: string) => {
-    setPaymentMethods(paymentMethods.map(payment => ({
-      ...payment,
-      isDefault: payment.id === paymentId
-    })));
-    toast.success("Default payment method updated");
+  const handleRemoveAddress = async (addressId: string) => {
+    try {
+      const { error } = await supabase
+        .from('addresses')
+        .delete()
+        .eq('id', addressId)
+        .eq('user_id', user?.id);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setAddresses(addresses.filter(address => address.id !== addressId));
+      toast.success("Address removed");
+    } catch (error) {
+      console.error("Error removing address:", error);
+      toast.error("Failed to remove address");
+    }
   };
   
-  const handleRemovePayment = (paymentId: string) => {
-    setPaymentMethods(paymentMethods.filter(payment => payment.id !== paymentId));
-    toast.success("Payment method removed");
+  const handleSetDefaultPayment = async (paymentId: string) => {
+    try {
+      // First set all payment methods to non-default
+      await supabase
+        .from('payment_methods')
+        .update({ is_default: false })
+        .eq('user_id', user?.id);
+      
+      // Then set the selected one as default
+      const { error } = await supabase
+        .from('payment_methods')
+        .update({ is_default: true })
+        .eq('id', paymentId)
+        .eq('user_id', user?.id);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setPaymentMethods(paymentMethods.map(payment => ({
+        ...payment,
+        is_default: payment.id === paymentId
+      })));
+      
+      toast.success("Default payment method updated");
+    } catch (error) {
+      console.error("Error setting default payment method:", error);
+      toast.error("Failed to update default payment method");
+    }
+  };
+  
+  const handleRemovePayment = async (paymentId: string) => {
+    try {
+      const { error } = await supabase
+        .from('payment_methods')
+        .delete()
+        .eq('id', paymentId)
+        .eq('user_id', user?.id);
+      
+      if (error) throw error;
+      
+      // Update local state
+      setPaymentMethods(paymentMethods.filter(payment => payment.id !== paymentId));
+      toast.success("Payment method removed");
+    } catch (error) {
+      console.error("Error removing payment method:", error);
+      toast.error("Failed to remove payment method");
+    }
   };
   
   if (!isLoggedIn) {
@@ -303,8 +614,9 @@ const Account = () => {
                       <Button 
                         type="submit" 
                         className="w-full bg-burgundy hover:bg-burgundy-light text-white"
+                        disabled={isLoggingIn}
                       >
-                        Sign In
+                        {isLoggingIn ? "Signing in..." : "Sign In"}
                       </Button>
                     </div>
                   </form>
@@ -316,12 +628,21 @@ const Account = () => {
                   <form onSubmit={handleRegister}>
                     <div className="space-y-4">
                       <div>
-                        <Label htmlFor="name">Full Name</Label>
+                        <Label htmlFor="firstName">First Name</Label>
                         <Input 
-                          id="name" 
-                          value={registerName}
-                          onChange={(e) => setRegisterName(e.target.value)}
+                          id="firstName" 
+                          value={registerFirstName}
+                          onChange={(e) => setRegisterFirstName(e.target.value)}
                           required
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="lastName">Last Name</Label>
+                        <Input 
+                          id="lastName" 
+                          value={registerLastName}
+                          onChange={(e) => setRegisterLastName(e.target.value)}
                         />
                       </div>
                       
@@ -370,8 +691,9 @@ const Account = () => {
                       <Button 
                         type="submit" 
                         className="w-full bg-burgundy hover:bg-burgundy-light text-white"
+                        disabled={isRegistering}
                       >
-                        Create Account
+                        {isRegistering ? "Creating Account..." : "Create Account"}
                       </Button>
                     </div>
                   </form>
@@ -400,8 +722,8 @@ const Account = () => {
           <div className="col-span-1">
             <div className="bg-cream p-6 rounded-lg sticky top-24">
               <div className="mb-6">
-                <h2 className="font-playfair text-xl mb-2">Welcome, {registerName || "User"}!</h2>
-                <p className="text-sm text-gray-600">{loginEmail || registerEmail || user?.email}</p>
+                <h2 className="font-playfair text-xl mb-2">Welcome, {firstName || "User"}!</h2>
+                <p className="text-sm text-gray-600">{email}</p>
               </div>
               
               <nav className="space-y-2">
@@ -418,7 +740,12 @@ const Account = () => {
                 </button>
                 
                 <button 
-                  onClick={() => setActiveTab("orders")}
+                  onClick={() => {
+                    setActiveTab("orders");
+                    if (!isLoadingOrders && orders.length === 0) {
+                      fetchOrders();
+                    }
+                  }}
                   className={`flex items-center space-x-2 p-2 rounded-md w-full transition-colors ${
                     activeTab === "orders" 
                       ? "bg-rose text-burgundy" 
@@ -430,7 +757,12 @@ const Account = () => {
                 </button>
                 
                 <button 
-                  onClick={() => setActiveTab("wishlist")}
+                  onClick={() => {
+                    setActiveTab("wishlist");
+                    if (!isLoadingWishlist && wishlistItems.length === 0) {
+                      fetchWishlist();
+                    }
+                  }}
                   className={`flex items-center space-x-2 p-2 rounded-md w-full transition-colors ${
                     activeTab === "wishlist" 
                       ? "bg-rose text-burgundy" 
@@ -442,7 +774,12 @@ const Account = () => {
                 </button>
                 
                 <button 
-                  onClick={() => setActiveTab("addresses")}
+                  onClick={() => {
+                    setActiveTab("addresses");
+                    if (!isLoadingAddresses && addresses.length === 0) {
+                      fetchAddresses();
+                    }
+                  }}
                   className={`flex items-center space-x-2 p-2 rounded-md w-full transition-colors ${
                     activeTab === "addresses" 
                       ? "bg-rose text-burgundy" 
@@ -454,7 +791,12 @@ const Account = () => {
                 </button>
                 
                 <button 
-                  onClick={() => setActiveTab("payment")}
+                  onClick={() => {
+                    setActiveTab("payment");
+                    if (!isLoadingPayments && paymentMethods.length === 0) {
+                      fetchPaymentMethods();
+                    }
+                  }}
                   className={`flex items-center space-x-2 p-2 rounded-md w-full transition-colors ${
                     activeTab === "payment" 
                       ? "bg-rose text-burgundy" 
@@ -490,43 +832,145 @@ const Account = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                       <div>
                         <h3 className="font-medium text-lg mb-4">Profile Information</h3>
-                        <p className="mb-1 font-medium">{registerName || "User"}</p>
-                        <p className="mb-4 text-gray-600">{loginEmail || registerEmail || user?.email}</p>
-                        <Button variant="outline" className="border-burgundy text-burgundy hover:bg-burgundy hover:text-white">
-                          Edit Profile
-                        </Button>
+                        <div className="space-y-4">
+                          <div>
+                            <Label htmlFor="firstName">First Name</Label>
+                            <Input 
+                              id="firstName" 
+                              value={firstName}
+                              onChange={(e) => setFirstName(e.target.value)}
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="lastName">Last Name</Label>
+                            <Input 
+                              id="lastName" 
+                              value={lastName}
+                              onChange={(e) => setLastName(e.target.value)}
+                            />
+                          </div>
+                          
+                          <div>
+                            <Label htmlFor="email">Email</Label>
+                            <Input 
+                              id="email" 
+                              value={email}
+                              disabled
+                              className="bg-gray-50"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              Email cannot be changed
+                            </p>
+                          </div>
+                          
+                          <Button 
+                            variant="outline" 
+                            className="border-burgundy text-burgundy hover:bg-burgundy hover:text-white"
+                            onClick={handleUpdateProfile}
+                            disabled={isUpdatingProfile}
+                          >
+                            {isUpdatingProfile ? (
+                              <>Saving...</>
+                            ) : (
+                              <>
+                                <Save className="w-4 h-4 mr-2" />
+                                Save Changes
+                              </>
+                            )}
+                          </Button>
+                        </div>
                       </div>
                       
                       <div>
-                        <h3 className="font-medium text-lg mb-4">Address Book</h3>
-                        {addresses.length > 0 ? (
-                          <div>
-                            <div className="mb-2">
-                              <p className="font-medium">Default Address:</p>
-                              <p>{addresses.find(a => a.isDefault)?.street}</p>
-                              <p>{addresses.find(a => a.isDefault)?.city}, {addresses.find(a => a.isDefault)?.state} {addresses.find(a => a.isDefault)?.zip}</p>
-                              <p>{addresses.find(a => a.isDefault)?.country}</p>
-                            </div>
-                            <Button 
-                              variant="outline" 
-                              className="border-burgundy text-burgundy hover:bg-burgundy hover:text-white"
-                              onClick={() => setActiveTab("addresses")}
-                            >
-                              Manage Addresses
-                            </Button>
+                        <h3 className="font-medium text-lg mb-4">Security</h3>
+                        <div className="space-y-4">
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                className="border-burgundy text-burgundy hover:bg-burgundy hover:text-white"
+                              >
+                                <Key className="w-4 h-4 mr-2" />
+                                Change Password
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Change Password</DialogTitle>
+                                <DialogDescription>
+                                  Update your password to a new secure one
+                                </DialogDescription>
+                              </DialogHeader>
+                              
+                              <div className="space-y-4 py-4">
+                                <div>
+                                  <Label htmlFor="newPassword">New Password</Label>
+                                  <Input 
+                                    id="newPassword" 
+                                    type="password"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                  />
+                                </div>
+                                
+                                <div>
+                                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                                  <Input 
+                                    id="confirmPassword" 
+                                    type="password"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                  />
+                                </div>
+                                
+                                {newPassword && confirmPassword && newPassword !== confirmPassword && (
+                                  <div className="flex items-center text-red-500 text-sm">
+                                    <AlertCircle className="w-4 h-4 mr-2" />
+                                    Passwords don't match
+                                  </div>
+                                )}
+                              </div>
+                              
+                              <DialogFooter>
+                                <Button
+                                  variant="outline"
+                                  onClick={() => {
+                                    setNewPassword("");
+                                    setConfirmPassword("");
+                                  }}
+                                >
+                                  Cancel
+                                </Button>
+                                <Button
+                                  onClick={handleChangePassword}
+                                  disabled={isChangingPassword || !newPassword || !confirmPassword || newPassword !== confirmPassword}
+                                  className="bg-burgundy hover:bg-burgundy-light"
+                                >
+                                  {isChangingPassword ? "Updating..." : "Update Password"}
+                                </Button>
+                              </DialogFooter>
+                            </DialogContent>
+                          </Dialog>
+                          
+                          <div className="p-4 border rounded-md bg-gray-50 mt-6">
+                            <h4 className="font-medium mb-2">Account Security Tips</h4>
+                            <ul className="text-sm space-y-2">
+                              <li className="flex items-start">
+                                <Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" />
+                                Use a strong, unique password
+                              </li>
+                              <li className="flex items-start">
+                                <Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" />
+                                Never share your password with others
+                              </li>
+                              <li className="flex items-start">
+                                <Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" />
+                                Update your password regularly
+                              </li>
+                            </ul>
                           </div>
-                        ) : (
-                          <div>
-                            <p className="text-gray-500 mb-4">You have no saved addresses.</p>
-                            <Button 
-                              variant="outline" 
-                              className="border-burgundy text-burgundy hover:bg-burgundy hover:text-white"
-                              onClick={() => setActiveTab("addresses")}
-                            >
-                              Add Address
-                            </Button>
-                          </div>
-                        )}
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -539,14 +983,22 @@ const Account = () => {
                       <Button 
                         variant="link" 
                         className="text-burgundy p-0 h-auto"
-                        onClick={() => setActiveTab("orders")}
+                        onClick={() => {
+                          setActiveTab("orders");
+                          fetchOrders();
+                        }}
                       >
                         View All
                       </Button>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    {orders.length === 0 ? (
+                    {isLoadingOrders ? (
+                      <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-burgundy mx-auto"></div>
+                        <p className="mt-2 text-gray-500">Loading your orders...</p>
+                      </div>
+                    ) : orders.length === 0 ? (
                       <div className="text-center py-8">
                         <ShoppingBag className="mx-auto h-12 w-12 text-gray-300 mb-4" />
                         <h3 className="text-lg font-medium mb-2">No orders yet</h3>
@@ -570,365 +1022,8 @@ const Account = () => {
                           <TableBody>
                             {orders.slice(0, 2).map((order) => (
                               <TableRow key={order.id}>
-                                <TableCell>{order.id}</TableCell>
-                                <TableCell>{order.date}</TableCell>
+                                <TableCell>#{order.id.slice(0, 8)}</TableCell>
+                                <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
                                 <TableCell>
                                   <span className={`inline-block px-3 py-1 rounded-full text-xs ${
-                                    order.status === 'Delivered' 
-                                      ? 'bg-green-100 text-green-800' 
-                                      : order.status === 'Processing'
-                                      ? 'bg-blue-100 text-blue-800'
-                                      : order.status === 'Shipped'
-                                      ? 'bg-purple-100 text-purple-800'
-                                      : 'bg-red-100 text-red-800'
-                                  }`}>
-                                    {order.status}
-                                  </span>
-                                </TableCell>
-                                <TableCell>{order.total}</TableCell>
-                                <TableCell>
-                                  <Button 
-                                    variant="ghost" 
-                                    size="sm" 
-                                    onClick={() => handleViewOrder(order.id)}
-                                    className="text-burgundy hover:text-burgundy-light hover:bg-rose-light"
-                                  >
-                                    <Eye className="h-4 w-4 mr-1" /> View
-                                  </Button>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-            
-            {/* Orders Tab */}
-            {activeTab === "orders" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Order History</CardTitle>
-                  <CardDescription>View and manage your orders</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {orders.length === 0 ? (
-                    <div className="text-center py-8">
-                      <ShoppingBag className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                      <h3 className="text-lg font-medium mb-2">No orders yet</h3>
-                      <p className="text-gray-500 mb-4">When you place your first order, it will appear here</p>
-                      <Button asChild className="bg-burgundy hover:bg-burgundy-light">
-                        <Link to="/products">Start Shopping</Link>
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Order</TableHead>
-                            <TableHead>Date</TableHead>
-                            <TableHead>Status</TableHead>
-                            <TableHead>Total</TableHead>
-                            <TableHead>Items</TableHead>
-                            <TableHead>Actions</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {orders.map((order) => (
-                            <TableRow key={order.id}>
-                              <TableCell>{order.id}</TableCell>
-                              <TableCell>{order.date}</TableCell>
-                              <TableCell>
-                                <span className={`inline-block px-3 py-1 rounded-full text-xs ${
-                                  order.status === 'Delivered' 
-                                    ? 'bg-green-100 text-green-800' 
-                                    : order.status === 'Processing'
-                                    ? 'bg-blue-100 text-blue-800'
-                                    : order.status === 'Shipped'
-                                    ? 'bg-purple-100 text-purple-800'
-                                    : 'bg-red-100 text-red-800'
-                                }`}>
-                                  {order.status}
-                                </span>
-                              </TableCell>
-                              <TableCell>{order.total}</TableCell>
-                              <TableCell>{order.items} {order.items === 1 ? 'item' : 'items'}</TableCell>
-                              <TableCell>
-                                <Button 
-                                  variant="ghost" 
-                                  size="sm" 
-                                  onClick={() => handleViewOrder(order.id)}
-                                  className="text-burgundy hover:text-burgundy-light hover:bg-rose-light"
-                                >
-                                  <Eye className="h-4 w-4 mr-1" /> View
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-            
-            {/* Wishlist Tab */}
-            {activeTab === "wishlist" && (
-              <Card>
-                <CardHeader>
-                  <div className="flex justify-between items-center">
-                    <CardTitle>Wishlist</CardTitle>
-                    <Link to="/wishlist">
-                      <Button variant="link" className="text-burgundy p-0 h-auto">
-                        View Full Wishlist <ExternalLink className="ml-1 h-4 w-4" />
-                      </Button>
-                    </Link>
-                  </div>
-                  <CardDescription>Items you've saved for later</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {wishlistItems.length === 0 ? (
-                    <div className="text-center py-8">
-                      <Heart className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                      <h3 className="text-lg font-medium mb-2">Your wishlist is empty</h3>
-                      <p className="text-gray-500 mb-4">Save items you love to your wishlist</p>
-                      <Button asChild className="bg-burgundy hover:bg-burgundy-light">
-                        <Link to="/products">Explore Products</Link>
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {wishlistItems.map((item) => (
-                        <div key={item.id} className="border rounded-lg shadow-sm overflow-hidden">
-                          <div className="relative h-40 bg-gray-100">
-                            <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                            <button
-                              onClick={() => handleRemoveWishlistItem(item.id)}
-                              className="absolute top-2 right-2 bg-white p-1.5 rounded-full shadow hover:bg-gray-100"
-                            >
-                              <X className="h-3 w-3 text-burgundy" />
-                            </button>
-                          </div>
-                          <div className="p-4">
-                            <h3 className="font-medium mb-1 line-clamp-1">{item.name}</h3>
-                            <p className="text-burgundy font-medium mb-2">{item.price}</p>
-                            <div className="flex justify-between items-center">
-                              <span className={item.inStock ? "text-green-600 text-sm" : "text-red-500 text-sm"}>
-                                {item.inStock ? 'In Stock' : 'Out of Stock'}
-                              </span>
-                              <Button
-                                size="sm"
-                                disabled={!item.inStock}
-                                className="bg-burgundy hover:bg-burgundy-light text-white"
-                                onClick={() => handleAddToCart(item.id)}
-                              >
-                                Add to Cart
-                              </Button>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </CardContent>
-                {wishlistItems.length > 0 && (
-                  <CardFooter className="flex justify-center">
-                    <Button asChild variant="outline" className="border-burgundy text-burgundy hover:bg-burgundy hover:text-white">
-                      <Link to="/wishlist">View All Wishlist Items</Link>
-                    </Button>
-                  </CardFooter>
-                )}
-              </Card>
-            )}
-            
-            {/* Addresses Tab */}
-            {activeTab === "addresses" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Address Book</CardTitle>
-                  <CardDescription>Manage your shipping addresses</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {addresses.length === 0 ? (
-                    <div className="text-center py-8">
-                      <MapPin className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                      <h3 className="text-lg font-medium mb-2">No addresses yet</h3>
-                      <p className="text-gray-500 mb-4">Add a shipping address for faster checkout</p>
-                      <Button className="bg-burgundy hover:bg-burgundy-light">
-                        <Plus className="mr-2 h-4 w-4" /> Add New Address
-                      </Button>
-                    </div>
-                  ) : (
-                    <div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                        {addresses.map((address) => (
-                          <div key={address.id} className={`border rounded-lg p-4 ${address.isDefault ? 'border-burgundy' : ''}`}>
-                            <div className="flex justify-between items-start mb-2">
-                              <div className="flex items-center">
-                                <h3 className="font-medium">{address.name}</h3>
-                                {address.isDefault && (
-                                  <span className="ml-2 text-xs bg-rose text-burgundy px-2 py-0.5 rounded-full">
-                                    Default
-                                  </span>
-                                )}
-                              </div>
-                              <div className="space-x-1">
-                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500">
-                                    <path d="M17 3a2.85 2.85 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z" />
-                                    <path d="m15 5 4 4" />
-                                  </svg>
-                                  <span className="sr-only">Edit</span>
-                                </Button>
-                                <Button size="sm" variant="ghost" className="h-8 w-8 p-0" onClick={() => handleRemoveAddress(address.id)}>
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500">
-                                    <path d="M3 6h18" />
-                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                  </svg>
-                                  <span className="sr-only">Delete</span>
-                                </Button>
-                              </div>
-                            </div>
-                            <div className="text-gray-600 mb-4">
-                              <p>{address.street}</p>
-                              <p>{address.city}, {address.state} {address.zip}</p>
-                              <p>{address.country}</p>
-                            </div>
-                            {!address.isDefault && (
-                              <Button 
-                                variant="outline" 
-                                className="w-full text-burgundy border-burgundy hover:bg-burgundy hover:text-white"
-                                onClick={() => handleSetDefaultAddress(address.id)}
-                              >
-                                Set as Default
-                              </Button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                      <Button className="bg-burgundy hover:bg-burgundy-light">
-                        <Plus className="mr-2 h-4 w-4" /> Add New Address
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-            
-            {/* Payment Methods Tab */}
-            {activeTab === "payment" && (
-              <Card>
-                <CardHeader>
-                  <CardTitle>Payment Methods</CardTitle>
-                  <CardDescription>Manage your payment methods</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {paymentMethods.length === 0 ? (
-                    <div className="text-center py-8">
-                      <CreditCard className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                      <h3 className="text-lg font-medium mb-2">No payment methods</h3>
-                      <p className="text-gray-500 mb-4">Add a payment method for faster checkout</p>
-                      <Button className="bg-burgundy hover:bg-burgundy-light">
-                        <Plus className="mr-2 h-4 w-4" /> Add Payment Method
-                      </Button>
-                    </div>
-                  ) : (
-                    <div>
-                      <div className="space-y-4 mb-6">
-                        {paymentMethods.map((payment) => (
-                          <div key={payment.id} className={`border rounded-lg p-4 ${payment.isDefault ? 'border-burgundy' : ''}`}>
-                            <div className="flex justify-between items-start">
-                              <div>
-                                <div className="flex items-center mb-2">
-                                  {payment.type === "Credit Card" ? (
-                                    <CreditCard className="mr-2 h-5 w-5 text-burgundy" />
-                                  ) : (
-                                    <svg className="mr-2 h-5 w-5" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                      <rect width="24" height="24" rx="4" fill="#0070E0" />
-                                      <path d="M7.5 15.5H16.5V17H7.5V15.5Z" fill="white" />
-                                      <path d="M7.5 13H16.5V14.5H7.5V13Z" fill="white" />
-                                      <path d="M16.5 8.5C16.5 6.84 15.16 5.5 13.5 5.5H10.5C8.84 5.5 7.5 6.84 7.5 8.5V11H16.5V8.5Z" fill="white" />
-                                    </svg>
-                                  )}
-                                  <h3 className="font-medium flex items-center">
-                                    {payment.type === "Credit Card" ? (
-                                      <>
-                                        Credit Card ending in {payment.lastFour}
-                                        {payment.isDefault && (
-                                          <span className="ml-2 text-xs bg-rose text-burgundy px-2 py-0.5 rounded-full">
-                                            Default
-                                          </span>
-                                        )}
-                                      </>
-                                    ) : (
-                                      <>
-                                        PayPal - {payment.email}
-                                        {payment.isDefault && (
-                                          <span className="ml-2 text-xs bg-rose text-burgundy px-2 py-0.5 rounded-full">
-                                            Default
-                                          </span>
-                                        )}
-                                      </>
-                                    )}
-                                  </h3>
-                                </div>
-                                {payment.type === "Credit Card" && (
-                                  <div className="text-gray-600">
-                                    <p>{payment.cardName}</p>
-                                    <p>Expires: {payment.expiryDate}</p>
-                                  </div>
-                                )}
-                              </div>
-                              <div className="space-x-1">
-                                <Button 
-                                  size="sm" 
-                                  variant="ghost" 
-                                  className="h-8 w-8 p-0" 
-                                  onClick={() => handleRemovePayment(payment.id)}
-                                >
-                                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-red-500">
-                                    <path d="M3 6h18" />
-                                    <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" />
-                                    <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" />
-                                  </svg>
-                                  <span className="sr-only">Delete</span>
-                                </Button>
-                              </div>
-                            </div>
-                            {!payment.isDefault && (
-                              <Button 
-                                variant="outline" 
-                                className="w-full mt-4 text-burgundy border-burgundy hover:bg-burgundy hover:text-white"
-                                onClick={() => handleSetDefaultPayment(payment.id)}
-                              >
-                                Set as Default
-                              </Button>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                      <Button className="bg-burgundy hover:bg-burgundy-light">
-                        <Plus className="mr-2 h-4 w-4" /> Add Payment Method
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-            )}
-          </div>
-        </div>
-      </div>
-      
-      <Footer />
-    </div>
-  );
-};
-
-export default Account;
-
+                                    order.status === 'Delivered'

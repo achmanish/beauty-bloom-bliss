@@ -81,4 +81,39 @@ export interface User {
   email: string;
   created_at: string;
   role?: UserRole;
+  first_name?: string;
+  last_name?: string;
+}
+
+export interface WishlistItem {
+  id: string;
+  user_id: string;
+  product_id: string;
+  product: Product;
+  created_at: string;
+}
+
+export interface UserAddress {
+  id: string;
+  user_id: string;
+  name: string;
+  street: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+  is_default: boolean;
+  created_at: string;
+}
+
+export interface UserPaymentMethod {
+  id: string;
+  user_id: string;
+  type: 'Credit Card' | 'PayPal';
+  last_four?: string;
+  expiry_date?: string;
+  card_name?: string;
+  email?: string;
+  is_default: boolean;
+  created_at: string;
 }
