@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { 
@@ -61,8 +60,9 @@ import {
   Save
 } from "lucide-react";
 import { Order } from "@/types/admin";
+import type { Tables } from "@/integrations/supabase/types";
 
-// Updated types to match our actual database
+// Define types based on our actual database tables
 interface WishlistItem {
   id: string;
   product_id: string;
@@ -245,7 +245,7 @@ const Account = () => {
     setIsLoadingAddresses(true);
     try {
       const { data, error } = await supabase
-        .from('addresses')
+        .from<Address>('addresses')
         .select('*')
         .eq('user_id', user.id);
       
@@ -266,7 +266,7 @@ const Account = () => {
     setIsLoadingPayments(true);
     try {
       const { data, error } = await supabase
-        .from('payment_methods')
+        .from<PaymentMethod>('payment_methods')
         .select('*')
         .eq('user_id', user.id);
       
@@ -460,13 +460,13 @@ const Account = () => {
     try {
       // First set all addresses to non-default
       await supabase
-        .from('addresses')
+        .from<Address>('addresses')
         .update({ is_default: false })
         .eq('user_id', user?.id);
       
       // Then set the selected one as default
       const { error } = await supabase
-        .from('addresses')
+        .from<Address>('addresses')
         .update({ is_default: true })
         .eq('id', addressId)
         .eq('user_id', user?.id);
@@ -489,7 +489,7 @@ const Account = () => {
   const handleRemoveAddress = async (addressId: string) => {
     try {
       const { error } = await supabase
-        .from('addresses')
+        .from<Address>('addresses')
         .delete()
         .eq('id', addressId)
         .eq('user_id', user?.id);
@@ -509,13 +509,13 @@ const Account = () => {
     try {
       // First set all payment methods to non-default
       await supabase
-        .from('payment_methods')
+        .from<PaymentMethod>('payment_methods')
         .update({ is_default: false })
         .eq('user_id', user?.id);
       
       // Then set the selected one as default
       const { error } = await supabase
-        .from('payment_methods')
+        .from<PaymentMethod>('payment_methods')
         .update({ is_default: true })
         .eq('id', paymentId)
         .eq('user_id', user?.id);
@@ -538,7 +538,7 @@ const Account = () => {
   const handleRemovePayment = async (paymentId: string) => {
     try {
       const { error } = await supabase
-        .from('payment_methods')
+        .from<PaymentMethod>('payment_methods')
         .delete()
         .eq('id', paymentId)
         .eq('user_id', user?.id);
@@ -1024,530 +1024,4 @@ const Account = () => {
                             {orders.slice(0, 2).map((order) => (
                               <TableRow key={order.id}>
                                 <TableCell>#{order.id.slice(0, 8)}</TableCell>
-                                <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
-                                <TableCell>
-                                  <span className={`inline-block px-3 py-1 rounded-full text-xs ${
-                                    order.status === 'Delivered' 
-                                      ? 'bg-green-100 text-green-800' 
-                                      : order.status === 'Processing'
-                                      ? 'bg-blue-100 text-blue-800'
-                                      : order.status === 'Cancelled'
-                                      ? 'bg-red-100 text-red-800'
-                                      : 'bg-amber-100 text-amber-800'
-                                  }`}>
-                                    {order.status}
-                                  </span>
-                                </TableCell>
-                                <TableCell>${order.total_amount}</TableCell>
-                                <TableCell>
-                                  <div className="flex space-x-2">
-                                    <Button 
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => handleViewOrder(order.id)}
-                                      className="h-8 px-2"
-                                    >
-                                      <Eye className="w-4 h-4" />
-                                    </Button>
-                                    {order.status !== 'Delivered' && order.status !== 'Cancelled' && (
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleCancelOrder(order.id)}
-                                        className="h-8 px-2 border-red-300 hover:bg-red-50 hover:text-red-600"
-                                      >
-                                        <X className="w-4 h-4" />
-                                      </Button>
-                                    )}
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-            
-            {/* Orders Tab Content */}
-            {activeTab === "orders" && (
-              <div>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Your Orders</CardTitle>
-                    <CardDescription>Track and manage your orders</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {isLoadingOrders ? (
-                      <div className="text-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-burgundy mx-auto"></div>
-                        <p className="mt-2 text-gray-500">Loading your orders...</p>
-                      </div>
-                    ) : orders.length === 0 ? (
-                      <div className="text-center py-8">
-                        <ShoppingBag className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                        <h3 className="text-lg font-medium mb-2">No orders yet</h3>
-                        <p className="text-gray-500 mb-4">When you place your first order, it will appear here</p>
-                        <Button asChild className="bg-burgundy hover:bg-burgundy-light">
-                          <Link to="/products">Start Shopping</Link>
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="overflow-x-auto">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Order</TableHead>
-                              <TableHead>Date</TableHead>
-                              <TableHead>Status</TableHead>
-                              <TableHead>Total</TableHead>
-                              <TableHead>Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {orders.map((order) => (
-                              <TableRow key={order.id}>
-                                <TableCell>#{order.id.slice(0, 8)}</TableCell>
-                                <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
-                                <TableCell>
-                                  <span className={`inline-block px-3 py-1 rounded-full text-xs ${
-                                    order.status === 'Delivered' 
-                                      ? 'bg-green-100 text-green-800' 
-                                      : order.status === 'Processing'
-                                      ? 'bg-blue-100 text-blue-800'
-                                      : order.status === 'Cancelled'
-                                      ? 'bg-red-100 text-red-800'
-                                      : 'bg-amber-100 text-amber-800'
-                                  }`}>
-                                    {order.status}
-                                  </span>
-                                </TableCell>
-                                <TableCell>${order.total_amount}</TableCell>
-                                <TableCell>
-                                  <div className="flex space-x-2">
-                                    <Button 
-                                      variant="outline"
-                                      size="sm"
-                                      onClick={() => handleViewOrder(order.id)}
-                                      className="h-8 px-2"
-                                    >
-                                      <Eye className="w-4 h-4" />
-                                    </Button>
-                                    {order.status !== 'Delivered' && order.status !== 'Cancelled' && (
-                                      <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleCancelOrder(order.id)}
-                                        className="h-8 px-2 border-red-300 hover:bg-red-50 hover:text-red-600"
-                                      >
-                                        <X className="w-4 h-4" />
-                                      </Button>
-                                    )}
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-            
-            {/* Wishlist Tab Content */}
-            {activeTab === "wishlist" && (
-              <div>
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Your Wishlist</CardTitle>
-                    <CardDescription>Items you've saved for later</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    {isLoadingWishlist ? (
-                      <div className="text-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-burgundy mx-auto"></div>
-                        <p className="mt-2 text-gray-500">Loading your wishlist...</p>
-                      </div>
-                    ) : wishlistItems.length === 0 ? (
-                      <div className="text-center py-8">
-                        <Heart className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                        <h3 className="text-lg font-medium mb-2">Your wishlist is empty</h3>
-                        <p className="text-gray-500 mb-4">Browse our products and add items to your wishlist</p>
-                        <Button asChild className="bg-burgundy hover:bg-burgundy-light">
-                          <Link to="/products">Browse Products</Link>
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {wishlistItems.map((item) => (
-                          <div key={item.id} className="border rounded-lg overflow-hidden flex flex-col">
-                            <div className="h-40 bg-gray-100 relative">
-                              {item.product.image_url ? (
-                                <img 
-                                  src={item.product.image_url} 
-                                  alt={item.product.name} 
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <div className="w-full h-full flex items-center justify-center text-gray-400">
-                                  No image
-                                </div>
-                              )}
-                              <button
-                                onClick={() => handleRemoveWishlistItem(item.id)}
-                                className="absolute top-2 right-2 bg-white p-1 rounded-full shadow-sm hover:bg-gray-100"
-                              >
-                                <X className="w-4 h-4 text-gray-600" />
-                              </button>
-                            </div>
-                            <div className="p-4 flex-grow flex flex-col">
-                              <h3 className="font-medium mb-1">{item.product.name}</h3>
-                              <p className="text-burgundy font-medium">${item.product.price}</p>
-                              <div className="mt-2 text-sm">
-                                <span className={item.product.stock > 0 ? "text-green-600" : "text-red-600"}>
-                                  {item.product.stock > 0 ? "In Stock" : "Out of Stock"}
-                                </span>
-                              </div>
-                              <div className="mt-auto pt-4">
-                                <Button
-                                  className="w-full bg-burgundy hover:bg-burgundy-light"
-                                  disabled={item.product.stock <= 0}
-                                  onClick={() => handleAddToCart(item.product_id)}
-                                >
-                                  Add to Cart
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-            
-            {/* Addresses Tab Content */}
-            {activeTab === "addresses" && (
-              <div>
-                <Card>
-                  <CardHeader>
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <CardTitle>Your Addresses</CardTitle>
-                        <CardDescription>Manage your shipping addresses</CardDescription>
-                      </div>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button className="bg-burgundy hover:bg-burgundy-light">
-                            <Plus className="w-4 h-4 mr-2" />
-                            Add Address
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Add New Address</DialogTitle>
-                            <DialogDescription>
-                              Enter your shipping address details
-                            </DialogDescription>
-                          </DialogHeader>
-                          
-                          <div className="grid gap-4 py-4">
-                            <div>
-                              <Label htmlFor="addressName">Address Name</Label>
-                              <Input id="addressName" placeholder="Home, Work, etc." />
-                            </div>
-                            <div>
-                              <Label htmlFor="street">Street Address</Label>
-                              <Input id="street" placeholder="123 Main St" />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <Label htmlFor="city">City</Label>
-                                <Input id="city" placeholder="City" />
-                              </div>
-                              <div>
-                                <Label htmlFor="state">State</Label>
-                                <Input id="state" placeholder="State" />
-                              </div>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <Label htmlFor="zipCode">Zip Code</Label>
-                                <Input id="zipCode" placeholder="12345" />
-                              </div>
-                              <div>
-                                <Label htmlFor="country">Country</Label>
-                                <Input id="country" placeholder="Country" defaultValue="United States" />
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <Checkbox id="defaultAddress" />
-                              <label
-                                htmlFor="defaultAddress"
-                                className="text-sm font-medium leading-none"
-                              >
-                                Set as default address
-                              </label>
-                            </div>
-                          </div>
-                          
-                          <DialogFooter>
-                            <Button variant="outline">Cancel</Button>
-                            <Button className="bg-burgundy hover:bg-burgundy-light">
-                              Save Address
-                            </Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    {isLoadingAddresses ? (
-                      <div className="text-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-burgundy mx-auto"></div>
-                        <p className="mt-2 text-gray-500">Loading your addresses...</p>
-                      </div>
-                    ) : addresses.length === 0 ? (
-                      <div className="text-center py-8">
-                        <MapPin className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                        <h3 className="text-lg font-medium mb-2">No addresses saved</h3>
-                        <p className="text-gray-500 mb-4">Add shipping addresses for faster checkout</p>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {addresses.map((address) => (
-                          <div 
-                            key={address.id} 
-                            className={`border rounded-lg p-4 relative ${
-                              address.is_default ? 'border-burgundy border-2' : ''
-                            }`}
-                          >
-                            {address.is_default && (
-                              <div className="absolute top-2 right-2 bg-burgundy text-white text-xs px-2 py-1 rounded-full">
-                                Default
-                              </div>
-                            )}
-                            
-                            <h3 className="font-medium mb-1">{address.name}</h3>
-                            <div className="text-sm text-gray-600 space-y-1">
-                              <p>{address.street}</p>
-                              <p>{address.city}, {address.state} {address.zip}</p>
-                              <p>{address.country}</p>
-                            </div>
-                            
-                            <div className="mt-4 pt-4 border-t flex justify-between">
-                              {!address.is_default && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleSetDefaultAddress(address.id)}
-                                  className="text-xs"
-                                >
-                                  Set as Default
-                                </Button>
-                              )}
-                              <div className="flex space-x-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-xs"
-                                >
-                                  Edit
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleRemoveAddress(address.id)}
-                                  className="text-xs border-red-300 hover:bg-red-50 hover:text-red-600"
-                                >
-                                  Remove
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-            
-            {/* Payment Methods Tab Content */}
-            {activeTab === "payment" && (
-              <div>
-                <Card>
-                  <CardHeader>
-                    <div className="flex justify-between items-center">
-                      <div>
-                        <CardTitle>Payment Methods</CardTitle>
-                        <CardDescription>Manage your saved payment methods</CardDescription>
-                      </div>
-                      <Dialog>
-                        <DialogTrigger asChild>
-                          <Button className="bg-burgundy hover:bg-burgundy-light">
-                            <Plus className="w-4 h-4 mr-2" />
-                            Add Payment Method
-                          </Button>
-                        </DialogTrigger>
-                        <DialogContent>
-                          <DialogHeader>
-                            <DialogTitle>Add Payment Method</DialogTitle>
-                            <DialogDescription>
-                              Enter your payment details
-                            </DialogDescription>
-                          </DialogHeader>
-                          
-                          <div className="space-y-4 py-4">
-                            <div className="flex items-center space-x-2">
-                              <Checkbox id="creditCard" checked />
-                              <label
-                                htmlFor="creditCard"
-                                className="text-sm font-medium leading-none"
-                              >
-                                Credit Card
-                              </label>
-                            </div>
-                            
-                            <div>
-                              <Label htmlFor="cardName">Name on Card</Label>
-                              <Input id="cardName" placeholder="John Doe" />
-                            </div>
-                            <div>
-                              <Label htmlFor="cardNumber">Card Number</Label>
-                              <Input id="cardNumber" placeholder="1234 5678 9012 3456" />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <Label htmlFor="expiryDate">Expiry Date</Label>
-                                <Input id="expiryDate" placeholder="MM/YY" />
-                              </div>
-                              <div>
-                                <Label htmlFor="cvv">CVV</Label>
-                                <Input id="cvv" placeholder="123" />
-                              </div>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                              <Checkbox id="defaultPayment" />
-                              <label
-                                htmlFor="defaultPayment"
-                                className="text-sm font-medium leading-none"
-                              >
-                                Set as default payment method
-                              </label>
-                            </div>
-                          </div>
-                          
-                          <DialogFooter>
-                            <Button variant="outline">Cancel</Button>
-                            <Button className="bg-burgundy hover:bg-burgundy-light">
-                              Save Payment Method
-                            </Button>
-                          </DialogFooter>
-                        </DialogContent>
-                      </Dialog>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    {isLoadingPayments ? (
-                      <div className="text-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-burgundy mx-auto"></div>
-                        <p className="mt-2 text-gray-500">Loading your payment methods...</p>
-                      </div>
-                    ) : paymentMethods.length === 0 ? (
-                      <div className="text-center py-8">
-                        <CreditCard className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                        <h3 className="text-lg font-medium mb-2">No payment methods saved</h3>
-                        <p className="text-gray-500 mb-4">Add payment methods for faster checkout</p>
-                      </div>
-                    ) : (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {paymentMethods.map((payment) => (
-                          <div 
-                            key={payment.id} 
-                            className={`border rounded-lg p-4 relative ${
-                              payment.is_default ? 'border-burgundy border-2' : ''
-                            }`}
-                          >
-                            {payment.is_default && (
-                              <div className="absolute top-2 right-2 bg-burgundy text-white text-xs px-2 py-1 rounded-full">
-                                Default
-                              </div>
-                            )}
-                            
-                            <div className="flex items-center mb-2">
-                              {payment.type === 'Credit Card' ? (
-                                <CreditCard className="w-5 h-5 mr-2 text-burgundy" />
-                              ) : (
-                                <div className="w-5 h-5 mr-2 text-blue-500">P</div>
-                              )}
-                              <h3 className="font-medium">
-                                {payment.type === 'Credit Card' ? 'Credit Card' : 'PayPal'}
-                              </h3>
-                            </div>
-                            
-                            <div className="text-sm text-gray-600">
-                              {payment.type === 'Credit Card' ? (
-                                <>
-                                  <p>{payment.card_name}</p>
-                                  <p>•••• •••• •••• {payment.last_four}</p>
-                                  <p>Expires {payment.expiry_date}</p>
-                                </>
-                              ) : (
-                                <p>{payment.email}</p>
-                              )}
-                            </div>
-                            
-                            <div className="mt-4 pt-4 border-t flex justify-between">
-                              {!payment.is_default && (
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleSetDefaultPayment(payment.id)}
-                                  className="text-xs"
-                                >
-                                  Set as Default
-                                </Button>
-                              )}
-                              <div className="flex space-x-2">
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  className="text-xs"
-                                >
-                                  Edit
-                                </Button>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => handleRemovePayment(payment.id)}
-                                  className="text-xs border-red-300 hover:bg-red-50 hover:text-red-600"
-                                >
-                                  Remove
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-      
-      <Footer />
-    </div>
-  );
-};
-
-export default Account;
+                                <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell

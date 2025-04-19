@@ -9,6 +9,45 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      addresses: {
+        Row: {
+          city: string
+          country: string
+          created_at: string
+          id: string
+          is_default: boolean
+          name: string
+          state: string
+          street: string
+          user_id: string
+          zip: string
+        }
+        Insert: {
+          city: string
+          country?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name: string
+          state: string
+          street: string
+          user_id: string
+          zip: string
+        }
+        Update: {
+          city?: string
+          country?: string
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          name?: string
+          state?: string
+          street?: string
+          user_id?: string
+          zip?: string
+        }
+        Relationships: []
+      }
       admins: {
         Row: {
           created_at: string
@@ -252,6 +291,42 @@ export type Database = {
           status?: string
           total_amount?: number
           user_id?: string | null
+        }
+        Relationships: []
+      }
+      payment_methods: {
+        Row: {
+          card_name: string | null
+          created_at: string
+          email: string | null
+          expiry_date: string | null
+          id: string
+          is_default: boolean
+          last_four: string | null
+          type: string
+          user_id: string
+        }
+        Insert: {
+          card_name?: string | null
+          created_at?: string
+          email?: string | null
+          expiry_date?: string | null
+          id?: string
+          is_default?: boolean
+          last_four?: string | null
+          type: string
+          user_id: string
+        }
+        Update: {
+          card_name?: string | null
+          created_at?: string
+          email?: string | null
+          expiry_date?: string | null
+          id?: string
+          is_default?: boolean
+          last_four?: string | null
+          type?: string
+          user_id?: string
         }
         Relationships: []
       }
