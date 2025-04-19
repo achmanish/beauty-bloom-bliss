@@ -2,21 +2,33 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
-import { WishlistItem } from '@/types/admin';
+
+// Define types for wishlist items
+interface WishlistProduct {
+  id: string;
+  name: string;
+  price: number;
+  image_url: string;
+  stock: number;
+}
+
+export interface WishlistItem {
+  id: string;
+  product_id: string;
+  user_id?: string;
+  created_at: string;
+  product: WishlistProduct;
+}
 
 interface WishlistContextType {
   wishlistCount: number;
-  addToWishlist: (productId: string, product: Partial<WishlistItem['product']>) => Promise<void>;
+  addToWishlist: (productId: string, product: Partial<WishlistProduct>) => Promise<void>;
   removeFromWishlist: (productId: string) => Promise<void>;
   isInWishlist: (productId: string) => boolean;
   wishlistItems: WishlistItem[];
 }
 
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
-
-interface GuestWishlistItem extends Omit<WishlistItem, 'user_id' | 'created_at'> {
-  created_at?: string;
-}
 
 export function WishlistProvider({ children }: { children: ReactNode }) {
   const { user, isLoggedIn } = useAuth();
@@ -29,7 +41,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     } else {
       loadGuestWishlist();
     }
-  }, [isLoggedIn]);
+  }, [isLoggedIn, user]);
 
   // Fetch authenticated user's wishlist from Supabase
   const fetchUserWishlist = async () => {
@@ -52,8 +64,13 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
         `)
         .eq('user_id', user.id);
 
-      if (error) throw error;
-      setWishlistItems(data || []);
+      if (error) {
+        throw error;
+      }
+      
+      if (data) {
+        setWishlistItems(data as WishlistItem[]);
+      }
     } catch (error) {
       console.error('Error fetching wishlist:', error);
     }
@@ -80,7 +97,7 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const addToWishlist = async (productId: string, product: Partial<WishlistItem['product']>) => {
+  const addToWishlist = async (productId: string, product: Partial<WishlistProduct>) => {
     if (isLoggedIn && user) {
       try {
         const { data, error } = await supabase
@@ -97,9 +114,10 @@ export function WishlistProvider({ children }: { children: ReactNode }) {
       }
     } else {
       // Handle guest wishlist
-      const newItem: GuestWishlistItem = {
+      const newItem: WishlistItem = {
         id: `guest-${Date.now()}`,
         product_id: productId,
+        created_at: new Date().toISOString(),
         product: {
           id: productId,
           name: product.name || '',

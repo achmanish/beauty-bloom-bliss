@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ShoppingBag, User, Search, Menu, X, Heart } from "lucide-react";
@@ -16,7 +17,8 @@ import { useWishlist } from "@/context/WishlistContext";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { wishlistCount, isLoggedIn, isAdmin, signOut } = useAuth();
+  const { isLoggedIn, isAdmin, signOut } = useAuth();
+  const { wishlistCount } = useWishlist();
   
   const cartContext = useCartContext();
   const [localCartCount, setLocalCartCount] = useState(0);

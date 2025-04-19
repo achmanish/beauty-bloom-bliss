@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
@@ -59,25 +60,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       subscription.unsubscribe();
     };
   }, []);
-
-  const fetchWishlistCount = async (userId: string) => {
-    try {
-      const { count, error } = await supabase
-        .from('wishlists')
-        .select('*', { count: 'exact', head: true })
-        .eq('user_id', userId);
-      
-      if (!error && count !== null) {
-        setWishlistCount(count);
-      } else {
-        console.error("Error fetching wishlist count:", error);
-        setWishlistCount(0);
-      }
-    } catch (error) {
-      console.error("Error fetching wishlist count:", error);
-      setWishlistCount(0);
-    }
-  };
 
   const checkUserRole = async (userId: string) => {
     try {
