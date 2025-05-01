@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Trash2, Plus, Minus, AlertTriangle, Wifi, WifiOff } from "lucide-react";
@@ -58,7 +57,7 @@ const Cart = () => {
         <h1 className="font-playfair text-3xl md:text-4xl text-burgundy mb-8">Your Shopping Cart</h1>
         
         {isOffline && isLoggedIn && (
-          <Alert variant="warning" className="mb-6">
+          <Alert variant="destructive" className="mb-6">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription>
               <div className="flex items-center">
