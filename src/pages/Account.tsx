@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { 
@@ -60,7 +61,6 @@ import {
   Save
 } from "lucide-react";
 import { Order } from "@/types/admin";
-import type { Tables } from "@/integrations/supabase/types";
 
 // Define types based on our actual database tables
 interface WishlistItem {
@@ -245,13 +245,14 @@ const Account = () => {
     setIsLoadingAddresses(true);
     try {
       const { data, error } = await supabase
-        .from<Address>('addresses')
+        .from('addresses')
         .select('*')
         .eq('user_id', user.id);
       
       if (error) throw error;
       
-      setAddresses(data || []);
+      // Type assertion to match our interface
+      setAddresses(data as Address[] || []);
     } catch (error) {
       console.error("Error fetching addresses:", error);
       toast.error("Failed to load your addresses");
@@ -266,13 +267,14 @@ const Account = () => {
     setIsLoadingPayments(true);
     try {
       const { data, error } = await supabase
-        .from<PaymentMethod>('payment_methods')
+        .from('payment_methods')
         .select('*')
         .eq('user_id', user.id);
       
       if (error) throw error;
       
-      setPaymentMethods(data || []);
+      // Type assertion to match our interface
+      setPaymentMethods(data as PaymentMethod[] || []);
     } catch (error) {
       console.error("Error fetching payment methods:", error);
       toast.error("Failed to load your payment methods");
@@ -460,13 +462,13 @@ const Account = () => {
     try {
       // First set all addresses to non-default
       await supabase
-        .from<Address>('addresses')
+        .from('addresses')
         .update({ is_default: false })
         .eq('user_id', user?.id);
       
       // Then set the selected one as default
       const { error } = await supabase
-        .from<Address>('addresses')
+        .from('addresses')
         .update({ is_default: true })
         .eq('id', addressId)
         .eq('user_id', user?.id);
@@ -489,7 +491,7 @@ const Account = () => {
   const handleRemoveAddress = async (addressId: string) => {
     try {
       const { error } = await supabase
-        .from<Address>('addresses')
+        .from('addresses')
         .delete()
         .eq('id', addressId)
         .eq('user_id', user?.id);
@@ -509,13 +511,13 @@ const Account = () => {
     try {
       // First set all payment methods to non-default
       await supabase
-        .from<PaymentMethod>('payment_methods')
+        .from('payment_methods')
         .update({ is_default: false })
         .eq('user_id', user?.id);
       
       // Then set the selected one as default
       const { error } = await supabase
-        .from<PaymentMethod>('payment_methods')
+        .from('payment_methods')
         .update({ is_default: true })
         .eq('id', paymentId)
         .eq('user_id', user?.id);
@@ -538,7 +540,7 @@ const Account = () => {
   const handleRemovePayment = async (paymentId: string) => {
     try {
       const { error } = await supabase
-        .from<PaymentMethod>('payment_methods')
+        .from('payment_methods')
         .delete()
         .eq('id', paymentId)
         .eq('user_id', user?.id);
@@ -551,6 +553,68 @@ const Account = () => {
     } catch (error) {
       console.error("Error removing payment method:", error);
       toast.error("Failed to remove payment method");
+    }
+  };
+  
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!loginEmail || !loginPassword) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    
+    setIsLoggingIn(true);
+    
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: loginEmail,
+        password: loginPassword
+      });
+      
+      if (error) throw error;
+      
+      toast.success("Successfully logged in");
+      setActiveTab("account");
+    } catch (error: any) {
+      console.error("Login error:", error);
+      toast.error(error.message || "Failed to log in");
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+  
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!registerEmail || !registerPassword || !registerFirstName) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+    
+    setIsRegistering(true);
+    
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email: registerEmail,
+        password: registerPassword,
+        options: {
+          data: {
+            first_name: registerFirstName,
+            last_name: registerLastName
+          }
+        }
+      });
+      
+      if (error) throw error;
+      
+      toast.success("Account created successfully. Please check your email for verification.");
+      setActiveTab("login");
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      toast.error(error.message || "Failed to create account");
+    } finally {
+      setIsRegistering(false);
     }
   };
   
