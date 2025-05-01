@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { 
@@ -556,68 +555,6 @@ const Account = () => {
     }
   };
   
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!loginEmail || !loginPassword) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-    
-    setIsLoggingIn(true);
-    
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: loginEmail,
-        password: loginPassword
-      });
-      
-      if (error) throw error;
-      
-      toast.success("Successfully logged in");
-      setActiveTab("account");
-    } catch (error: any) {
-      console.error("Login error:", error);
-      toast.error(error.message || "Failed to log in");
-    } finally {
-      setIsLoggingIn(false);
-    }
-  };
-  
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!registerEmail || !registerPassword || !registerFirstName) {
-      toast.error("Please fill in all required fields");
-      return;
-    }
-    
-    setIsRegistering(true);
-    
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email: registerEmail,
-        password: registerPassword,
-        options: {
-          data: {
-            first_name: registerFirstName,
-            last_name: registerLastName
-          }
-        }
-      });
-      
-      if (error) throw error;
-      
-      toast.success("Account created successfully. Please check your email for verification.");
-      setActiveTab("login");
-    } catch (error: any) {
-      console.error("Registration error:", error);
-      toast.error(error.message || "Failed to create account");
-    } finally {
-      setIsRegistering(false);
-    }
-  };
-  
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen bg-white">
@@ -1090,49 +1027,4 @@ const Account = () => {
                                 <TableCell>#{order.id.slice(0, 8)}</TableCell>
                                 <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
                                 <TableCell>{order.status}</TableCell>
-                                <TableCell>${order.total_amount}</TableCell>
-                                <TableCell>
-                                  <div className="flex space-x-2">
-                                    <Button 
-                                      variant="outline" 
-                                      size="sm"
-                                      onClick={() => handleViewOrder(order.id)}
-                                    >
-                                      <Eye className="w-4 h-4" />
-                                      <span className="sr-only">View</span>
-                                    </Button>
-                                    
-                                    {order.status !== 'Cancelled' && order.status !== 'Delivered' && (
-                                      <Button 
-                                        variant="outline" 
-                                        size="sm" 
-                                        onClick={() => handleCancelOrder(order.id)}
-                                      >
-                                        <X className="w-4 h-4" />
-                                        <span className="sr-only">Cancel</span>
-                                      </Button>
-                                    )}
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-            )}
-            
-            {/* Other tab content would go here */}
-          </div>
-        </div>
-      </div>
-      
-      <Footer />
-    </div>
-  );
-};
-
-export default Account;
+                                <TableCell>${order
