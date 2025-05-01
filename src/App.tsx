@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Index from './pages/Index';
@@ -12,9 +13,9 @@ import Account from './pages/Account';
 import Auth from './pages/Auth';
 import NotFound from './pages/NotFound';
 import ProtectedRoute from './components/ProtectedRoute';
-import AdminDashboard from './pages/admin/AdminDashboard';
 import { Toaster } from "@/components/ui/sonner"
 import ProductDetail from './pages/ProductDetail';
+import AdminDashboard from './pages/AdminDashboard';
 
 function App() {
   return (
@@ -22,7 +23,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/products" element={<ProductsPage />} />
-        <Route path="/product/:productId" element={<ProductDetail />} /> {/* Add this line */}
+        <Route path="/product/:productId" element={<ProductDetail />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/order-confirmation" element={<OrderConfirmation />} />
