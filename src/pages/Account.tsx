@@ -1024,4 +1024,51 @@ const Account = () => {
                             {orders.slice(0, 2).map((order) => (
                               <TableRow key={order.id}>
                                 <TableCell>#{order.id.slice(0, 8)}</TableCell>
-                                <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell
+                                <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
+                                <TableCell>{order.status}</TableCell>
+                                <TableCell>${order.total_amount}</TableCell>
+                                <TableCell>
+                                  <div className="flex space-x-2">
+                                    <Button 
+                                      variant="outline" 
+                                      size="sm"
+                                      onClick={() => handleViewOrder(order.id)}
+                                    >
+                                      <Eye className="w-4 h-4" />
+                                      <span className="sr-only">View</span>
+                                    </Button>
+                                    
+                                    {order.status !== 'Cancelled' && order.status !== 'Delivered' && (
+                                      <Button 
+                                        variant="outline" 
+                                        size="sm" 
+                                        onClick={() => handleCancelOrder(order.id)}
+                                      >
+                                        <X className="w-4 h-4" />
+                                        <span className="sr-only">Cancel</span>
+                                      </Button>
+                                    )}
+                                  </div>
+                                </TableCell>
+                              </TableRow>
+                            ))}
+                          </TableBody>
+                        </Table>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+            
+            {/* Other tab content would go here */}
+          </div>
+        </div>
+      </div>
+      
+      <Footer />
+    </div>
+  );
+};
+
+export default Account;
