@@ -1,65 +1,21 @@
+
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { 
-  Tabs, 
-  TabsContent, 
-  TabsList, 
-  TabsTrigger 
-} from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { 
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from "@/components/ui/table";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-  CardFooter
-} from "@/components/ui/card";
-import { 
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { useNavigate } from "react-router-dom";
 import { toast } from "@/components/ui/sonner";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import { useAuth } from "@/context/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
-import { 
-  UserRound, 
-  Package, 
-  Heart, 
-  CreditCard, 
-  LogOut,
-  Home,
-  Check,
-  Plus,
-  Eye,
-  ExternalLink,
-  MapPin,
-  ShoppingBag,
-  X,
-  AlertCircle,
-  Key,
-  Save
-} from "lucide-react";
 import { Order } from "@/types/admin";
+
+// Import refactored components
+import AccountSidebar from "@/components/account/AccountSidebar";
+import AccountOverview from "@/components/account/AccountOverview";
+import OrdersList from "@/components/account/OrdersList";
+import WishlistItems from "@/components/account/WishlistItems";
+import AddressList from "@/components/account/AddressList";
+import PaymentMethodList from "@/components/account/PaymentMethodList";
+import AuthForms from "@/components/account/AuthForms";
 
 // Define types based on our actual database tables
 interface WishlistItem {
@@ -127,18 +83,6 @@ const Account = () => {
   const [isLoadingAddresses, setIsLoadingAddresses] = useState(false);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [isLoadingPayments, setIsLoadingPayments] = useState(false);
-  
-  // Login form state
-  const [loginEmail, setLoginEmail] = useState("");
-  const [loginPassword, setLoginPassword] = useState("");
-  const [isLoggingIn, setIsLoggingIn] = useState(false);
-  
-  // Register form state
-  const [registerEmail, setRegisterEmail] = useState("");
-  const [registerPassword, setRegisterPassword] = useState("");
-  const [registerFirstName, setRegisterFirstName] = useState("");
-  const [registerLastName, setRegisterLastName] = useState("");
-  const [isRegistering, setIsRegistering] = useState(false);
   
   useEffect(() => {
     // If user logs out or is not logged in, we should show the login tab
@@ -274,73 +218,8 @@ const Account = () => {
       
       // Type assertion to match our interface
       setPaymentMethods(data as PaymentMethod[] || []);
-    } catch (error) {
-      console.error("Error fetching payment methods:", error);
-      toast.error("Failed to load your payment methods");
     } finally {
       setIsLoadingPayments(false);
-    }
-  };
-  
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!loginEmail || !loginPassword) {
-      toast.error("Please fill in all fields");
-      return;
-    }
-    
-    setIsLoggingIn(true);
-    
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: loginEmail,
-        password: loginPassword
-      });
-      
-      if (error) throw error;
-      
-      toast.success("Successfully logged in");
-      setActiveTab("account");
-    } catch (error: any) {
-      console.error("Login error:", error);
-      toast.error(error.message || "Failed to log in");
-    } finally {
-      setIsLoggingIn(false);
-    }
-  };
-  
-  const handleRegister = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!registerEmail || !registerPassword || !registerFirstName) {
-      toast.error("Please fill in all required fields");
-      return;
-    }
-    
-    setIsRegistering(true);
-    
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email: registerEmail,
-        password: registerPassword,
-        options: {
-          data: {
-            first_name: registerFirstName,
-            last_name: registerLastName
-          }
-        }
-      });
-      
-      if (error) throw error;
-      
-      toast.success("Account created successfully. Please check your email for verification.");
-      setActiveTab("login");
-    } catch (error: any) {
-      console.error("Registration error:", error);
-      toast.error(error.message || "Failed to create account");
-    } finally {
-      setIsRegistering(false);
     }
   };
   
@@ -565,144 +444,7 @@ const Account = () => {
             Account
           </h1>
           
-          <div className="max-w-3xl mx-auto">
-            <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="grid w-full grid-cols-2 mb-8">
-                <TabsTrigger value="login">Login</TabsTrigger>
-                <TabsTrigger value="register">Register</TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="login">
-                <div className="bg-white p-8 rounded-lg border">
-                  <form onSubmit={handleLogin}>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="email">Email</Label>
-                        <Input 
-                          id="email" 
-                          type="email" 
-                          value={loginEmail}
-                          onChange={(e) => setLoginEmail(e.target.value)}
-                          required
-                        />
-                      </div>
-                      
-                      <div>
-                        <div className="flex justify-between items-center">
-                          <Label htmlFor="password">Password</Label>
-                          <Link to="/forgot-password" className="text-sm text-burgundy hover:underline">
-                            Forgot Password?
-                          </Link>
-                        </div>
-                        <Input 
-                          id="password" 
-                          type="password" 
-                          value={loginPassword}
-                          onChange={(e) => setLoginPassword(e.target.value)}
-                          required
-                        />
-                      </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="remember" />
-                        <label
-                          htmlFor="remember"
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        >
-                          Remember me
-                        </label>
-                      </div>
-                      
-                      <Button 
-                        type="submit" 
-                        className="w-full bg-burgundy hover:bg-burgundy-light text-white"
-                        disabled={isLoggingIn}
-                      >
-                        {isLoggingIn ? "Signing in..." : "Sign In"}
-                      </Button>
-                    </div>
-                  </form>
-                </div>
-              </TabsContent>
-              
-              <TabsContent value="register">
-                <div className="bg-white p-8 rounded-lg border">
-                  <form onSubmit={handleRegister}>
-                    <div className="space-y-4">
-                      <div>
-                        <Label htmlFor="firstName">First Name</Label>
-                        <Input 
-                          id="firstName" 
-                          value={registerFirstName}
-                          onChange={(e) => setRegisterFirstName(e.target.value)}
-                          required
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="lastName">Last Name</Label>
-                        <Input 
-                          id="lastName" 
-                          value={registerLastName}
-                          onChange={(e) => setRegisterLastName(e.target.value)}
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="registerEmail">Email</Label>
-                        <Input 
-                          id="registerEmail" 
-                          type="email" 
-                          value={registerEmail}
-                          onChange={(e) => setRegisterEmail(e.target.value)}
-                          required
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="registerPassword">Password</Label>
-                        <Input 
-                          id="registerPassword" 
-                          type="password" 
-                          value={registerPassword}
-                          onChange={(e) => setRegisterPassword(e.target.value)}
-                          required
-                        />
-                        <p className="text-xs text-gray-500 mt-1">
-                          Password must be at least 8 characters long with a number and special character.
-                        </p>
-                      </div>
-                      
-                      <div className="flex items-center space-x-2">
-                        <Checkbox id="terms" required />
-                        <label
-                          htmlFor="terms"
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        >
-                          I agree to the{" "}
-                          <Link to="/terms" className="text-burgundy hover:underline">
-                            Terms of Service
-                          </Link>
-                          {" "}and{" "}
-                          <Link to="/privacy" className="text-burgundy hover:underline">
-                            Privacy Policy
-                          </Link>
-                        </label>
-                      </div>
-                      
-                      <Button 
-                        type="submit" 
-                        className="w-full bg-burgundy hover:bg-burgundy-light text-white"
-                        disabled={isRegistering}
-                      >
-                        {isRegistering ? "Creating Account..." : "Create Account"}
-                      </Button>
-                    </div>
-                  </form>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
+          <AuthForms activeTab={activeTab} setActiveTab={setActiveTab} />
         </div>
         
         <Footer />
@@ -721,310 +463,99 @@ const Account = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-10">
           {/* Sidebar Navigation */}
-          <div className="col-span-1">
-            <div className="bg-cream p-6 rounded-lg sticky top-24">
-              <div className="mb-6">
-                <h2 className="font-playfair text-xl mb-2">Welcome, {firstName || "User"}!</h2>
-                <p className="text-sm text-gray-600">{email}</p>
-              </div>
-              
-              <nav className="space-y-2">
-                <button 
-                  onClick={() => setActiveTab("account")}
-                  className={`flex items-center space-x-2 p-2 rounded-md w-full transition-colors ${
-                    activeTab === "account" 
-                      ? "bg-rose text-burgundy" 
-                      : "hover:bg-rose-light text-gray-700 hover:text-burgundy"
-                  }`}
-                >
-                  <UserRound className="w-5 h-5" />
-                  <span>Account Overview</span>
-                </button>
-                
-                <button 
-                  onClick={() => {
-                    setActiveTab("orders");
-                    if (!isLoadingOrders && orders.length === 0) {
-                      fetchOrders();
-                    }
-                  }}
-                  className={`flex items-center space-x-2 p-2 rounded-md w-full transition-colors ${
-                    activeTab === "orders" 
-                      ? "bg-rose text-burgundy" 
-                      : "hover:bg-rose-light text-gray-700 hover:text-burgundy"
-                  }`}
-                >
-                  <Package className="w-5 h-5" />
-                  <span>Orders</span>
-                </button>
-                
-                <button 
-                  onClick={() => {
-                    setActiveTab("wishlist");
-                    if (!isLoadingWishlist && wishlistItems.length === 0) {
-                      fetchWishlist();
-                    }
-                  }}
-                  className={`flex items-center space-x-2 p-2 rounded-md w-full transition-colors ${
-                    activeTab === "wishlist" 
-                      ? "bg-rose text-burgundy" 
-                      : "hover:bg-rose-light text-gray-700 hover:text-burgundy"
-                  }`}
-                >
-                  <Heart className="w-5 h-5" />
-                  <span>Wishlist</span>
-                </button>
-                
-                <button 
-                  onClick={() => {
-                    setActiveTab("addresses");
-                    if (!isLoadingAddresses && addresses.length === 0) {
-                      fetchAddresses();
-                    }
-                  }}
-                  className={`flex items-center space-x-2 p-2 rounded-md w-full transition-colors ${
-                    activeTab === "addresses" 
-                      ? "bg-rose text-burgundy" 
-                      : "hover:bg-rose-light text-gray-700 hover:text-burgundy"
-                  }`}
-                >
-                  <Home className="w-5 h-5" />
-                  <span>Addresses</span>
-                </button>
-                
-                <button 
-                  onClick={() => {
-                    setActiveTab("payment");
-                    if (!isLoadingPayments && paymentMethods.length === 0) {
-                      fetchPaymentMethods();
-                    }
-                  }}
-                  className={`flex items-center space-x-2 p-2 rounded-md w-full transition-colors ${
-                    activeTab === "payment" 
-                      ? "bg-rose text-burgundy" 
-                      : "hover:bg-rose-light text-gray-700 hover:text-burgundy"
-                  }`}
-                >
-                  <CreditCard className="w-5 h-5" />
-                  <span>Payment Methods</span>
-                </button>
-                
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center space-x-2 p-2 hover:bg-rose-light text-gray-700 hover:text-burgundy rounded-md w-full transition-colors mt-6"
-                >
-                  <LogOut className="w-5 h-5" />
-                  <span>Logout</span>
-                </button>
-              </nav>
-            </div>
-          </div>
+          <AccountSidebar 
+            firstName={firstName}
+            email={email}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            onLogout={handleLogout}
+            fetchOrders={fetchOrders}
+            fetchWishlist={fetchWishlist}
+            fetchAddresses={fetchAddresses}
+            fetchPaymentMethods={fetchPaymentMethods}
+            isLoadingOrders={isLoadingOrders}
+            isLoadingWishlist={isLoadingWishlist}
+            isLoadingAddresses={isLoadingAddresses}
+            isLoadingPayments={isLoadingPayments}
+            ordersCount={orders.length}
+            wishlistCount={wishlistItems.length}
+            addressesCount={addresses.length}
+            paymentsCount={paymentMethods.length}
+          />
           
           {/* Main Content */}
           <div className="col-span-1 lg:col-span-3">
             {/* Account Overview */}
             {activeTab === "account" && (
-              <div>
-                <Card className="mb-8">
-                  <CardHeader>
-                    <CardTitle>Account Details</CardTitle>
-                    <CardDescription>Update your account information</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <div>
-                        <h3 className="font-medium text-lg mb-4">Profile Information</h3>
-                        <div className="space-y-4">
-                          <div>
-                            <Label htmlFor="firstName">First Name</Label>
-                            <Input 
-                              id="firstName" 
-                              value={firstName}
-                              onChange={(e) => setFirstName(e.target.value)}
-                            />
-                          </div>
-                          
-                          <div>
-                            <Label htmlFor="lastName">Last Name</Label>
-                            <Input 
-                              id="lastName" 
-                              value={lastName}
-                              onChange={(e) => setLastName(e.target.value)}
-                            />
-                          </div>
-                          
-                          <div>
-                            <Label htmlFor="email">Email</Label>
-                            <Input 
-                              id="email" 
-                              value={email}
-                              disabled
-                              className="bg-gray-50"
-                            />
-                            <p className="text-xs text-gray-500 mt-1">
-                              Email cannot be changed
-                            </p>
-                          </div>
-                          
-                          <Button 
-                            variant="outline" 
-                            className="border-burgundy text-burgundy hover:bg-burgundy hover:text-white"
-                            onClick={handleUpdateProfile}
-                            disabled={isUpdatingProfile}
-                          >
-                            {isUpdatingProfile ? (
-                              <>Saving...</>
-                            ) : (
-                              <>
-                                <Save className="w-4 h-4 mr-2" />
-                                Save Changes
-                              </>
-                            )}
-                          </Button>
-                        </div>
-                      </div>
-                      
-                      <div>
-                        <h3 className="font-medium text-lg mb-4">Security</h3>
-                        <div className="space-y-4">
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button 
-                                variant="outline" 
-                                className="border-burgundy text-burgundy hover:bg-burgundy hover:text-white"
-                              >
-                                <Key className="w-4 h-4 mr-2" />
-                                Change Password
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Change Password</DialogTitle>
-                                <DialogDescription>
-                                  Update your password to a new secure one
-                                </DialogDescription>
-                              </DialogHeader>
-                              
-                              <div className="space-y-4 py-4">
-                                <div>
-                                  <Label htmlFor="newPassword">New Password</Label>
-                                  <Input 
-                                    id="newPassword" 
-                                    type="password"
-                                    value={newPassword}
-                                    onChange={(e) => setNewPassword(e.target.value)}
-                                  />
-                                </div>
-                                
-                                <div>
-                                  <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                                  <Input 
-                                    id="confirmPassword" 
-                                    type="password"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
-                                  />
-                                </div>
-                                
-                                {newPassword && confirmPassword && newPassword !== confirmPassword && (
-                                  <div className="flex items-center text-red-500 text-sm">
-                                    <AlertCircle className="w-4 h-4 mr-2" />
-                                    Passwords don't match
-                                  </div>
-                                )}
-                              </div>
-                              
-                              <DialogFooter>
-                                <Button
-                                  variant="outline"
-                                  onClick={() => {
-                                    setNewPassword("");
-                                    setConfirmPassword("");
-                                  }}
-                                >
-                                  Cancel
-                                </Button>
-                                <Button
-                                  onClick={handleChangePassword}
-                                  disabled={isChangingPassword || !newPassword || !confirmPassword || newPassword !== confirmPassword}
-                                  className="bg-burgundy hover:bg-burgundy-light"
-                                >
-                                  {isChangingPassword ? "Updating..." : "Update Password"}
-                                </Button>
-                              </DialogFooter>
-                            </DialogContent>
-                          </Dialog>
-                          
-                          <div className="p-4 border rounded-md bg-gray-50 mt-6">
-                            <h4 className="font-medium mb-2">Account Security Tips</h4>
-                            <ul className="text-sm space-y-2">
-                              <li className="flex items-start">
-                                <Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" />
-                                Use a strong, unique password
-                              </li>
-                              <li className="flex items-start">
-                                <Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" />
-                                Never share your password with others
-                              </li>
-                              <li className="flex items-start">
-                                <Check className="w-4 h-4 mr-2 text-green-500 mt-0.5" />
-                                Update your password regularly
-                              </li>
-                            </ul>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-                
-                <Card>
-                  <CardHeader>
-                    <div className="flex justify-between items-center">
-                      <CardTitle>Recent Orders</CardTitle>
-                      <Button 
-                        variant="link" 
-                        className="text-burgundy p-0 h-auto"
-                        onClick={() => {
-                          setActiveTab("orders");
-                          fetchOrders();
-                        }}
-                      >
-                        View All
-                      </Button>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    {isLoadingOrders ? (
-                      <div className="text-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-burgundy mx-auto"></div>
-                        <p className="mt-2 text-gray-500">Loading your orders...</p>
-                      </div>
-                    ) : orders.length === 0 ? (
-                      <div className="text-center py-8">
-                        <ShoppingBag className="mx-auto h-12 w-12 text-gray-300 mb-4" />
-                        <h3 className="text-lg font-medium mb-2">No orders yet</h3>
-                        <p className="text-gray-500 mb-4">When you place your first order, it will appear here</p>
-                        <Button asChild className="bg-burgundy hover:bg-burgundy-light">
-                          <Link to="/products">Start Shopping</Link>
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="overflow-x-auto">
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Order</TableHead>
-                              <TableHead>Date</TableHead>
-                              <TableHead>Status</TableHead>
-                              <TableHead>Total</TableHead>
-                              <TableHead>Actions</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {orders.slice(0, 2).map((order) => (
-                              <TableRow key={order.id}>
-                                <TableCell>#{order.id.slice(0, 8)}</TableCell>
-                                <TableCell>{new Date(order.created_at).toLocaleDateString()}</TableCell>
-                                <TableCell>{order.status}</TableCell>
-                                <TableCell>${order
+              <AccountOverview 
+                firstName={firstName}
+                lastName={lastName}
+                email={email}
+                orders={orders}
+                isLoadingOrders={isLoadingOrders}
+                onProfileUpdate={handleUpdateProfile}
+                onPasswordChange={handleChangePassword}
+                onViewOrder={handleViewOrder}
+                onCancelOrder={handleCancelOrder}
+                setActiveTab={setActiveTab}
+                fetchOrders={fetchOrders}
+                isUpdatingProfile={isUpdatingProfile}
+                isChangingPassword={isChangingPassword}
+                setFirstName={setFirstName}
+                setLastName={setLastName}
+                newPassword={newPassword}
+                setNewPassword={setNewPassword}
+                confirmPassword={confirmPassword}
+                setConfirmPassword={setConfirmPassword}
+              />
+            )}
+            
+            {/* Orders Tab */}
+            {activeTab === "orders" && (
+              <OrdersList 
+                orders={orders}
+                isLoadingOrders={isLoadingOrders}
+                onViewOrder={handleViewOrder}
+                onCancelOrder={handleCancelOrder}
+              />
+            )}
+            
+            {/* Wishlist Tab */}
+            {activeTab === "wishlist" && (
+              <WishlistItems 
+                wishlistItems={wishlistItems}
+                isLoadingWishlist={isLoadingWishlist}
+                onRemoveWishlistItem={handleRemoveWishlistItem}
+                onAddToCart={handleAddToCart}
+              />
+            )}
+            
+            {/* Addresses Tab */}
+            {activeTab === "addresses" && (
+              <AddressList 
+                addresses={addresses}
+                isLoadingAddresses={isLoadingAddresses}
+                onSetDefaultAddress={handleSetDefaultAddress}
+                onRemoveAddress={handleRemoveAddress}
+              />
+            )}
+            
+            {/* Payment Methods Tab */}
+            {activeTab === "payment" && (
+              <PaymentMethodList 
+                paymentMethods={paymentMethods}
+                isLoadingPayments={isLoadingPayments}
+                onSetDefaultPayment={handleSetDefaultPayment}
+                onRemovePayment={handleRemovePayment}
+              />
+            )}
+          </div>
+        </div>
+      </div>
+      
+      <Footer />
+    </div>
+  );
+};
+
+export default Account;
