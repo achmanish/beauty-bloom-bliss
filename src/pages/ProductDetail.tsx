@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -10,7 +9,7 @@ import { toast } from '@/components/ui/sonner';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { useCartContext } from '@/context/CartContext';
-import { useWishlistContext } from '@/context/WishlistContext';
+import { useWishlist } from '@/context/WishlistContext';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -37,7 +36,7 @@ const ProductDetail = () => {
   const [inWishlist, setInWishlist] = useState(false);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const { addToCart } = useCartContext();
-  const { addToWishlist, removeFromWishlist, wishlistItems } = useWishlistContext();
+  const { addToWishlist, removeFromWishlist, wishlistItems, isInWishlist } = useWishlist();
   const { user } = useAuth();
   
   // Fetch product details
@@ -75,8 +74,8 @@ const ProductDetail = () => {
   // Check if product is in wishlist
   useEffect(() => {
     if (product && wishlistItems && wishlistItems.length > 0) {
-      const isInWishlist = wishlistItems.some(item => item.product_id === product.id);
-      setInWishlist(isInWishlist);
+      const isInWishlistItem = wishlistItems.some(item => item.product_id === product.id);
+      setInWishlist(isInWishlistItem);
     }
   }, [product, wishlistItems]);
   
@@ -103,15 +102,12 @@ const ProductDetail = () => {
     if (!product) return;
     
     addToCart({
-      product_id: product.id,
-      quantity,
-      product: {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image_url: product.image_url,
-        size: product.size || '',
-      }
+      id: product.id,
+      name: product.name,
+      price: product.price,
+      image_url: product.image_url,
+      quantity: quantity,
+      size: product.size || '',
     });
     
     toast.success(`${product.name} added to cart`);
@@ -134,7 +130,13 @@ const ProductDetail = () => {
         toast.success(`${product.name} removed from wishlist`);
       }
     } else {
-      addToWishlist(product.id);
+      addToWishlist(product.id, {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image_url: product.image_url,
+        stock: product.stock
+      });
       setInWishlist(true);
       toast.success(`${product.name} added to wishlist`);
     }
