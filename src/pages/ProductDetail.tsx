@@ -73,11 +73,11 @@ const ProductDetail = () => {
   
   // Check if product is in wishlist
   useEffect(() => {
-    if (product && wishlistItems && wishlistItems.length > 0) {
-      const isInWishlistItem = wishlistItems.some(item => item.product_id === product.id);
-      setInWishlist(isInWishlistItem);
+    if (product) {
+      const isInWishlistResult = isInWishlist(product.id);
+      setInWishlist(isInWishlistResult);
     }
-  }, [product, wishlistItems]);
+  }, [product, isInWishlist]);
   
   const fetchRelatedProducts = async (category: string) => {
     try {
@@ -122,13 +122,9 @@ const ProductDetail = () => {
     }
     
     if (inWishlist) {
-      // Find the wishlist item with this product ID
-      const wishlistItem = wishlistItems.find(item => item.product_id === product.id);
-      if (wishlistItem) {
-        removeFromWishlist(wishlistItem.id);
-        setInWishlist(false);
-        toast.success(`${product.name} removed from wishlist`);
-      }
+      removeFromWishlist(product.id);
+      setInWishlist(false);
+      toast.success(`${product.name} removed from wishlist`);
     } else {
       addToWishlist(product.id, {
         id: product.id,

@@ -17,28 +17,31 @@ import { Toaster } from "@/components/ui/sonner"
 import ProductDetail from './pages/ProductDetail';
 import AdminDashboard from './pages/AdminDashboard';
 import { AuthProvider } from './context/AuthContext';
+import { WishlistProvider } from './context/WishlistContext';
 
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/products" element={<ProductsPage />} />
-          <Route path="/product/:productId" element={<ProductDetail />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/checkout" element={<Checkout />} />
-          <Route path="/order-confirmation" element={<OrderConfirmation />} />
-          <Route path="/about" element={<About />} />
-          <Route path="/contact" element={<Contact />} />
-          <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
-          <Route path="/account/*" element={<Account />} />
-          <Route path="/auth" element={<Auth />} />
-          <Route path="/admin/*" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <Toaster />
-      </BrowserRouter>
+      <WishlistProvider>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/products" element={<ProductsPage />} />
+            <Route path="/product/:productId" element={<ProductDetail />} />
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/order-confirmation" element={<OrderConfirmation />} />
+            <Route path="/about" element={<About />} />
+            <Route path="/contact" element={<Contact />} />
+            <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
+            <Route path="/account/*" element={<Account />} />
+            <Route path="/auth" element={<Auth />} />
+            <Route path="/admin/*" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+        </BrowserRouter>
+      </WishlistProvider>
     </AuthProvider>
   );
 }
