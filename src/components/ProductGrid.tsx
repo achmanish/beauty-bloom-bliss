@@ -1,11 +1,14 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/components/ui/use-toast";
+import { toast } from "sonner";
 import { useCartContext } from "@/context/CartContext";
+import { useWishlist } from "@/context/WishlistContext";
+import { useAuth } from "@/context/AuthContext";
 
 // Import a large selection of products (first 100)
 import { allProducts, Product } from "@/data/productData";
@@ -25,74 +28,9 @@ const ProductGrid = ({
   category,
   customProducts
 }: ProductGridProps) => {
-  const [wishlist, setWishlist] = useState<number[]>([]);
-  const { toast } = useToast();
-  const cartContext = useCartContext();
-
-  // Function to update cart in localStorage and dispatch event
-  const updateCart = (items: any[]) => {
-    localStorage.setItem('cartItems', JSON.stringify(items));
-    
-    // Dispatch a custom event for the same tab
-    const event = new CustomEvent('cartUpdated', { detail: items.length });
-    window.dispatchEvent(event);
-    
-    // Update context if available
-    if (cartContext?.updateCartCount) {
-      cartContext.updateCartCount(items.length);
-    }
-  };
-
-  const toggleWishlist = (productId: number) => {
-    if (wishlist.includes(productId)) {
-      setWishlist(wishlist.filter(id => id !== productId));
-      toast({
-        title: "Removed from wishlist",
-        description: "Product has been removed from your wishlist",
-      });
-    } else {
-      setWishlist([...wishlist, productId]);
-      toast({
-        title: "Added to wishlist",
-        description: "Product has been added to your wishlist",
-      });
-    }
-  };
-
-  const addToCart = (product: any) => {
-    // Get current cart items
-    const cartItems = localStorage.getItem('cartItems') 
-      ? JSON.parse(localStorage.getItem('cartItems') || '[]') 
-      : [];
-    
-    // Check if product is already in cart
-    const existingItem = cartItems.find((item: any) => item.id === product.id);
-    
-    if (existingItem) {
-      // Update quantity
-      const updatedItems = cartItems.map((item: any) => 
-        item.id === product.id 
-          ? { ...item, quantity: item.quantity + 1 } 
-          : item
-      );
-      updateCart(updatedItems);
-    } else {
-      // Add new item
-      const newItem = {
-        id: product.id,
-        name: product.name,
-        price: product.price,
-        image: product.image,
-        quantity: 1
-      };
-      updateCart([...cartItems, newItem]);
-    }
-    
-    toast({
-      title: "Added to cart",
-      description: "Product has been added to your cart",
-    });
-  };
+  const { user } = useAuth();
+  const { addToCart } = useCartContext();
+  const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
   
   // Determine which products to display
   let displayProducts: Product[] = customProducts || allProducts;
@@ -104,6 +42,47 @@ const ProductGrid = ({
   
   // Apply limit to number of products displayed
   displayProducts = displayProducts.slice(0, limit);
+
+  const handleToggleWishlist = (product: Product, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!user) {
+      toast.error("Please sign in to add items to your wishlist");
+      return;
+    }
+    
+    const productIsInWishlist = isInWishlist(product.id);
+    
+    if (productIsInWishlist) {
+      removeFromWishlist(product.id);
+      toast.success(`${product.name} removed from wishlist`);
+    } else {
+      addToWishlist(product.id, {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        image_url: product.image,
+        stock: 999 // Default stock for data from productData
+      });
+      toast.success(`${product.name} added to wishlist`);
+    }
+  };
+
+  const handleAddToCart = (product: Product, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    addToCart({
+      id: product.id,
+      name: product.name,
+      price: product.price/100, // Convert from cents to dollars
+      image_url: product.image,
+      quantity: 1
+    });
+    
+    toast.success(`${product.name} added to cart`);
+  };
 
   return (
     <section className="py-12 bg-white">
@@ -145,11 +124,11 @@ const ProductGrid = ({
                   
                   {/* Wishlist button */}
                   <button
-                    onClick={() => toggleWishlist(product.id)}
+                    onClick={(e) => handleToggleWishlist(product, e)}
                     className="absolute top-2 right-2 bg-white rounded-full p-1.5 shadow-md hover:bg-rose-light transition-colors"
                   >
                     <Heart 
-                      className={`h-4 w-4 ${wishlist.includes(product.id) ? 'text-red-500 fill-red-500' : 'text-burgundy'}`} 
+                      className={`h-4 w-4 ${isInWishlist(product.id) ? 'text-red-500 fill-red-500' : 'text-burgundy'}`} 
                     />
                   </button>
                 </div>
@@ -179,7 +158,7 @@ const ProductGrid = ({
                   </div>
                   
                   <Button 
-                    onClick={() => addToCart(product)} 
+                    onClick={(e) => handleAddToCart(product, e)} 
                     size="sm" 
                     className="mt-auto w-full bg-burgundy hover:bg-burgundy-light text-white text-xs transition-all duration-200 hover:scale-105"
                   >

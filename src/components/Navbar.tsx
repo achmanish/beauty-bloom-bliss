@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { ShoppingBag, User, Search, Menu, X, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,8 +17,10 @@ import { useWishlist } from "@/context/WishlistContext";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const { isLoggedIn, isAdmin, signOut } = useAuth();
   const { wishlistCount } = useWishlist();
+  const navigate = useNavigate();
   
   const cartContext = useCartContext();
   const [localCartCount, setLocalCartCount] = useState(0);
@@ -82,6 +84,13 @@ const Navbar = () => {
     };
   }, [cartContext]);
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
   return (
     <nav className="bg-cream py-4 sticky top-0 z-50 shadow-sm">
       <div className="container mx-auto px-4">
@@ -98,18 +107,18 @@ const Navbar = () => {
               <DropdownMenuTrigger className="text-burgundy hover:text-burgundy-light transition-colors">
                 Categories
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-white">
-                <DropdownMenuItem>
+              <DropdownMenuContent className="bg-white z-50">
+                <DropdownMenuItem asChild>
                   <Link to="/category/skincare" className="w-full">Skincare</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
+                <DropdownMenuItem asChild>
                   <Link to="/category/makeup" className="w-full">Makeup</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link to="/category/hair" className="w-full">Hair Care</Link>
+                <DropdownMenuItem asChild>
+                  <Link to="/category/haircare" className="w-full">Hair Care</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link to="/category/body" className="w-full">Body Care</Link>
+                <DropdownMenuItem asChild>
+                  <Link to="/category/bodycare" className="w-full">Body Care</Link>
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -125,8 +134,21 @@ const Navbar = () => {
           </div>
 
           <div className="hidden md:flex items-center relative w-1/3">
-            <Input type="text" placeholder="Search products..." className="pr-8" />
-            <Search className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
+            <form onSubmit={handleSearch} className="w-full">
+              <Input 
+                type="text" 
+                placeholder="Search products..." 
+                className="pr-8"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button 
+                type="submit" 
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4"
+              >
+                <Search className="h-4 w-4" />
+              </button>
+            </form>
           </div>
 
           <div className="flex items-center space-x-4">
@@ -134,7 +156,7 @@ const Navbar = () => {
               <DropdownMenuTrigger className="text-burgundy hover:text-burgundy-light focus:outline-none transition-colors">
                 <User className="h-5 w-5" />
               </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-48">
+              <DropdownMenuContent className="w-48 bg-white z-50">
                 {isLoggedIn ? (
                   <>
                     <DropdownMenuItem asChild>
@@ -159,10 +181,10 @@ const Navbar = () => {
                 ) : (
                   <>
                     <DropdownMenuItem asChild>
-                      <Link to="/account" className="w-full cursor-pointer">Sign In</Link>
+                      <Link to="/auth" className="w-full cursor-pointer">Sign In</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
-                      <Link to="/account" className="w-full cursor-pointer">Register</Link>
+                      <Link to="/auth" className="w-full cursor-pointer">Register</Link>
                     </DropdownMenuItem>
                   </>
                 )}
@@ -196,38 +218,58 @@ const Navbar = () => {
         {isMenuOpen && (
           <div className="md:hidden mt-4 bg-cream-light p-4 rounded-lg animate-fade-in">
             <div className="flex flex-col space-y-4">
-              <Link to="/products" className="text-burgundy hover:text-burgundy-light transition-colors">
+              <Link to="/products" className="text-burgundy hover:text-burgundy-light transition-colors"
+                onClick={() => setIsMenuOpen(false)}>
                 Shop All
               </Link>
-              <Link to="/category/skincare" className="text-burgundy hover:text-burgundy-light transition-colors">
+              <Link to="/category/skincare" className="text-burgundy hover:text-burgundy-light transition-colors"
+                onClick={() => setIsMenuOpen(false)}>
                 Skincare
               </Link>
-              <Link to="/category/makeup" className="text-burgundy hover:text-burgundy-light transition-colors">
+              <Link to="/category/makeup" className="text-burgundy hover:text-burgundy-light transition-colors"
+                onClick={() => setIsMenuOpen(false)}>
                 Makeup
               </Link>
-              <Link to="/category/hair" className="text-burgundy hover:text-burgundy-light transition-colors">
+              <Link to="/category/haircare" className="text-burgundy hover:text-burgundy-light transition-colors"
+                onClick={() => setIsMenuOpen(false)}>
                 Hair Care
               </Link>
-              <Link to="/category/body" className="text-burgundy hover:text-burgundy-light transition-colors">
+              <Link to="/category/bodycare" className="text-burgundy hover:text-burgundy-light transition-colors"
+                onClick={() => setIsMenuOpen(false)}>
                 Body Care
               </Link>
-              <Link to="/bestsellers" className="text-burgundy hover:text-burgundy-light transition-colors">
+              <Link to="/bestsellers" className="text-burgundy hover:text-burgundy-light transition-colors"
+                onClick={() => setIsMenuOpen(false)}>
                 Bestsellers
               </Link>
-              <Link to="/about" className="text-burgundy hover:text-burgundy-light transition-colors">
+              <Link to="/about" className="text-burgundy hover:text-burgundy-light transition-colors"
+                onClick={() => setIsMenuOpen(false)}>
                 About
               </Link>
-              <Link to="/contact" className="text-burgundy hover:text-burgundy-light transition-colors">
+              <Link to="/contact" className="text-burgundy hover:text-burgundy-light transition-colors"
+                onClick={() => setIsMenuOpen(false)}>
                 Contact
               </Link>
-              <Link to="/wishlist" className="text-burgundy hover:text-burgundy-light transition-colors">
+              <Link to="/wishlist" className="text-burgundy hover:text-burgundy-light transition-colors"
+                onClick={() => setIsMenuOpen(false)}>
                 Wishlist
               </Link>
               
-              <div className="relative">
-                <Input type="text" placeholder="Search products..." className="w-full pr-8" />
-                <Search className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4" />
-              </div>
+              <form onSubmit={handleSearch} className="relative">
+                <Input 
+                  type="text" 
+                  placeholder="Search products..." 
+                  className="w-full pr-8"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                <button 
+                  type="submit" 
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"
+                >
+                  <Search className="h-4 w-4" />
+                </button>
+              </form>
             </div>
           </div>
         )}
