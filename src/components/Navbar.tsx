@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ShoppingBag, User, Search, Menu, X, Heart } from "lucide-react";
@@ -87,7 +86,9 @@ const Navbar = () => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
+      setIsMenuOpen(false); // Close mobile menu if open
       navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery(""); // Clear search input after search
     }
   };
 
@@ -145,6 +146,7 @@ const Navbar = () => {
               <button 
                 type="submit" 
                 className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4"
+                aria-label="Search"
               >
                 <Search className="h-4 w-4" />
               </button>
@@ -266,6 +268,7 @@ const Navbar = () => {
                 <button 
                   type="submit" 
                   className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"
+                  aria-label="Search"
                 >
                   <Search className="h-4 w-4" />
                 </button>

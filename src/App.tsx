@@ -23,6 +23,8 @@ import { AuthProvider } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
 import { CartProvider } from './context/CartContext';
 import UserAuth from './pages/UserAuth';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 
 function App() {
   return (
@@ -45,6 +47,8 @@ function App() {
               <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
               <Route path="/account/*" element={<Account />} />
               <Route path="/auth" element={<UserAuth />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/admin-login" element={<Auth />} />
               <Route path="/admin/*" element={<ProtectedRoute adminOnly={true}><AdminDashboard /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
