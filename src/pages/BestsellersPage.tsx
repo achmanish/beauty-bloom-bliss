@@ -8,11 +8,14 @@ import { Separator } from "@/components/ui/separator";
 
 const BestsellersPage = () => {
   const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   
   useEffect(() => {
     // Filter bestseller products
+    setLoading(true);
     const bestsellerProducts = allProducts.filter(product => product.isBestseller === true);
     setProducts(bestsellerProducts);
+    setLoading(false);
   }, []);
 
   return (
@@ -32,22 +35,30 @@ const BestsellersPage = () => {
       </div>
       
       <div className="container mx-auto px-4 py-12">
-        <div className="mb-6 flex justify-between items-center">
-          <h2 className="text-xl font-medium">{products.length} products</h2>
-        </div>
-        <Separator className="mb-8" />
-        
-        {products.length > 0 ? (
-          <ProductGrid customProducts={products} showTitle={false} />
-        ) : (
-          <div className="text-center py-16">
-            <h3 className="text-xl font-medium text-gray-600 mb-4">
-              No bestsellers found
-            </h3>
-            <p className="text-gray-500">
-              Please check back later for our curated bestsellers.
-            </p>
+        {loading ? (
+          <div className="flex justify-center items-center h-40">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-burgundy"></div>
           </div>
+        ) : (
+          <>
+            <div className="mb-6 flex justify-between items-center">
+              <h2 className="text-xl font-medium">{products.length} products</h2>
+            </div>
+            <Separator className="mb-8" />
+            
+            {products.length > 0 ? (
+              <ProductGrid customProducts={products} showTitle={false} />
+            ) : (
+              <div className="text-center py-16">
+                <h3 className="text-xl font-medium text-gray-600 mb-4">
+                  No bestsellers found
+                </h3>
+                <p className="text-gray-500">
+                  Please check back later for our curated bestsellers.
+                </p>
+              </div>
+            )}
+          </>
         )}
       </div>
       

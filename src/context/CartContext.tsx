@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./AuthContext";
@@ -143,8 +144,14 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         id: item.id,
         product_id: item.product_id,
         quantity: item.quantity,
-        product: {
+        product: item.product ? {
           ...item.product,
+          quantity: item.quantity
+        } : {
+          id: item.product_id,
+          name: 'Product not found',
+          price: 0,
+          image_url: '/placeholder.svg',
           quantity: item.quantity
         }
       }));
@@ -187,8 +194,21 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
       const savedCart = localStorage.getItem('cartItems');
       if (savedCart) {
         const guestCartItems = JSON.parse(savedCart);
-        setCartItems(guestCartItems);
-        setCartCount(guestCartItems.reduce((total: number, item: CartItem) => total + item.quantity, 0));
+        
+        // Ensure all items have valid product objects
+        const validatedItems = guestCartItems.map((item: CartItem) => ({
+          ...item,
+          product: item.product || {
+            id: item.product_id,
+            name: 'Product not found',
+            price: 0,
+            image_url: '/placeholder.svg',
+            quantity: item.quantity
+          }
+        }));
+        
+        setCartItems(validatedItems);
+        setCartCount(validatedItems.reduce((total: number, item: CartItem) => total + item.quantity, 0));
       } else {
         setCartItems([]);
         setCartCount(0);
@@ -219,6 +239,12 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
 
   // Add to cart
   const addToCart = async (product: CartProduct) => {
+    if (!product || !product.id) {
+      console.error('Invalid product data', product);
+      toast.error('Failed to add item to cart: Invalid product data');
+      return;
+    }
+    
     // Check if product is already in cart
     const existingItemIndex = cartItems.findIndex(item => item.product_id === product.id);
     const newQuantity = existingItemIndex >= 0 ? cartItems[existingItemIndex].quantity + 1 : 1;

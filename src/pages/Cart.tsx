@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Trash2, Plus, Minus, AlertTriangle, Wifi, WifiOff } from "lucide-react";
@@ -18,7 +19,13 @@ const Cart = () => {
   const [discount, setDiscount] = useState(0);
   const [isOffline, setIsOffline] = useState(false);
   
-  const subtotal = cartItems.reduce((total, item) => total + (item.product.price * item.quantity), 0);
+  // Calculate subtotal safely ensuring cartItems and product prices exist
+  const subtotal = cartItems && cartItems.length > 0 
+    ? cartItems.reduce((total, item) => {
+        return total + ((item.product?.price || 0) * item.quantity);
+      }, 0)
+    : 0;
+  
   const shipping = subtotal > 100 ? 0 : 10;
   const total = subtotal + shipping - discount;
   
@@ -112,14 +119,14 @@ const Cart = () => {
                       <div className="col-span-6 flex items-center">
                         <div className="w-20 h-20 rounded-md overflow-hidden flex-shrink-0 mr-4">
                           <img 
-                            src={item.product.image_url} 
-                            alt={item.product.name} 
+                            src={item.product?.image_url} 
+                            alt={item.product?.name} 
                             className="w-full h-full object-cover"
                           />
                         </div>
                         <div>
-                          <h3 className="font-medium text-burgundy mb-1">{item.product.name}</h3>
-                          {item.product.size && (
+                          <h3 className="font-medium text-burgundy mb-1">{item.product?.name}</h3>
+                          {item.product?.size && (
                             <p className="text-sm text-gray-500">Size: {item.product.size}</p>
                           )}
                           <button 
@@ -135,7 +142,7 @@ const Cart = () => {
                       {/* Price */}
                       <div className="md:col-span-2 md:text-center flex justify-between md:block">
                         <span className="md:hidden">Price:</span>
-                        <span>${item.product.price.toFixed(2)}</span>
+                        <span>${item.product?.price?.toFixed(2) || '0.00'}</span>
                       </div>
                       
                       {/* Quantity */}
@@ -161,7 +168,9 @@ const Cart = () => {
                       {/* Total */}
                       <div className="md:col-span-2 md:text-center flex justify-between md:block">
                         <span className="md:hidden">Total:</span>
-                        <span className="font-medium">${(item.product.price * item.quantity).toFixed(2)}</span>
+                        <span className="font-medium">
+                          ${((item.product?.price || 0) * item.quantity).toFixed(2)}
+                        </span>
                       </div>
                       
                       {/* Remove button (desktop) */}

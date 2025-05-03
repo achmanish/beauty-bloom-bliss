@@ -52,16 +52,16 @@ const ProductGrid = ({
       return;
     }
     
-    const productIsInWishlist = isInWishlist(product.id);
+    const productIsInWishlist = isInWishlist(product.id.toString());
     
     if (productIsInWishlist) {
-      removeFromWishlist(product.id);
+      removeFromWishlist(product.id.toString());
       toast.success(`${product.name} removed from wishlist`);
     } else {
-      addToWishlist(product.id, {
-        id: product.id,
+      addToWishlist(product.id.toString(), {
+        id: product.id.toString(),
         name: product.name,
-        price: product.price,
+        price: product.price / 100,
         image_url: product.image,
         stock: 999 // Default stock for data from productData
       });
@@ -74,7 +74,7 @@ const ProductGrid = ({
     e.stopPropagation();
     
     addToCart({
-      id: product.id,
+      id: product.id.toString(),
       name: product.name,
       price: product.price/100, // Convert from cents to dollars
       image_url: product.image,
@@ -128,7 +128,7 @@ const ProductGrid = ({
                     className="absolute top-2 right-2 bg-white rounded-full p-1.5 shadow-md hover:bg-rose-light transition-colors"
                   >
                     <Heart 
-                      className={`h-4 w-4 ${isInWishlist(product.id) ? 'text-red-500 fill-red-500' : 'text-burgundy'}`} 
+                      className={`h-4 w-4 ${isInWishlist(product.id.toString()) ? 'text-red-500 fill-red-500' : 'text-burgundy'}`} 
                     />
                   </button>
                 </div>
