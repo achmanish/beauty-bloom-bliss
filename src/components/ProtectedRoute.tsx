@@ -8,7 +8,7 @@ interface ProtectedRouteProps {
   adminOnly?: boolean;
 }
 
-const ProtectedRoute = ({ children, adminOnly = true }: ProtectedRouteProps) => {
+const ProtectedRoute = ({ children, adminOnly = false }: ProtectedRouteProps) => {
   const { user, isAdmin, loading } = useAuth();
   const location = useLocation();
 

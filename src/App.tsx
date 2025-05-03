@@ -21,7 +21,7 @@ import ProductDetail from './pages/ProductDetail';
 import AdminDashboard from './pages/AdminDashboard';
 import { AuthProvider } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
-import { CartProvider } from './context/CartContext';
+import { CartProvider } from './context/CartProvider';
 
 function App() {
   return (
@@ -43,8 +43,8 @@ function App() {
               <Route path="/contact" element={<Contact />} />
               <Route path="/wishlist" element={<ProtectedRoute><Wishlist /></ProtectedRoute>} />
               <Route path="/account/*" element={<Account />} />
-              <Route path="/auth" element={<Auth />} />
-              <Route path="/admin/*" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+              <Route path="/admin-login" element={<Auth />} />
+              <Route path="/admin/*" element={<ProtectedRoute adminOnly={true}><AdminDashboard /></ProtectedRoute>} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />
