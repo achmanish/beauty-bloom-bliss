@@ -21,7 +21,7 @@ import ProductDetail from './pages/ProductDetail';
 import AdminDashboard from './pages/AdminDashboard';
 import { AuthProvider } from './context/AuthContext';
 import { WishlistProvider } from './context/WishlistContext';
-import { CartProvider } from './context/CartProvider';
+import { CartProvider } from './context/CartContext';
 
 function App() {
   return (
