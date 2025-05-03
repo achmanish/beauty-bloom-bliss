@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShoppingBag, User, Search, Menu, X, Heart } from "lucide-react";
+import { ShoppingBag, User, Search, Menu, X, Heart, Store } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -13,6 +14,7 @@ import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
 import { useCartContext } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
+import LanguageSelector from "./LanguageSelector";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -126,6 +128,9 @@ const Navbar = () => {
             <Link to="/bestsellers" className="text-burgundy hover:text-burgundy-light transition-colors">
               Bestsellers
             </Link>
+            <Link to="/marketplace" className="text-burgundy hover:text-burgundy-light transition-colors">
+              Marketplace
+            </Link>
             <Link to="/about" className="text-burgundy hover:text-burgundy-light transition-colors">
               About
             </Link>
@@ -154,6 +159,8 @@ const Navbar = () => {
           </div>
 
           <div className="flex items-center space-x-4">
+            <LanguageSelector />
+            
             <DropdownMenu>
               <DropdownMenuTrigger className="text-burgundy hover:text-burgundy-light focus:outline-none transition-colors">
                 <User className="h-5 w-5" />
@@ -243,6 +250,11 @@ const Navbar = () => {
               <Link to="/bestsellers" className="text-burgundy hover:text-burgundy-light transition-colors"
                 onClick={() => setIsMenuOpen(false)}>
                 Bestsellers
+              </Link>
+              <Link to="/marketplace" className="text-burgundy hover:text-burgundy-light transition-colors"
+                onClick={() => setIsMenuOpen(false)}>
+                <Store className="inline-block mr-1 h-4 w-4" />
+                Marketplace
               </Link>
               <Link to="/about" className="text-burgundy hover:text-burgundy-light transition-colors"
                 onClick={() => setIsMenuOpen(false)}>
