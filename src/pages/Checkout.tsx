@@ -32,7 +32,7 @@ const checkoutSchema = z.object({
   zipCode: z.string().min(4, { message: "Please enter a valid zip/postal code" }),
   country: z.string().min(2, { message: "Please select a country" }),
   phone: z.string().min(10, { message: "Please enter a valid phone number" }),
-  paymentMethod: z.enum(["credit-card", "paypal"]),
+  paymentMethod: z.enum(["credit-card", "paypal", "esewa", "khalti"]),
   saveInfo: z.boolean().optional(),
   terms: z.boolean().refine(val => val === true, {
     message: "You must agree to the terms and conditions"
@@ -85,7 +85,7 @@ const Checkout = () => {
       city: "",
       state: "",
       zipCode: "",
-      country: "United States",
+      country: "Nepal",
       phone: "",
       paymentMethod: "credit-card",
       saveInfo: true,
@@ -359,15 +359,42 @@ const Checkout = () => {
                               <RadioGroup
                                 onValueChange={field.onChange}
                                 defaultValue={field.value}
+                                className="space-y-3"
                               >
-                                <div className="flex items-center p-4 rounded-lg border mb-3">
+                                <div className="flex items-center p-4 rounded-lg border">
                                   <RadioGroupItem value="credit-card" id="credit-card" className="mr-3" />
-                                  <Label htmlFor="credit-card" className="font-medium">Credit Card</Label>
+                                  <Label htmlFor="credit-card" className="font-medium flex items-center">
+                                    <span>Credit Card</span>
+                                    <div className="flex ml-2 space-x-1">
+                                      <div className="w-8 h-5 bg-blue-600 rounded"></div>
+                                      <div className="w-8 h-5 bg-red-500 rounded"></div>
+                                      <div className="w-8 h-5 bg-yellow-400 rounded"></div>
+                                    </div>
+                                  </Label>
                                 </div>
                                 
                                 <div className="flex items-center p-4 rounded-lg border">
+                                  <RadioGroupItem value="esewa" id="esewa" className="mr-3" />
+                                  <Label htmlFor="esewa" className="font-medium flex items-center">
+                                    <span className="text-green-600 font-bold">eSewa</span>
+                                    <span className="ml-2 text-sm text-gray-500">(Popular in Nepal)</span>
+                                  </Label>
+                                </div>
+
+                                <div className="flex items-center p-4 rounded-lg border">
+                                  <RadioGroupItem value="khalti" id="khalti" className="mr-3" />
+                                  <Label htmlFor="khalti" className="font-medium flex items-center">
+                                    <span className="text-purple-600 font-bold">Khalti</span>
+                                    <span className="ml-2 text-sm text-gray-500">(Popular in Nepal)</span>
+                                  </Label>
+                                </div>
+
+                                <div className="flex items-center p-4 rounded-lg border">
                                   <RadioGroupItem value="paypal" id="paypal" className="mr-3" />
-                                  <Label htmlFor="paypal" className="font-medium">PayPal</Label>
+                                  <Label htmlFor="paypal" className="font-medium flex items-center">
+                                    <span className="text-blue-600 font-bold">PayPal</span>
+                                    <span className="ml-2 text-sm text-gray-500">(International payments)</span>
+                                  </Label>
                                 </div>
                               </RadioGroup>
                             </FormControl>
@@ -401,6 +428,69 @@ const Checkout = () => {
                             <div>
                               <Label htmlFor="cvc">CVC</Label>
                               <Input id="cvc" placeholder="CVC" />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {form.watch("paymentMethod") === "esewa" && (
+                      <div className="bg-white p-6 rounded-lg border">
+                        <h2 className="font-playfair text-xl mb-6">eSewa Information</h2>
+                        <p className="text-gray-600 mb-4">You will be redirected to eSewa to complete your payment.</p>
+                        
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                          <div className="flex items-center">
+                            <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                            <div className="ml-4">
+                              <h3 className="font-medium">How it works:</h3>
+                              <p className="text-sm text-gray-500">After clicking "Complete Order", you'll be taken to eSewa to make your payment securely.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {form.watch("paymentMethod") === "khalti" && (
+                      <div className="bg-white p-6 rounded-lg border">
+                        <h2 className="font-playfair text-xl mb-6">Khalti Information</h2>
+                        <p className="text-gray-600 mb-4">You will be redirected to Khalti to complete your payment.</p>
+                        
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                          <div className="flex items-center">
+                            <div className="w-12 h-12 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                            <div className="ml-4">
+                              <h3 className="font-medium">How it works:</h3>
+                              <p className="text-sm text-gray-500">After clicking "Complete Order", you'll be taken to Khalti to make your payment securely.</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    {form.watch("paymentMethod") === "paypal" && (
+                      <div className="bg-white p-6 rounded-lg border">
+                        <h2 className="font-playfair text-xl mb-6">PayPal Information</h2>
+                        <p className="text-gray-600 mb-4">You will be redirected to PayPal to complete your payment.</p>
+                        
+                        <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                          <div className="flex items-center">
+                            <div className="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            </div>
+                            <div className="ml-4">
+                              <h3 className="font-medium">How it works:</h3>
+                              <p className="text-sm text-gray-500">After clicking "Complete Order", you'll be taken to PayPal to make your payment securely.</p>
                             </div>
                           </div>
                         </div>
@@ -555,6 +645,18 @@ const Checkout = () => {
                 <div className="flex justify-between font-medium text-lg">
                   <span>Total</span>
                   <span className="text-burgundy">${total.toFixed(2)}</span>
+                </div>
+              </div>
+              
+              {/* Payment Methods */}
+              <div className="mb-4">
+                <p className="text-sm font-medium mb-2">Accepted Payment Methods:</p>
+                <div className="flex flex-wrap gap-2">
+                  <div className="w-12 h-8 bg-blue-600 rounded flex items-center justify-center text-white text-xs">Visa</div>
+                  <div className="w-12 h-8 bg-red-500 rounded flex items-center justify-center text-white text-xs">MC</div>
+                  <div className="w-14 h-8 bg-green-600 rounded flex items-center justify-center text-white text-xs">eSewa</div>
+                  <div className="w-14 h-8 bg-purple-600 rounded flex items-center justify-center text-white text-xs">Khalti</div>
+                  <div className="w-14 h-8 bg-blue-800 rounded flex items-center justify-center text-white text-xs">PayPal</div>
                 </div>
               </div>
               
