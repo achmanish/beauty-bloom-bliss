@@ -44,7 +44,7 @@ const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
           product.name.toLowerCase().includes(searchQuery.toLowerCase())
         )
         .slice(0, 5)
-        .map(product => ({ id: product.id, name: product.name }));
+        .map(product => ({ id: String(product.id), name: product.name }));
       
       setSuggestions(filteredProducts);
     } else {

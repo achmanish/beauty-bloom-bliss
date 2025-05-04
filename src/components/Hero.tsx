@@ -1,32 +1,35 @@
 
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
+import { useLanguage } from "./LanguageSelector";
 
 const Hero = () => {
+  const { translate } = useLanguage();
+  
   return (
     <div className="min-h-screen bg-cream flex items-center">
       <div className="container mx-auto px-4 py-20">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="space-y-6 animate-fade-in">
             <h1 className="font-playfair text-5xl md:text-6xl lg:text-7xl text-burgundy leading-tight">
-              Discover Your Natural Beauty
+              {translate('discoverBeauty')}
             </h1>
             <p className="text-gray-600 text-lg md:text-xl max-w-md">
-              Luxury skincare and cosmetics made with natural ingredients for a radiant, confident you.
+              {translate('luxurySkincare')}
             </p>
             <div className="flex flex-col sm:flex-row gap-4">
               <Button 
                 asChild
                 className="bg-burgundy hover:bg-burgundy-light text-white px-8 w-full sm:w-auto"
               >
-                <Link to="/products">Shop Now</Link>
+                <Link to="/products">{translate('shopNow')}</Link>
               </Button>
               <Button 
                 asChild
                 variant="outline" 
                 className="border-burgundy text-burgundy hover:bg-burgundy/5 w-full sm:w-auto"
               >
-                <Link to="/about">Learn More</Link>
+                <Link to="/about">{translate('learnMore')}</Link>
               </Button>
             </div>
           </div>
