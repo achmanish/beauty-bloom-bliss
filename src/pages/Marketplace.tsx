@@ -117,7 +117,7 @@ const Marketplace = () => {
             </div>
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">All Locations</SelectItem>
+            <SelectItem value="all-locations">All Locations</SelectItem>
             {locations.map((location) => (
               <SelectItem key={location} value={location}>{location}</SelectItem>
             ))}
