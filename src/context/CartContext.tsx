@@ -31,11 +31,15 @@ interface CartContextType {
   isLoading: boolean;
   syncCart: () => Promise<void>;
   updateCartCount: (count: number) => void;
+  cart: CartItem[];
+  cartTotal: number;
 }
 
 const CartContext = createContext<CartContextType>({
   cartItems: [],
+  cart: [],
   cartCount: 0,
+  cartTotal: 0,
   addToCart: async () => {},
   removeFromCart: async () => {},
   updateQuantity: async () => {},
@@ -45,7 +49,9 @@ const CartContext = createContext<CartContextType>({
   updateCartCount: () => {},
 });
 
+// Export both names for backward compatibility
 export const useCartContext = () => useContext(CartContext);
+export const useCart = () => useContext(CartContext);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
   const { user, isLoggedIn } = useAuth();
@@ -56,6 +62,11 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const [isOffline, setIsOffline] = useState(false);
   const [pendingChanges, setPendingChanges] = useState<CartItem[]>([]);
   const [isCartSynced, setIsCartSynced] = useState(false);
+
+  // Calculate cart total
+  const cartTotal = cartItems.reduce((total, item) => {
+    return total + ((item.product?.price || 0) * item.quantity);
+  }, 0);
 
   // Check network status
   useEffect(() => {
@@ -540,7 +551,9 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   return (
     <CartContext.Provider value={{
       cartItems,
+      cart: cartItems, // Provide cart as an alias to cartItems for compatibility
       cartCount,
+      cartTotal, // Add cartTotal to the context
       addToCart,
       removeFromCart,
       updateQuantity,

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/context/CartContext';
@@ -122,13 +121,24 @@ const Checkout = () => {
         .eq('id', orderId)
         .then(() => {
           // Clear cart and redirect to confirmation
-          clearCart();
-          navigate('/order-confirmation', { 
-            state: { 
-              orderId,
-              total: cartTotal
-            } 
-          });
+          clearCart()
+            .then(() => {
+              navigate('/order-confirmation', { 
+                state: { 
+                  orderId,
+                  total: cartTotal
+                } 
+              });
+            })
+            .catch(error => {
+              console.error("Error clearing cart:", error);
+              navigate('/order-confirmation', { 
+                state: { 
+                  orderId,
+                  total: cartTotal
+                } 
+              });
+            });
         })
         .catch(error => {
           console.error("Error updating order:", error);

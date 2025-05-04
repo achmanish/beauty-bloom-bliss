@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Trash2, Plus, Minus, AlertTriangle, Wifi, WifiOff } from "lucide-react";
@@ -9,25 +8,19 @@ import { toast } from "@/components/ui/sonner";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { useCartContext } from "@/context/CartContext";
+import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 
 const Cart = () => {
-  const { cartItems, updateQuantity, removeFromCart, clearCart, isLoading, syncCart } = useCartContext();
+  // Replace cartItems with cart from useCart
+  const { cart, updateQuantity, removeFromCart, clearCart, isLoading, syncCart, cartTotal } = useCart();
   const { isLoggedIn } = useAuth();
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
   const [isOffline, setIsOffline] = useState(false);
   
-  // Calculate subtotal safely ensuring cartItems and product prices exist
-  const subtotal = cartItems && cartItems.length > 0 
-    ? cartItems.reduce((total, item) => {
-        return total + ((item.product?.price || 0) * item.quantity);
-      }, 0)
-    : 0;
-  
-  const shipping = subtotal > 100 ? 0 : 10;
-  const total = subtotal + shipping - discount;
+  const shipping = cartTotal > 100 ? 0 : 10;
+  const total = cartTotal + shipping - discount;
   
   // Check network status
   useEffect(() => {
@@ -49,7 +42,7 @@ const Cart = () => {
   const applyPromoCode = () => {
     // Mock promo code logic
     if (promoCode.toLowerCase() === "welcome10") {
-      setDiscount(subtotal * 0.1);
+      setDiscount(cartTotal * 0.1);
       toast.success("Promo code applied: 10% off");
     } else {
       toast.error("Invalid promo code");
@@ -90,7 +83,7 @@ const Cart = () => {
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-burgundy mx-auto"></div>
             <p className="mt-4 text-gray-600">Loading your cart...</p>
           </div>
-        ) : cartItems.length === 0 ? (
+        ) : cart.length === 0 ? (
           <div className="text-center py-20">
             <h2 className="text-2xl font-playfair mb-4">Your cart is empty</h2>
             <p className="text-gray-600 mb-8">Looks like you haven't added any items to your cart yet.</p>
@@ -112,7 +105,7 @@ const Cart = () => {
                   <div className="col-span-2 text-center">Total</div>
                 </div>
                 
-                {cartItems.map((item) => (
+                {cart.map((item) => (
                   <div key={item.id} className="border-b last:border-b-0">
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-center">
                       {/* Product */}
@@ -213,7 +206,7 @@ const Cart = () => {
                 <div className="space-y-4 mb-6">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal</span>
-                    <span>${subtotal.toFixed(2)}</span>
+                    <span>${cartTotal.toFixed(2)}</span>
                   </div>
                   
                   <div className="flex justify-between">
