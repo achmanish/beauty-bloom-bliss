@@ -25,7 +25,6 @@ import { CartProvider } from './context/CartContext';
 import UserAuth from './pages/UserAuth';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
-import Marketplace from './pages/Marketplace';
 import ChatbotSupport from './components/ChatbotSupport';
 
 function App() {
@@ -53,7 +52,6 @@ function App() {
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/admin-login" element={<Auth />} />
               <Route path="/admin/*" element={<ProtectedRoute adminOnly={true}><AdminDashboard /></ProtectedRoute>} />
-              <Route path="/marketplace" element={<Marketplace />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
             <Toaster />

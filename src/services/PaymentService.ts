@@ -9,7 +9,7 @@ export interface PaymentDetails {
 }
 
 export class PaymentService {
-  static async verifyKhaltiPayment(token: string, amount: number) {
+  static async verifyKhaltiPayment(token: string, amount: number): Promise<any> {
     try {
       const { data, error } = await supabase.functions.invoke('payment-verify/khalti', {
         method: 'POST',
@@ -24,7 +24,7 @@ export class PaymentService {
     }
   }
 
-  static async verifyEsewaPayment(pid: string, amt: number, rid: string) {
+  static async verifyEsewaPayment(pid: string, amt: number, rid: string): Promise<any> {
     try {
       const { data, error } = await supabase.functions.invoke('payment-verify/esewa', {
         method: 'POST',
@@ -39,7 +39,7 @@ export class PaymentService {
     }
   }
 
-  static async createPaymentRecord(paymentDetails: PaymentDetails) {
+  static async createPaymentRecord(paymentDetails: PaymentDetails): Promise<any> {
     try {
       const { orderId, amount, paymentMethod, paymentData } = paymentDetails;
 

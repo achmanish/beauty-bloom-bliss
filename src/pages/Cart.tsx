@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Trash2, Plus, Minus, AlertTriangle, Wifi, WifiOff } from "lucide-react";
@@ -117,8 +118,16 @@ const Cart = () => {
                             className="w-full h-full object-cover"
                           />
                         </div>
-                        <div>
-                          <h3 className="font-medium text-burgundy mb-1">{item.product?.name}</h3>
+                        <div className="flex-1">
+                          <div className="flex justify-between">
+                            <h3 className="font-medium text-burgundy mb-1">{item.product?.name}</h3>
+                            <button 
+                              onClick={() => removeFromCart(item.product_id)}
+                              className="text-gray-400 hover:text-red-500 md:hidden"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                           {item.product?.size && (
                             <p className="text-sm text-gray-500">Size: {item.product.size}</p>
                           )}
@@ -126,7 +135,6 @@ const Cart = () => {
                             onClick={() => removeFromCart(item.product_id)}
                             className="text-sm text-red-500 flex items-center mt-2 md:hidden"
                           >
-                            <Trash2 className="w-4 h-4 mr-1" />
                             Remove
                           </button>
                         </div>
@@ -145,6 +153,7 @@ const Cart = () => {
                           <button
                             onClick={() => updateQuantity(item.product_id, item.quantity - 1)}
                             className="px-2 py-1 text-gray-600 hover:bg-gray-100"
+                            aria-label="Decrease quantity"
                           >
                             <Minus className="w-3 h-3" />
                           </button>
@@ -152,6 +161,7 @@ const Cart = () => {
                           <button
                             onClick={() => updateQuantity(item.product_id, item.quantity + 1)}
                             className="px-2 py-1 text-gray-600 hover:bg-gray-100"
+                            aria-label="Increase quantity"
                           >
                             <Plus className="w-3 h-3" />
                           </button>
@@ -161,18 +171,20 @@ const Cart = () => {
                       {/* Total */}
                       <div className="md:col-span-2 md:text-center flex justify-between md:block">
                         <span className="md:hidden">Total:</span>
-                        <span className="font-medium">
-                          ${((item.product?.price || 0) * item.quantity).toFixed(2)}
-                        </span>
+                        <div className="flex items-center justify-between w-full">
+                          <span className="font-medium">
+                            ${((item.product?.price || 0) * item.quantity).toFixed(2)}
+                          </span>
+                          {/* Desktop remove button - now matches better with professional layouts */}
+                          <button 
+                            onClick={() => removeFromCart(item.product_id)}
+                            className="text-gray-400 hover:text-red-500 hidden md:block ml-4"
+                            aria-label="Remove item"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </div>
-                      
-                      {/* Remove button (desktop) */}
-                      <button 
-                        onClick={() => removeFromCart(item.product_id)}
-                        className="text-gray-400 hover:text-red-500 hidden md:block justify-self-end"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
                     </div>
                   </div>
                 ))}

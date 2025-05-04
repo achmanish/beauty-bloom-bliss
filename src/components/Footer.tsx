@@ -16,19 +16,19 @@ const Footer = () => {
           <div>
             <h4 className="font-semibold mb-4">Shop</h4>
             <ul className="space-y-2">
-              <li><Link to="/category/skincare" className="text-gray-600 hover:text-burgundy">Skincare</Link></li>
-              <li><Link to="/category/makeup" className="text-gray-600 hover:text-burgundy">Makeup</Link></li>
-              <li><Link to="/category/haircare" className="text-gray-600 hover:text-burgundy">Haircare</Link></li>
-              <li><Link to="/category/bodycare" className="text-gray-600 hover:text-burgundy">Body Care</Link></li>
+              <li><Link to="/category/skincare" className="text-gray-600 hover:text-burgundy" onClick={() => window.scrollTo(0, 0)}>Skincare</Link></li>
+              <li><Link to="/category/makeup" className="text-gray-600 hover:text-burgundy" onClick={() => window.scrollTo(0, 0)}>Makeup</Link></li>
+              <li><Link to="/category/haircare" className="text-gray-600 hover:text-burgundy" onClick={() => window.scrollTo(0, 0)}>Haircare</Link></li>
+              <li><Link to="/category/bodycare" className="text-gray-600 hover:text-burgundy" onClick={() => window.scrollTo(0, 0)}>Body Care</Link></li>
             </ul>
           </div>
           <div>
             <h4 className="font-semibold mb-4">Company</h4>
             <ul className="space-y-2">
-              <li><Link to="/about" className="text-gray-600 hover:text-burgundy">About</Link></li>
-              <li><Link to="/contact" className="text-gray-600 hover:text-burgundy">Contact</Link></li>
-              <li><Link to="/products" className="text-gray-600 hover:text-burgundy">All Products</Link></li>
-              <li><Link to="/bestsellers" className="text-gray-600 hover:text-burgundy">Bestsellers</Link></li>
+              <li><Link to="/about" className="text-gray-600 hover:text-burgundy" onClick={() => window.scrollTo(0, 0)}>About</Link></li>
+              <li><Link to="/contact" className="text-gray-600 hover:text-burgundy" onClick={() => window.scrollTo(0, 0)}>Contact</Link></li>
+              <li><Link to="/products" className="text-gray-600 hover:text-burgundy" onClick={() => window.scrollTo(0, 0)}>All Products</Link></li>
+              <li><Link to="/bestsellers" className="text-gray-600 hover:text-burgundy" onClick={() => window.scrollTo(0, 0)}>Bestsellers</Link></li>
             </ul>
           </div>
           <div>
