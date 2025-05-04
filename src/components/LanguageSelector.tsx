@@ -60,6 +60,32 @@ const translations: Translation = {
   emptyCart: { en: 'Your cart is empty', ne: 'तपाइँको कार्ट खाली छ' },
   continueShopping: { en: 'Continue Shopping', ne: 'किनमेल जारी राख्नुहोस्' },
   addToCart: { en: 'Add to Cart', ne: 'कार्टमा थप्नुहोस्' },
+  
+  // Checkout
+  checkout: { en: 'Checkout', ne: 'चेकआउट' },
+  shippingDetails: { en: 'Shipping Details', ne: 'डेलिभरी विवरण' },
+  payment: { en: 'Payment', ne: 'भुक्तानी' },
+  orderSummary: { en: 'Order Summary', ne: 'अर्डर सारांश' },
+  fullName: { en: 'Full Name', ne: 'पूरा नाम' },
+  email: { en: 'Email', ne: 'इमेल' },
+  phone: { en: 'Phone', ne: 'फोन' },
+  address: { en: 'Address', ne: 'ठेगाना' },
+  city: { en: 'City', ne: 'शहर' },
+  zipCode: { en: 'ZIP Code', ne: 'जिप कोड' },
+  orderNotes: { en: 'Order Notes', ne: 'अर्डर नोटहरू' },
+  processing: { en: 'Processing...', ne: 'प्रक्रिया हुँदैछ...' },
+  continueToPayment: { en: 'Continue to Payment', ne: 'भुक्तानीमा जारी राख्नुहोस्' },
+  subtotal: { en: 'Subtotal', ne: 'सबटोटल' },
+  shipping: { en: 'Shipping', ne: 'डेलिभरी शुल्क' },
+  totalAmount: { en: 'Total Amount', ne: 'जम्मा रकम' },
+  free: { en: 'Free', ne: 'नि:शुल्क' },
+  
+  // Payment
+  selectPaymentMethod: { en: 'Select Payment Method', ne: 'भुक्तानी विधि चयन गर्नुहोस्' },
+  khalti: { en: 'Khalti', ne: 'खल्ती' },
+  esewa: { en: 'eSewa', ne: 'इसेवा' },
+  payNow: { en: 'Pay Now', ne: 'अहिले भुक्तानी गर्नुहोस्' },
+  processingPayment: { en: 'Processing Payment...', ne: 'भुक्तानी प्रक्रिया गरिंदै...' },
 };
 
 // Create a context for language

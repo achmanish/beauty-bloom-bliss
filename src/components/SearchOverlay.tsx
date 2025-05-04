@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, KeyboardEvent as ReactKeyboardEvent } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -15,8 +15,10 @@ interface SearchOverlayProps {
 const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [suggestions, setSuggestions] = useState<Array<{ id: string; name: string }>>([]);
+  const [selectedIndex, setSelectedIndex] = useState<number>(-1);
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
+  const suggestionsRef = useRef<HTMLUListElement>(null);
   const { translate } = useLanguage();
   
   useEffect(() => {
@@ -49,8 +51,10 @@ const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
         .map(product => ({ id: String(product.id), name: product.name }));
       
       setSuggestions(filteredProducts);
+      setSelectedIndex(-1); // Reset selection when suggestions change
     } else {
       setSuggestions([]);
+      setSelectedIndex(-1);
     }
   }, [searchQuery]);
 
@@ -68,6 +72,34 @@ const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
     onClose();
     setSearchQuery("");
   };
+
+  const handleKeyDown = (e: ReactKeyboardEvent<HTMLInputElement>) => {
+    // Arrow up/down navigation for suggestions
+    if (e.key === 'ArrowDown' && selectedIndex < suggestions.length - 1) {
+      e.preventDefault(); // Prevent cursor from moving
+      setSelectedIndex(prevIndex => prevIndex + 1);
+    } else if (e.key === 'ArrowUp' && selectedIndex > -1) {
+      e.preventDefault(); // Prevent cursor from moving
+      setSelectedIndex(prevIndex => prevIndex - 1);
+    } else if (e.key === 'Enter' && selectedIndex > -1) {
+      // Select current suggestion
+      e.preventDefault();
+      handleSuggestionClick(suggestions[selectedIndex].id);
+    }
+  };
+
+  // Scroll suggestion into view when using keyboard navigation
+  useEffect(() => {
+    if (selectedIndex >= 0 && suggestionsRef.current) {
+      const selectedItem = suggestionsRef.current.children[selectedIndex] as HTMLElement;
+      if (selectedItem) {
+        selectedItem.scrollIntoView({
+          behavior: 'smooth',
+          block: 'nearest'
+        });
+      }
+    }
+  }, [selectedIndex]);
 
   if (!isOpen) return null;
 
@@ -91,17 +123,24 @@ const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
               className="pl-10 w-full text-lg py-6"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleKeyDown}
+              aria-label={translate('searchProducts')}
+              aria-autocomplete="list"
+              aria-controls="search-suggestions"
+              aria-expanded={suggestions.length > 0}
             />
           </form>
           
           {suggestions.length > 0 && (
             <div className="mt-4 border-t pt-2">
               <p className="text-sm text-gray-500 mb-2">{translate('suggestions')}</p>
-              <ul>
-                {suggestions.map((item) => (
-                  <li key={item.id}>
+              <ul ref={suggestionsRef} id="search-suggestions" role="listbox">
+                {suggestions.map((item, index) => (
+                  <li key={item.id} role="option" aria-selected={selectedIndex === index}>
                     <button
-                      className="w-full text-left p-2 hover:bg-cream rounded-md flex items-center gap-2 transition-colors"
+                      className={`w-full text-left p-2 hover:bg-cream rounded-md flex items-center gap-2 transition-colors ${
+                        selectedIndex === index ? 'bg-cream' : ''
+                      }`}
                       onClick={() => handleSuggestionClick(item.id)}
                     >
                       <Search className="h-4 w-4 text-gray-400" />
@@ -125,6 +164,7 @@ const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
               onClick={handleSearch}
               className="bg-burgundy hover:bg-burgundy-light text-white"
               disabled={!searchQuery.trim()}
+              aria-label={translate('search')}
             >
               {translate('search')}
             </Button>
