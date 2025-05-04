@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ShoppingBag, User, Search, Menu, X, Heart, Store } from "lucide-react";
@@ -10,15 +9,15 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
 import { useAuth } from "@/context/AuthContext";
 import { useCartContext } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import LanguageSelector from "./LanguageSelector";
+import SearchOverlay from "./SearchOverlay";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { isLoggedIn, isAdmin, signOut } = useAuth();
   const { wishlistCount } = useWishlist();
   const navigate = useNavigate();
@@ -29,6 +28,7 @@ const Navbar = () => {
   const cartCount = cartContext?.cartCount ?? localCartCount;
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const toggleSearch = () => setIsSearchOpen(!isSearchOpen);
 
   useEffect(() => {
     const savedCart = localStorage.getItem('cartItems');
@@ -85,211 +85,191 @@ const Navbar = () => {
     };
   }, [cartContext]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      setIsMenuOpen(false); // Close mobile menu if open
-      navigate(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery(""); // Clear search input after search
-    }
-  };
-
   return (
-    <nav className="bg-cream py-4 sticky top-0 z-50 shadow-sm">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between">
-          <Link to="/" className="font-playfair text-2xl font-bold text-burgundy">
-            Élégance
-          </Link>
+    <>
+      <nav className="bg-cream py-4 sticky top-0 z-50 shadow-sm">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between">
+            <Link to="/" className="font-playfair text-2xl font-bold text-burgundy">
+              Élégance
+            </Link>
 
-          <div className="hidden md:flex space-x-8">
-            <Link to="/products" className="text-burgundy hover:text-burgundy-light transition-colors">
-              Shop All
-            </Link>
-            <DropdownMenu>
-              <DropdownMenuTrigger className="text-burgundy hover:text-burgundy-light transition-colors">
-                Categories
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="bg-white z-50">
-                <DropdownMenuItem asChild>
-                  <Link to="/category/skincare" className="w-full">Skincare</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/category/makeup" className="w-full">Makeup</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/category/haircare" className="w-full">Hair Care</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem asChild>
-                  <Link to="/category/bodycare" className="w-full">Body Care</Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <Link to="/bestsellers" className="text-burgundy hover:text-burgundy-light transition-colors">
-              Bestsellers
-            </Link>
-            <Link to="/marketplace" className="text-burgundy hover:text-burgundy-light transition-colors">
-              Marketplace
-            </Link>
-            <Link to="/about" className="text-burgundy hover:text-burgundy-light transition-colors">
-              About
-            </Link>
-            <Link to="/contact" className="text-burgundy hover:text-burgundy-light transition-colors">
-              Contact
-            </Link>
-          </div>
-
-          <div className="hidden md:flex items-center relative w-1/3">
-            <form onSubmit={handleSearch} className="w-full">
-              <Input 
-                type="text" 
-                placeholder="Search products..." 
-                className="pr-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <button 
-                type="submit" 
-                className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 h-4 w-4"
-                aria-label="Search"
-              >
-                <Search className="h-4 w-4" />
-              </button>
-            </form>
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <LanguageSelector />
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger className="text-burgundy hover:text-burgundy-light focus:outline-none transition-colors">
-                <User className="h-5 w-5" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-48 bg-white z-50">
-                {isLoggedIn ? (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Link to="/account" className="w-full cursor-pointer">My Account</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/orders" className="w-full cursor-pointer">My Orders</Link>
-                    </DropdownMenuItem>
-                    {isAdmin && (
-                      <DropdownMenuItem asChild>
-                        <Link to="/admin" className="w-full cursor-pointer">Admin Dashboard</Link>
-                      </DropdownMenuItem>
-                    )}
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem 
-                      onClick={() => signOut()}
-                      className="cursor-pointer text-red-600 hover:bg-red-50"
-                    >
-                      Sign Out
-                    </DropdownMenuItem>
-                  </>
-                ) : (
-                  <>
-                    <DropdownMenuItem asChild>
-                      <Link to="/auth" className="w-full cursor-pointer">Sign In</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem asChild>
-                      <Link to="/auth" className="w-full cursor-pointer">Register</Link>
-                    </DropdownMenuItem>
-                  </>
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            
-            <Link to="/wishlist" className="text-burgundy hover:text-burgundy-light relative transition-colors">
-              <Heart className="h-5 w-5" />
-              {wishlistCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-burgundy text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                  {wishlistCount}
-                </span>
-              )}
-            </Link>
-            
-            <Link to="/cart" className="text-burgundy hover:text-burgundy-light relative transition-transform hover:scale-110">
-              <ShoppingBag className="h-5 w-5" />
-              {cartCount > 0 && (
-                <span className="absolute -top-2 -right-2 bg-burgundy text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-scale-in">
-                  {cartCount}
-                </span>
-              )}
-            </Link>
-            
-            <button className="md:hidden text-burgundy" onClick={toggleMenu} aria-label="Toggle menu">
-              {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-            </button>
-          </div>
-        </div>
-
-        {isMenuOpen && (
-          <div className="md:hidden mt-4 bg-cream-light p-4 rounded-lg animate-fade-in">
-            <div className="flex flex-col space-y-4">
-              <Link to="/products" className="text-burgundy hover:text-burgundy-light transition-colors"
-                onClick={() => setIsMenuOpen(false)}>
+            <div className="hidden md:flex space-x-8">
+              <Link to="/products" className="text-burgundy hover:text-burgundy-light transition-colors">
                 Shop All
               </Link>
-              <Link to="/category/skincare" className="text-burgundy hover:text-burgundy-light transition-colors"
-                onClick={() => setIsMenuOpen(false)}>
-                Skincare
-              </Link>
-              <Link to="/category/makeup" className="text-burgundy hover:text-burgundy-light transition-colors"
-                onClick={() => setIsMenuOpen(false)}>
-                Makeup
-              </Link>
-              <Link to="/category/haircare" className="text-burgundy hover:text-burgundy-light transition-colors"
-                onClick={() => setIsMenuOpen(false)}>
-                Hair Care
-              </Link>
-              <Link to="/category/bodycare" className="text-burgundy hover:text-burgundy-light transition-colors"
-                onClick={() => setIsMenuOpen(false)}>
-                Body Care
-              </Link>
-              <Link to="/bestsellers" className="text-burgundy hover:text-burgundy-light transition-colors"
-                onClick={() => setIsMenuOpen(false)}>
+              <DropdownMenu>
+                <DropdownMenuTrigger className="text-burgundy hover:text-burgundy-light transition-colors">
+                  Categories
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="bg-white z-50">
+                  <DropdownMenuItem asChild>
+                    <Link to="/category/skincare" className="w-full">Skincare</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/category/makeup" className="w-full">Makeup</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/category/haircare" className="w-full">Hair Care</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link to="/category/bodycare" className="w-full">Body Care</Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Link to="/bestsellers" className="text-burgundy hover:text-burgundy-light transition-colors">
                 Bestsellers
               </Link>
-              <Link to="/marketplace" className="text-burgundy hover:text-burgundy-light transition-colors"
-                onClick={() => setIsMenuOpen(false)}>
-                <Store className="inline-block mr-1 h-4 w-4" />
+              <Link to="/marketplace" className="text-burgundy hover:text-burgundy-light transition-colors">
                 Marketplace
               </Link>
-              <Link to="/about" className="text-burgundy hover:text-burgundy-light transition-colors"
-                onClick={() => setIsMenuOpen(false)}>
+              <Link to="/about" className="text-burgundy hover:text-burgundy-light transition-colors">
                 About
               </Link>
-              <Link to="/contact" className="text-burgundy hover:text-burgundy-light transition-colors"
-                onClick={() => setIsMenuOpen(false)}>
+              <Link to="/contact" className="text-burgundy hover:text-burgundy-light transition-colors">
                 Contact
               </Link>
-              <Link to="/wishlist" className="text-burgundy hover:text-burgundy-light transition-colors"
-                onClick={() => setIsMenuOpen(false)}>
-                Wishlist
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                onClick={toggleSearch}
+                className="text-burgundy hover:text-burgundy-light"
+                aria-label="Search"
+              >
+                <Search className="h-5 w-5" />
+              </Button>
+
+              <LanguageSelector />
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger className="text-burgundy hover:text-burgundy-light focus:outline-none transition-colors">
+                  <User className="h-5 w-5" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent className="w-48 bg-white z-50">
+                  {isLoggedIn ? (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link to="/account" className="w-full cursor-pointer">My Account</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/orders" className="w-full cursor-pointer">My Orders</Link>
+                      </DropdownMenuItem>
+                      {isAdmin && (
+                        <DropdownMenuItem asChild>
+                          <Link to="/admin" className="w-full cursor-pointer">Admin Dashboard</Link>
+                        </DropdownMenuItem>
+                      )}
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem 
+                        onClick={() => signOut()}
+                        className="cursor-pointer text-red-600 hover:bg-red-50"
+                      >
+                        Sign Out
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <>
+                      <DropdownMenuItem asChild>
+                        <Link to="/auth" className="w-full cursor-pointer">Sign In</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link to="/auth" className="w-full cursor-pointer">Register</Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+              
+              <Link to="/wishlist" className="text-burgundy hover:text-burgundy-light relative transition-colors">
+                <Heart className="h-5 w-5" />
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-burgundy text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {wishlistCount}
+                  </span>
+                )}
               </Link>
               
-              <form onSubmit={handleSearch} className="relative">
-                <Input 
-                  type="text" 
-                  placeholder="Search products..." 
-                  className="w-full pr-8"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-                <button 
-                  type="submit" 
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"
-                  aria-label="Search"
-                >
-                  <Search className="h-4 w-4" />
-                </button>
-              </form>
+              <Link to="/cart" className="text-burgundy hover:text-burgundy-light relative transition-transform hover:scale-110">
+                <ShoppingBag className="h-5 w-5" />
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-burgundy text-white text-xs rounded-full h-5 w-5 flex items-center justify-center animate-scale-in">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+              
+              <button className="md:hidden text-burgundy" onClick={toggleMenu} aria-label="Toggle menu">
+                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              </button>
             </div>
           </div>
-        )}
-      </div>
-    </nav>
+
+          {isMenuOpen && (
+            <div className="md:hidden mt-4 bg-cream-light p-4 rounded-lg animate-fade-in">
+              <div className="flex flex-col space-y-4">
+                <Link to="/products" className="text-burgundy hover:text-burgundy-light transition-colors"
+                  onClick={() => setIsMenuOpen(false)}>
+                  Shop All
+                </Link>
+                <Link to="/category/skincare" className="text-burgundy hover:text-burgundy-light transition-colors"
+                  onClick={() => setIsMenuOpen(false)}>
+                  Skincare
+                </Link>
+                <Link to="/category/makeup" className="text-burgundy hover:text-burgundy-light transition-colors"
+                  onClick={() => setIsMenuOpen(false)}>
+                  Makeup
+                </Link>
+                <Link to="/category/haircare" className="text-burgundy hover:text-burgundy-light transition-colors"
+                  onClick={() => setIsMenuOpen(false)}>
+                  Hair Care
+                </Link>
+                <Link to="/category/bodycare" className="text-burgundy hover:text-burgundy-light transition-colors"
+                  onClick={() => setIsMenuOpen(false)}>
+                  Body Care
+                </Link>
+                <Link to="/bestsellers" className="text-burgundy hover:text-burgundy-light transition-colors"
+                  onClick={() => setIsMenuOpen(false)}>
+                  Bestsellers
+                </Link>
+                <Link to="/marketplace" className="text-burgundy hover:text-burgundy-light transition-colors"
+                  onClick={() => setIsMenuOpen(false)}>
+                  <Store className="inline-block mr-1 h-4 w-4" />
+                  Marketplace
+                </Link>
+                <Link to="/about" className="text-burgundy hover:text-burgundy-light transition-colors"
+                  onClick={() => setIsMenuOpen(false)}>
+                  About
+                </Link>
+                <Link to="/contact" className="text-burgundy hover:text-burgundy-light transition-colors"
+                  onClick={() => setIsMenuOpen(false)}>
+                  Contact
+                </Link>
+                <Link to="/wishlist" className="text-burgundy hover:text-burgundy-light transition-colors"
+                  onClick={() => setIsMenuOpen(false)}>
+                  Wishlist
+                </Link>
+                
+                <Button 
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    setIsSearchOpen(true);
+                  }}
+                  className="bg-burgundy text-white w-full flex items-center justify-center gap-2"
+                >
+                  <Search className="h-4 w-4" />
+                  Search Products
+                </Button>
+              </div>
+            </div>
+          )}
+        </div>
+      </nav>
+      
+      <SearchOverlay isOpen={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+    </>
   );
 };
 

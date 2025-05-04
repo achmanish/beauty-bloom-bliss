@@ -1,5 +1,6 @@
 
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 const Hero = () => {
   return (
@@ -13,12 +14,19 @@ const Hero = () => {
             <p className="text-gray-600 text-lg md:text-xl max-w-md">
               Luxury skincare and cosmetics made with natural ingredients for a radiant, confident you.
             </p>
-            <div className="flex gap-4">
-              <Button className="bg-burgundy hover:bg-burgundy-light text-white px-8">
-                Shop Now
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button 
+                asChild
+                className="bg-burgundy hover:bg-burgundy-light text-white px-8 w-full sm:w-auto"
+              >
+                <Link to="/products">Shop Now</Link>
               </Button>
-              <Button variant="outline" className="border-burgundy text-burgundy hover:bg-burgundy/5">
-                Learn More
+              <Button 
+                asChild
+                variant="outline" 
+                className="border-burgundy text-burgundy hover:bg-burgundy/5 w-full sm:w-auto"
+              >
+                <Link to="/about">Learn More</Link>
               </Button>
             </div>
           </div>
