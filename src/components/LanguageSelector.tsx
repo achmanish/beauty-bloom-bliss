@@ -54,6 +54,12 @@ const translations: Translation = {
                     ne: 'प्राकृतिक सामग्रीहरूले बनाइएको डिलक्स स्किनकेयर र कस्मेटिक्स तपाईंको चमकदार र आत्मविश्वासी रूपका लागि।' },
   shopNow: { en: 'Shop Now', ne: 'किन्नुहोस्' },
   learnMore: { en: 'Learn More', ne: 'थप जान्नुहोस्' },
+  
+  // Cart
+  yourCart: { en: 'Your Shopping Cart', ne: 'तपाईंको शपिङ कार्ट' },
+  emptyCart: { en: 'Your cart is empty', ne: 'तपाइँको कार्ट खाली छ' },
+  continueShopping: { en: 'Continue Shopping', ne: 'किनमेल जारी राख्नुहोस्' },
+  addToCart: { en: 'Add to Cart', ne: 'कार्टमा थप्नुहोस्' },
 };
 
 // Create a context for language
@@ -91,9 +97,8 @@ const LanguageSelector = () => {
 
   const handleLanguageChange = (language: Language) => {
     changeLanguage(language);
-    // Reload the page to apply all translations
-    // In a real app, you might use React Context instead of a page reload
-    window.location.reload();
+    // Apply translations without requiring page reload
+    window.dispatchEvent(new CustomEvent('languageChanged', { detail: language }));
   };
 
   return (

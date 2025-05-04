@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ShoppingBag, User, Search, Menu, X, Heart, Store } from "lucide-react";
@@ -14,6 +15,7 @@ import { useCartContext } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import LanguageSelector from "./LanguageSelector";
 import SearchOverlay from "./SearchOverlay";
+import { useLanguage } from "./LanguageSelector";
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -21,6 +23,7 @@ const Navbar = () => {
   const { isLoggedIn, isAdmin, signOut } = useAuth();
   const { wishlistCount } = useWishlist();
   const navigate = useNavigate();
+  const { translate } = useLanguage();
   
   const cartContext = useCartContext();
   const [localCartCount, setLocalCartCount] = useState(0);
@@ -96,38 +99,38 @@ const Navbar = () => {
 
             <div className="hidden md:flex space-x-8">
               <Link to="/products" className="text-burgundy hover:text-burgundy-light transition-colors">
-                Shop All
+                {translate('shopAll')}
               </Link>
               <DropdownMenu>
                 <DropdownMenuTrigger className="text-burgundy hover:text-burgundy-light transition-colors">
-                  Categories
+                  {translate('categories')}
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="bg-white z-50">
                   <DropdownMenuItem asChild>
-                    <Link to="/category/skincare" className="w-full">Skincare</Link>
+                    <Link to="/category/skincare" className="w-full">{translate('skincare')}</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/category/makeup" className="w-full">Makeup</Link>
+                    <Link to="/category/makeup" className="w-full">{translate('makeup')}</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/category/haircare" className="w-full">Hair Care</Link>
+                    <Link to="/category/haircare" className="w-full">{translate('haircare')}</Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem asChild>
-                    <Link to="/category/bodycare" className="w-full">Body Care</Link>
+                    <Link to="/category/bodycare" className="w-full">{translate('bodycare')}</Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               <Link to="/bestsellers" className="text-burgundy hover:text-burgundy-light transition-colors">
-                Bestsellers
+                {translate('bestsellers')}
               </Link>
               <Link to="/marketplace" className="text-burgundy hover:text-burgundy-light transition-colors">
-                Marketplace
+                {translate('marketplace')}
               </Link>
               <Link to="/about" className="text-burgundy hover:text-burgundy-light transition-colors">
-                About
+                {translate('about')}
               </Link>
               <Link to="/contact" className="text-burgundy hover:text-burgundy-light transition-colors">
-                Contact
+                {translate('contact')}
               </Link>
             </div>
 
@@ -152,14 +155,14 @@ const Navbar = () => {
                   {isLoggedIn ? (
                     <>
                       <DropdownMenuItem asChild>
-                        <Link to="/account" className="w-full cursor-pointer">My Account</Link>
+                        <Link to="/account" className="w-full cursor-pointer">{translate('myAccount')}</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link to="/orders" className="w-full cursor-pointer">My Orders</Link>
+                        <Link to="/orders" className="w-full cursor-pointer">{translate('myOrders')}</Link>
                       </DropdownMenuItem>
                       {isAdmin && (
                         <DropdownMenuItem asChild>
-                          <Link to="/admin" className="w-full cursor-pointer">Admin Dashboard</Link>
+                          <Link to="/admin" className="w-full cursor-pointer">{translate('adminDashboard')}</Link>
                         </DropdownMenuItem>
                       )}
                       <DropdownMenuSeparator />
@@ -167,16 +170,16 @@ const Navbar = () => {
                         onClick={() => signOut()}
                         className="cursor-pointer text-red-600 hover:bg-red-50"
                       >
-                        Sign Out
+                        {translate('signOut')}
                       </DropdownMenuItem>
                     </>
                   ) : (
                     <>
                       <DropdownMenuItem asChild>
-                        <Link to="/auth" className="w-full cursor-pointer">Sign In</Link>
+                        <Link to="/auth" className="w-full cursor-pointer">{translate('signIn')}</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link to="/auth" className="w-full cursor-pointer">Register</Link>
+                        <Link to="/auth" className="w-full cursor-pointer">{translate('register')}</Link>
                       </DropdownMenuItem>
                     </>
                   )}
@@ -212,40 +215,40 @@ const Navbar = () => {
               <div className="flex flex-col space-y-4">
                 <Link to="/products" className="text-burgundy hover:text-burgundy-light transition-colors"
                   onClick={() => setIsMenuOpen(false)}>
-                  Shop All
+                  {translate('shopAll')}
                 </Link>
                 <Link to="/category/skincare" className="text-burgundy hover:text-burgundy-light transition-colors"
                   onClick={() => setIsMenuOpen(false)}>
-                  Skincare
+                  {translate('skincare')}
                 </Link>
                 <Link to="/category/makeup" className="text-burgundy hover:text-burgundy-light transition-colors"
                   onClick={() => setIsMenuOpen(false)}>
-                  Makeup
+                  {translate('makeup')}
                 </Link>
                 <Link to="/category/haircare" className="text-burgundy hover:text-burgundy-light transition-colors"
                   onClick={() => setIsMenuOpen(false)}>
-                  Hair Care
+                  {translate('haircare')}
                 </Link>
                 <Link to="/category/bodycare" className="text-burgundy hover:text-burgundy-light transition-colors"
                   onClick={() => setIsMenuOpen(false)}>
-                  Body Care
+                  {translate('bodycare')}
                 </Link>
                 <Link to="/bestsellers" className="text-burgundy hover:text-burgundy-light transition-colors"
                   onClick={() => setIsMenuOpen(false)}>
-                  Bestsellers
+                  {translate('bestsellers')}
                 </Link>
                 <Link to="/marketplace" className="text-burgundy hover:text-burgundy-light transition-colors"
                   onClick={() => setIsMenuOpen(false)}>
                   <Store className="inline-block mr-1 h-4 w-4" />
-                  Marketplace
+                  {translate('marketplace')}
                 </Link>
                 <Link to="/about" className="text-burgundy hover:text-burgundy-light transition-colors"
                   onClick={() => setIsMenuOpen(false)}>
-                  About
+                  {translate('about')}
                 </Link>
                 <Link to="/contact" className="text-burgundy hover:text-burgundy-light transition-colors"
                   onClick={() => setIsMenuOpen(false)}>
-                  Contact
+                  {translate('contact')}
                 </Link>
                 <Link to="/wishlist" className="text-burgundy hover:text-burgundy-light transition-colors"
                   onClick={() => setIsMenuOpen(false)}>
@@ -260,7 +263,7 @@ const Navbar = () => {
                   className="bg-burgundy text-white w-full flex items-center justify-center gap-2"
                 >
                   <Search className="h-4 w-4" />
-                  Search Products
+                  {translate('searchProducts')}
                 </Button>
               </div>
             </div>

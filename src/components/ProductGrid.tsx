@@ -5,10 +5,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShoppingBag, Heart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/sonner";
 import { useCartContext } from "@/context/CartContext";
 import { useWishlist } from "@/context/WishlistContext";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "./LanguageSelector";
 
 // Import a large selection of products (first 100)
 import { allProducts, Product } from "@/data/productData";
@@ -31,6 +32,7 @@ const ProductGrid = ({
   const { user } = useAuth();
   const { addToCart } = useCartContext();
   const { isInWishlist, addToWishlist, removeFromWishlist } = useWishlist();
+  const { translate } = useLanguage();
   
   // Determine which products to display
   let displayProducts: Product[] = customProducts || allProducts;
@@ -72,6 +74,8 @@ const ProductGrid = ({
   const handleAddToCart = (product: Product, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    
+    console.log("Adding to cart:", product);
     
     addToCart({
       id: product.id.toString(),

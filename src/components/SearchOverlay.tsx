@@ -5,6 +5,7 @@ import { Search, X } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { allProducts } from "@/data/productData";
+import { useLanguage } from "./LanguageSelector";
 
 interface SearchOverlayProps {
   isOpen: boolean;
@@ -16,6 +17,7 @@ const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
   const [suggestions, setSuggestions] = useState<Array<{ id: string; name: string }>>([]);
   const navigate = useNavigate();
   const inputRef = useRef<HTMLInputElement>(null);
+  const { translate } = useLanguage();
   
   useEffect(() => {
     if (isOpen && inputRef.current) {
@@ -73,7 +75,7 @@ const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center pt-20 md:pt-32 px-4 animate-fade-in">
       <div className="bg-white w-full max-w-2xl rounded-lg shadow-xl">
         <div className="p-4 flex items-center justify-between border-b">
-          <h3 className="text-lg font-medium">Search Products</h3>
+          <h3 className="text-lg font-medium">{translate('searchProducts')}</h3>
           <Button variant="ghost" size="icon" onClick={onClose}>
             <X className="h-5 w-5" />
           </Button>
@@ -85,7 +87,7 @@ const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
             <Input 
               ref={inputRef}
               type="text" 
-              placeholder="Search for products..." 
+              placeholder={translate('searchProducts')} 
               className="pl-10 w-full text-lg py-6"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -94,7 +96,7 @@ const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
           
           {suggestions.length > 0 && (
             <div className="mt-4 border-t pt-2">
-              <p className="text-sm text-gray-500 mb-2">Suggestions</p>
+              <p className="text-sm text-gray-500 mb-2">{translate('suggestions')}</p>
               <ul>
                 {suggestions.map((item) => (
                   <li key={item.id}>
@@ -113,7 +115,7 @@ const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
           
           {searchQuery.trim().length > 1 && suggestions.length === 0 && (
             <div className="mt-4 text-center py-4 text-gray-500">
-              No products match your search
+              {translate('noProducts')}
             </div>
           )}
           
@@ -124,7 +126,7 @@ const SearchOverlay = ({ isOpen, onClose }: SearchOverlayProps) => {
               className="bg-burgundy hover:bg-burgundy-light text-white"
               disabled={!searchQuery.trim()}
             >
-              Search
+              {translate('search')}
             </Button>
           </div>
         </div>
