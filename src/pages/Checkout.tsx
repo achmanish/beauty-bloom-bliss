@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/context/CartContext';
@@ -115,28 +116,27 @@ const Checkout = () => {
   const handlePaymentComplete = () => {
     // Update order status to paid
     if (orderId) {
-      // Fixed: Replaced Promise.catch with then/catch pattern
+      // Fix: Use Promise chain properly without directly calling catch on PromiseLike
       supabase
         .from('orders')
         .update({ status: 'paid' })
         .eq('id', orderId)
         .then(() => {
-          // Clear cart and redirect to confirmation
-          clearCart()
-            .then(() => {
-              navigate('/order-confirmation', { 
-                state: { 
-                  orderId,
-                  total: cartTotal
-                } 
-              });
-            })
-            .catch(error => {
-              console.error("Error clearing cart:", error);
-            });
+          // Use then to handle cart clearing success
+          return clearCart();
+        })
+        .then(() => {
+          // Navigate after cart is cleared
+          navigate('/order-confirmation', { 
+            state: { 
+              orderId,
+              total: cartTotal
+            } 
+          });
         })
         .catch(error => {
-          console.error("Error updating order:", error);
+          // This catch will handle errors from both promises
+          console.error("Error in payment completion:", error);
         });
     }
   };
