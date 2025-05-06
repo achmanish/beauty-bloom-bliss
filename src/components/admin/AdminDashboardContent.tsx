@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import StatsCards from "@/components/admin/StatsCards";
 import OrdersTab from "@/components/admin/OrdersTab";
@@ -8,7 +7,7 @@ import CategoriesTab from "@/components/admin/CategoriesTab";
 import CouponsTab from "@/components/admin/CouponsTab";
 import FlashSalesTab from "@/components/admin/FlashSalesTab";
 import { Order, Product, Payment, Category, Coupon, FlashSale } from "@/types/admin";
-import { LogOut, RefreshCw } from "lucide-react";
+import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
@@ -164,14 +163,6 @@ const AdminDashboardContent = ({
               Refresh Data
             </Button>
           )}
-          <Button 
-            variant="outline" 
-            onClick={handleLogout} 
-            className="flex items-center gap-2 hover:bg-gray-100 transition-colors"
-          >
-            <LogOut className="h-4 w-4" />
-            Logout
-          </Button>
         </div>
       </div>
       

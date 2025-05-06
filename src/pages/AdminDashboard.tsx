@@ -115,8 +115,14 @@ const AdminDashboard = () => {
     fetchData();
   }, [refreshTrigger]);
 
+  // Single logout function used by all components
   const handleLogout = async () => {
+    console.log("Logging out admin user");
     await signOut();
+    
+    // Clear the mock session if it exists
+    localStorage.removeItem("admin_authenticated");
+    
     navigate("/admin-login");
     toast({
       title: "Logged out",

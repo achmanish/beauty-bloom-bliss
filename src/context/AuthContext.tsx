@@ -28,7 +28,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
+        console.log("Auth state changed:", event);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -46,6 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log("Initial session check:", session ? "Logged in" : "Not logged in");
       setSession(session);
       setUser(session?.user ?? null);
       
@@ -63,6 +65,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const checkUserRole = async (userId: string) => {
     try {
+      console.log("Checking user role for:", userId);
+      
       // First check if user is in admins table (legacy approach)
       const { data: adminData, error: adminError } = await supabase
         .from('admins')
@@ -71,6 +75,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .maybeSingle();
       
       if (!adminError && adminData) {
+        console.log("User is admin (via admins table)");
         setIsAdmin(true);
         setUserRole('admin');
         return;
@@ -83,12 +88,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq('user_id', userId)
         .maybeSingle();
       
+      console.log("User role check results:", { roleData, roleError });
+      
       if (!roleError && roleData) {
         setUserRole(roleData.role as UserRole);
         setIsAdmin(roleData.role === 'admin');
+        console.log("User role set to:", roleData.role);
       } else {
         setUserRole(null);
         setIsAdmin(false);
+        console.log("User has no special role");
       }
     } catch (error) {
       console.error("Error checking user role:", error);
@@ -98,7 +107,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    console.log("Signing out user");
+    
+    try {
+      // Clear admin authentication if it exists
+      localStorage.removeItem("admin_authenticated");
+      
+      // Sign out from supabase
+      await supabase.auth.signOut();
+      
+      console.log("Sign out completed");
+    } catch (error) {
+      console.error("Error during sign out:", error);
+    }
   };
 
   const updateProfile = async (data: { firstName?: string; lastName?: string }) => {

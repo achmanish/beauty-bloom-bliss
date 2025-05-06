@@ -25,10 +25,13 @@ const Auth = () => {
     e.preventDefault();
     setLoading(true);
     
+    console.log("Attempting admin login:", { email });
+    
     try {
       // For demo purposes only
       if (email === "admin@elegance.com" && password === "admin123") {
         // Mock successful login for demo
+        console.log("Demo admin login successful");
         toast({
           title: "Login successful",
           description: "Welcome to the admin dashboard",
@@ -46,6 +49,8 @@ const Auth = () => {
       
       if (error) throw error;
       
+      console.log("Supabase login successful, checking admin privileges");
+      
       // Check if the user is an admin
       const { data: adminData, error: adminError } = await supabase
         .from('admins')
@@ -60,8 +65,11 @@ const Auth = () => {
         .eq('user_id', data.user.id)
         .maybeSingle();
       
+      console.log("Admin check results:", { adminData, roleData });
+      
       if ((adminError || !adminData) && (!roleData || roleData.role !== 'admin')) {
         // If not an admin, sign them out
+        console.log("Not an admin, signing out");
         await supabase.auth.signOut();
         toast({
           title: "Access Denied",
@@ -69,6 +77,7 @@ const Auth = () => {
           variant: "destructive",
         });
       } else {
+        console.log("Admin verified, redirecting to dashboard");
         toast({
           title: "Login successful",
           description: "Welcome to the admin dashboard",
@@ -76,6 +85,7 @@ const Auth = () => {
         navigate("/admin");
       }
     } catch (error: any) {
+      console.error("Login error:", error.message);
       toast({
         title: "Login failed",
         description: error.message || "An error occurred during login",
