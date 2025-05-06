@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/context/CartContext';
@@ -116,17 +115,17 @@ const Checkout = () => {
   const handlePaymentComplete = () => {
     // Update order status to paid
     if (orderId) {
-      // Fix: Use Promise chain properly without directly calling catch on PromiseLike
+      // First update the order status to paid
       supabase
         .from('orders')
         .update({ status: 'paid' })
         .eq('id', orderId)
         .then(() => {
-          // Use then to handle cart clearing success
+          // After successful order update, clear the cart
           return clearCart();
         })
         .then(() => {
-          // Navigate after cart is cleared
+          // After cart is cleared, navigate to confirmation page
           navigate('/order-confirmation', { 
             state: { 
               orderId,
@@ -134,9 +133,14 @@ const Checkout = () => {
             } 
           });
         })
-        .catch(error => {
-          // This catch will handle errors from both promises
+        .catch((error) => {
+          // Handle any errors that occur in the Promise chain
           console.error("Error in payment completion:", error);
+          toast({
+            title: "Error",
+            description: "There was an error completing your order.",
+            variant: "destructive",
+          });
         });
     }
   };
