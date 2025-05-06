@@ -16,11 +16,15 @@ export class PaymentService {
         body: { token, amount },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Khalti verification error:", error);
+        throw new Error(`Payment verification failed: ${error.message}`);
+      }
+      
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Khalti verification error:", error);
-      throw error;
+      throw new Error(error.message || "Payment verification failed");
     }
   }
 
@@ -31,17 +35,25 @@ export class PaymentService {
         body: { pid, amt, rid },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("eSewa verification error:", error);
+        throw new Error(`Payment verification failed: ${error.message}`);
+      }
+      
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error("eSewa verification error:", error);
-      throw error;
+      throw new Error(error.message || "Payment verification failed");
     }
   }
 
   static async createPaymentRecord(paymentDetails: PaymentDetails): Promise<any> {
     try {
       const { orderId, amount, paymentMethod, paymentData } = paymentDetails;
+      
+      if (!orderId || !amount || !paymentMethod || !paymentData) {
+        throw new Error("Missing payment details");
+      }
 
       const { data, error } = await supabase
         .from('payments')
@@ -54,11 +66,15 @@ export class PaymentService {
         })
         .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error creating payment record:", error);
+        throw new Error(`Failed to create payment record: ${error.message}`);
+      }
+      
       return data;
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error creating payment record:", error);
-      throw error;
+      throw new Error(error.message || "Failed to create payment record");
     }
   }
 }

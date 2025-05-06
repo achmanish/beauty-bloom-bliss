@@ -50,6 +50,11 @@ const Cart = () => {
     }
   };
   
+  const handleRemoveItem = (productId: string) => {
+    removeFromCart(productId);
+    toast.success("Item removed from cart");
+  };
+  
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
@@ -119,24 +124,10 @@ const Cart = () => {
                           />
                         </div>
                         <div className="flex-1">
-                          <div className="flex justify-between">
-                            <h3 className="font-medium text-burgundy mb-1">{item.product?.name}</h3>
-                            <button 
-                              onClick={() => removeFromCart(item.product_id)}
-                              className="text-gray-400 hover:text-red-500 md:hidden"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
+                          <h3 className="font-medium text-burgundy mb-1">{item.product?.name}</h3>
                           {item.product?.size && (
                             <p className="text-sm text-gray-500">Size: {item.product.size}</p>
                           )}
-                          <button 
-                            onClick={() => removeFromCart(item.product_id)}
-                            className="text-sm text-red-500 flex items-center mt-2 md:hidden"
-                          >
-                            Remove
-                          </button>
                         </div>
                       </div>
                       
@@ -168,22 +159,20 @@ const Cart = () => {
                         </div>
                       </div>
                       
-                      {/* Total */}
-                      <div className="md:col-span-2 md:text-center flex justify-between md:block">
+                      {/* Total and Remove button */}
+                      <div className="md:col-span-2 md:text-center flex justify-between items-center w-full">
                         <span className="md:hidden">Total:</span>
-                        <div className="flex items-center justify-between w-full">
-                          <span className="font-medium">
-                            ${((item.product?.price || 0) * item.quantity).toFixed(2)}
-                          </span>
-                          {/* Desktop remove button - now matches better with professional layouts */}
-                          <button 
-                            onClick={() => removeFromCart(item.product_id)}
-                            className="text-gray-400 hover:text-red-500 hidden md:block ml-4"
-                            aria-label="Remove item"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                        <span className="font-medium">
+                          ${((item.product?.price || 0) * item.quantity).toFixed(2)}
+                        </span>
+                        <Button 
+                          onClick={() => handleRemoveItem(item.product_id)}
+                          className="ml-4 text-gray-400 hover:text-red-500 px-2 py-1 hover:bg-red-50 rounded"
+                          variant="ghost"
+                          size="sm"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -191,7 +180,7 @@ const Cart = () => {
                 
                 {/* Continue Shopping */}
                 <div className="pt-6 pb-4 flex justify-between">
-                  <Link to="/products" className="text-burgundy hover:underline flex items-center">
+                  <Link to="/products" className="text-burgundy hover:underline flex items-center" onClick={() => window.scrollTo(0, 0)}>
                     ← Continue Shopping
                   </Link>
                   <Button 
@@ -200,6 +189,7 @@ const Cart = () => {
                     onClick={() => {
                       if (confirm("Are you sure you want to clear your cart?")) {
                         clearCart();
+                        toast.success("Cart cleared");
                       }
                     }}
                   >
@@ -263,7 +253,7 @@ const Cart = () => {
                 </div>
                 
                 {/* Checkout Button */}
-                <Link to="/checkout">
+                <Link to="/checkout" onClick={() => window.scrollTo(0, 0)}>
                   <Button className="w-full bg-burgundy hover:bg-burgundy-light text-white">
                     Proceed to Checkout
                   </Button>

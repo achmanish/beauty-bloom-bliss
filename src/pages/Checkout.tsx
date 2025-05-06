@@ -129,15 +129,6 @@ const Checkout = () => {
                   total: cartTotal
                 } 
               });
-            })
-            .catch(error => {
-              console.error("Error clearing cart:", error);
-              navigate('/order-confirmation', { 
-                state: { 
-                  orderId,
-                  total: cartTotal
-                } 
-              });
             });
         })
         .catch(error => {
