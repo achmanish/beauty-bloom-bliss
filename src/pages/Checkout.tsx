@@ -112,36 +112,35 @@ const Checkout = () => {
     }
   };
 
-  const handlePaymentComplete = () => {
+  const handlePaymentComplete = async () => {
     // Update order status to paid
     if (orderId) {
-      // First update the order status to paid
-      supabase
-        .from('orders')
-        .update({ status: 'paid' })
-        .eq('id', orderId)
-        .then(() => {
-          // After successful order update, clear the cart
-          return clearCart();
-        })
-        .then(() => {
-          // After cart is cleared, navigate to confirmation page
-          navigate('/order-confirmation', { 
-            state: { 
-              orderId,
-              total: cartTotal
-            } 
-          });
-        })
-        .catch((error) => {
-          // Handle any errors that occur in the Promise chain
-          console.error("Error in payment completion:", error);
-          toast({
-            title: "Error",
-            description: "There was an error completing your order.",
-            variant: "destructive",
-          });
+      try {
+        // First update the order status to paid
+        await supabase
+          .from('orders')
+          .update({ status: 'paid' })
+          .eq('id', orderId);
+        
+        // After successful order update, clear the cart
+        await clearCart();
+        
+        // After cart is cleared, navigate to confirmation page
+        navigate('/order-confirmation', { 
+          state: { 
+            orderId,
+            total: cartTotal
+          } 
         });
+      } catch (error) {
+        // Handle any errors that occur in the Promise chain
+        console.error("Error in payment completion:", error);
+        toast({
+          title: "Error",
+          description: "There was an error completing your order.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
