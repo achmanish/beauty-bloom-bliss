@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/context/CartContext';
@@ -9,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useLanguage } from '@/components/LanguageSelector';
 import PaymentOptions from '@/components/checkout/PaymentOptions';
+import PhoneInput from '@/components/checkout/PhoneInput';
 import { Loader2 } from 'lucide-react';
 
 const Checkout = () => {
@@ -35,6 +37,10 @@ const Checkout = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handlePhoneChange = (value: string) => {
+    setFormData(prev => ({ ...prev, phone: value }));
   };
 
   const handleSubmitDetails = async (e: React.FormEvent) => {
@@ -206,14 +212,10 @@ const Checkout = () => {
                     <label htmlFor="phone" className="block text-sm font-medium">
                       {translate('phone')}*
                     </label>
-                    <input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      required
-                      className="w-full p-2 border rounded-md"
+                    <PhoneInput 
                       value={formData.phone}
-                      onChange={handleInputChange}
+                      onChange={handlePhoneChange}
+                      required 
                     />
                   </div>
                   

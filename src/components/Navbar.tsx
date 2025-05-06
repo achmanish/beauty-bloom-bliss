@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ShoppingBag, User, Search, Menu, X, Heart, Store } from "lucide-react";
+import { ShoppingBag, User, Search, Menu, X, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -123,9 +123,6 @@ const Navbar = () => {
               <Link to="/bestsellers" className="text-burgundy hover:text-burgundy-light transition-colors">
                 {translate('bestsellers')}
               </Link>
-              <Link to="/marketplace" className="text-burgundy hover:text-burgundy-light transition-colors">
-                {translate('marketplace')}
-              </Link>
               <Link to="/about" className="text-burgundy hover:text-burgundy-light transition-colors">
                 {translate('about')}
               </Link>
@@ -158,7 +155,7 @@ const Navbar = () => {
                         <Link to="/account" className="w-full cursor-pointer">{translate('myAccount')}</Link>
                       </DropdownMenuItem>
                       <DropdownMenuItem asChild>
-                        <Link to="/orders" className="w-full cursor-pointer">{translate('myOrders')}</Link>
+                        <Link to="/account" state={{ activeTab: 'orders' }} className="w-full cursor-pointer">{translate('myOrders')}</Link>
                       </DropdownMenuItem>
                       {isAdmin && (
                         <DropdownMenuItem asChild>
@@ -236,11 +233,6 @@ const Navbar = () => {
                 <Link to="/bestsellers" className="text-burgundy hover:text-burgundy-light transition-colors"
                   onClick={() => setIsMenuOpen(false)}>
                   {translate('bestsellers')}
-                </Link>
-                <Link to="/marketplace" className="text-burgundy hover:text-burgundy-light transition-colors"
-                  onClick={() => setIsMenuOpen(false)}>
-                  <Store className="inline-block mr-1 h-4 w-4" />
-                  {translate('marketplace')}
                 </Link>
                 <Link to="/about" className="text-burgundy hover:text-burgundy-light transition-colors"
                   onClick={() => setIsMenuOpen(false)}>

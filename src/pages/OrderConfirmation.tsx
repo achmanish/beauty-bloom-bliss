@@ -1,50 +1,243 @@
 
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Check, Package, Truck, Calendar } from "lucide-react";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import Products from "@/components/Products";
 
+// Define interfaces to type our data
+interface OrderItem {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  size: string;
+  image: string;
+}
+
+interface ShippingAddress {
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
+  country: string;
+}
+
+interface OrderDetails {
+  orderNumber: string;
+  date: string;
+  expectedDelivery: string;
+  items: OrderItem[];
+  subtotal: number;
+  shipping: number;
+  tax: number;
+  total: number;
+  shippingAddress: ShippingAddress;
+  paymentMethod: string;
+}
+
 const OrderConfirmation = () => {
-  // Mock order details
-  const orderDetails = {
-    orderNumber: "ORD-65432",
-    date: "April 15, 2023",
-    expectedDelivery: "April 20-23, 2023",
-    items: [
-      {
-        id: 1,
-        name: "Rose Glow Serum",
-        price: 89,
-        quantity: 2,
-        size: "30ml",
-        image: "https://images.unsplash.com/photo-1571875257727-256c39da42af?auto=format&fit=crop&w=800&q=80"
-      },
-      {
-        id: 2,
-        name: "Hydrating Cream",
-        price: 65,
-        quantity: 1,
-        size: "50ml",
-        image: "https://images.unsplash.com/photo-1570194065650-d707c41c4754?auto=format&fit=crop&w=800&q=80"
+  const location = useLocation();
+  const navigate = useNavigate();
+  const [orderDetails, setOrderDetails] = useState<OrderDetails | null>(null);
+  const [loading, setLoading] = useState(true);
+  
+  // Extract orderId from location state or fall back to mock data
+  const orderId = location.state?.orderId;
+  
+  useEffect(() => {
+    const fetchOrderDetails = async () => {
+      if (!orderId) {
+        // If no orderId, use mock data (for development purposes)
+        setOrderDetails(getMockOrderDetails());
+        setLoading(false);
+        return;
       }
-    ],
-    subtotal: 243,
-    shipping: 0,
-    tax: 19.44,
-    total: 262.44,
-    shippingAddress: {
-      name: "Emma Wilson",
-      address: "123 Beauty Street",
-      city: "Los Angeles",
-      state: "CA",
-      zip: "90001",
-      country: "United States"
-    },
-    paymentMethod: "Credit Card (ending in 4242)"
+      
+      try {
+        // Fetch the order
+        const { data: orderData, error: orderError } = await supabase
+          .from('orders')
+          .select('*')
+          .eq('id', orderId)
+          .single();
+        
+        if (orderError || !orderData) {
+          console.error("Error fetching order:", orderError);
+          setOrderDetails(getMockOrderDetails());
+          setLoading(false);
+          return;
+        }
+        
+        // Fetch the order items
+        const { data: orderItemsData, error: itemsError } = await supabase
+          .from('order_items')
+          .select('*, products(*)')
+          .eq('order_id', orderId);
+        
+        if (itemsError) {
+          console.error("Error fetching order items:", itemsError);
+          setOrderDetails(getMockOrderDetails());
+          setLoading(false);
+          return;
+        }
+        
+        // Get payment info
+        const { data: paymentData } = await supabase
+          .from('payments')
+          .select('*')
+          .eq('order_id', orderId)
+          .maybeSingle();
+          
+        // Format the order details
+        const items = orderItemsData.map(item => ({
+          id: item.id,
+          name: item.products.name,
+          price: parseFloat(item.price_at_time),
+          quantity: item.quantity,
+          size: '30ml', // Default size as it's not stored in DB
+          image: item.products.image_url || 'https://images.unsplash.com/photo-1571875257727-256c39da42af?auto=format&fit=crop&w=800&q=80'
+        }));
+        
+        const subtotal = items.reduce((total, item) => total + (item.price * item.quantity), 0);
+        const tax = subtotal * 0.08; // Assuming 8% tax
+        const total = parseFloat(orderData.total_amount);
+        
+        // Parse shipping address (stored as a string in format "name, address, city, zipCode")
+        const addressParts = (orderData.shipping_address || "").split(',');
+        const shippingAddress = {
+          name: addressParts[0]?.trim() || 'N/A',
+          address: addressParts[1]?.trim() || 'N/A',
+          city: addressParts[2]?.trim() || 'N/A',
+          state: 'N/A',
+          zip: addressParts[3]?.trim() || 'N/A',
+          country: 'United States'
+        };
+        
+        // Format the date
+        const orderDate = new Date(orderData.created_at);
+        const formattedDate = orderDate.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        });
+        
+        // Calculate expected delivery (5-7 days from order date)
+        const deliveryDate = new Date(orderDate);
+        deliveryDate.setDate(deliveryDate.getDate() + 5);
+        const deliveryEndDate = new Date(orderDate);
+        deliveryEndDate.setDate(deliveryEndDate.getDate() + 7);
+        
+        const expectedDelivery = `${deliveryDate.toLocaleDateString('en-US', {
+          month: 'long',
+          day: 'numeric'
+        })} - ${deliveryEndDate.toLocaleDateString('en-US', {
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric'
+        })}`;
+        
+        setOrderDetails({
+          orderNumber: orderId.substring(0, 8),
+          date: formattedDate,
+          expectedDelivery,
+          items,
+          subtotal,
+          shipping: 0, // Free shipping
+          tax,
+          total,
+          shippingAddress,
+          paymentMethod: paymentData?.payment_method || 'Credit Card'
+        });
+        
+      } catch (error) {
+        console.error("Error fetching order details:", error);
+        setOrderDetails(getMockOrderDetails());
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchOrderDetails();
+  }, [orderId]);
+  
+  const handleViewOrderDetails = () => {
+    navigate('/account', { state: { activeTab: 'orders' } });
   };
+  
+  // Mock order details for development or fallback
+  const getMockOrderDetails = (): OrderDetails => {
+    return {
+      orderNumber: "ORD-65432",
+      date: "April 15, 2023",
+      expectedDelivery: "April 20-23, 2023",
+      items: [
+        {
+          id: 1,
+          name: "Rose Glow Serum",
+          price: 89,
+          quantity: 2,
+          size: "30ml",
+          image: "https://images.unsplash.com/photo-1571875257727-256c39da42af?auto=format&fit=crop&w=800&q=80"
+        },
+        {
+          id: 2,
+          name: "Hydrating Cream",
+          price: 65,
+          quantity: 1,
+          size: "50ml",
+          image: "https://images.unsplash.com/photo-1570194065650-d707c41c4754?auto=format&fit=crop&w=800&q=80"
+        }
+      ],
+      subtotal: 243,
+      shipping: 0,
+      tax: 19.44,
+      total: 262.44,
+      shippingAddress: {
+        name: "Emma Wilson",
+        address: "123 Beauty Street",
+        city: "Los Angeles",
+        state: "CA",
+        zip: "90001",
+        country: "United States"
+      },
+      paymentMethod: "Credit Card (ending in 4242)"
+    };
+  };
+  
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-burgundy"></div>
+      </div>
+    );
+  }
+  
+  if (!orderDetails) {
+    return (
+      <div className="min-h-screen bg-white">
+        <Navbar />
+        <div className="container mx-auto px-4 py-16 text-center">
+          <h1 className="font-playfair text-3xl text-burgundy mb-4">Order Not Found</h1>
+          <p className="text-gray-600 mb-6">
+            We couldn't find the order details you're looking for.
+          </p>
+          <Button 
+            onClick={() => navigate('/products')}
+            className="bg-burgundy hover:bg-burgundy-light text-white"
+          >
+            Continue Shopping
+          </Button>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen bg-white">
@@ -107,11 +300,13 @@ const OrderConfirmation = () => {
           
           <div className="flex justify-center">
             <div className="flex space-x-4 mt-6">
-              <Link to="/orders">
-                <Button variant="outline" className="border-burgundy text-burgundy hover:bg-burgundy hover:text-white">
-                  View Order Details
-                </Button>
-              </Link>
+              <Button 
+                variant="outline" 
+                className="border-burgundy text-burgundy hover:bg-burgundy hover:text-white"
+                onClick={handleViewOrderDetails}
+              >
+                View Order Details
+              </Button>
               <Link to="/products">
                 <Button className="bg-burgundy hover:bg-burgundy-light text-white">
                   Continue Shopping
