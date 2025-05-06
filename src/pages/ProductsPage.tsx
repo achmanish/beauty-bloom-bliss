@@ -60,6 +60,14 @@ const ProductsPage = () => {
   
   // Apply filters to products
   const applyFilters = () => {
+    console.log("Applying filters with:", { 
+      searchQuery, 
+      priceRange, 
+      selectedCategories, 
+      selectedConcerns, 
+      sortBy 
+    });
+    
     let results = [...allProducts];
     
     // Filter by search query
@@ -111,8 +119,14 @@ const ProductsPage = () => {
         results.sort((a, b) => (b.isBestseller ? 1 : 0) - (a.isBestseller ? 1 : 0));
     }
     
+    console.log(`Found ${results.length} products after filtering`);
     setFilteredProducts(results);
   };
+
+  // Apply filters whenever any filter value changes
+  useEffect(() => {
+    applyFilters();
+  }, [sortBy]); // Only auto-apply when sort changes
   
   return (
     <div className="min-h-screen bg-white">
