@@ -5,7 +5,10 @@ import { Link } from "react-router-dom";
 const Footer = () => {
   // Function to scroll to top when navigating
   const scrollToTop = () => {
-    window.scrollTo(0, 0);
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
   };
   
   return (

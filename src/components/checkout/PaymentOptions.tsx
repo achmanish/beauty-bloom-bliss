@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { PaymentService } from '@/services/PaymentService';
-import { useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { useLanguage } from '../LanguageSelector';
 
 // Add these translations to your LanguageSelector.tsx translations object
@@ -25,7 +25,6 @@ const PaymentOptions = ({ orderId, amount, onPaymentComplete }: PaymentOptionsPr
   const [selectedMethod, setSelectedMethod] = useState<'esewa' | 'khalti' | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const { toast } = useToast();
-  const navigate = useNavigate();
   const { translate } = useLanguage();
 
   // This is a mock function for the Khalti SDK integration
@@ -164,7 +163,12 @@ const PaymentOptions = ({ orderId, amount, onPaymentComplete }: PaymentOptionsPr
         disabled={!selectedMethod || isProcessing}
         onClick={handlePayNow}
       >
-        {isProcessing ? translate('processingPayment') : translate('payNow')}
+        {isProcessing ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            {translate('processingPayment')}
+          </>
+        ) : translate('payNow')}
       </Button>
     </div>
   );

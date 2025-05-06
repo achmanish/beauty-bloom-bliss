@@ -13,7 +13,6 @@ import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 
 const Cart = () => {
-  // Replace cartItems with cart from useCart
   const { cart, updateQuantity, removeFromCart, clearCart, isLoading, syncCart, cartTotal } = useCart();
   const { isLoggedIn } = useAuth();
   const [promoCode, setPromoCode] = useState("");
@@ -105,17 +104,18 @@ const Cart = () => {
             <div className="lg:col-span-2">
               <div className="bg-white rounded-lg">
                 <div className="hidden md:grid grid-cols-12 gap-4 px-4 py-2 bg-cream text-gray-600 font-medium rounded-t-lg">
-                  <div className="col-span-6">Product</div>
+                  <div className="col-span-5">Product</div>
                   <div className="col-span-2 text-center">Price</div>
                   <div className="col-span-2 text-center">Quantity</div>
                   <div className="col-span-2 text-center">Total</div>
+                  <div className="col-span-1 text-center">Action</div>
                 </div>
                 
                 {cart.map((item) => (
                   <div key={item.id} className="border-b last:border-b-0">
                     <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-4 items-center">
                       {/* Product */}
-                      <div className="col-span-6 flex items-center">
+                      <div className="col-span-5 flex items-center">
                         <div className="w-20 h-20 rounded-md overflow-hidden flex-shrink-0 mr-4">
                           <img 
                             src={item.product?.image_url} 
@@ -145,6 +145,7 @@ const Cart = () => {
                             onClick={() => updateQuantity(item.product_id, item.quantity - 1)}
                             className="px-2 py-1 text-gray-600 hover:bg-gray-100"
                             aria-label="Decrease quantity"
+                            disabled={item.quantity <= 1}
                           >
                             <Minus className="w-3 h-3" />
                           </button>
@@ -159,17 +160,22 @@ const Cart = () => {
                         </div>
                       </div>
                       
-                      {/* Total and Remove button */}
-                      <div className="md:col-span-2 md:text-center flex justify-between items-center w-full">
+                      {/* Total */}
+                      <div className="md:col-span-2 md:text-center flex justify-between items-center">
                         <span className="md:hidden">Total:</span>
                         <span className="font-medium">
                           ${((item.product?.price || 0) * item.quantity).toFixed(2)}
                         </span>
+                      </div>
+                      
+                      {/* Delete button - moved to its own column */}
+                      <div className="md:col-span-1 flex justify-end md:justify-center">
                         <Button 
                           onClick={() => handleRemoveItem(item.product_id)}
-                          className="ml-4 text-gray-400 hover:text-red-500 px-2 py-1 hover:bg-red-50 rounded"
+                          className="text-gray-400 hover:text-red-500 hover:bg-red-50 rounded"
                           variant="ghost"
                           size="sm"
+                          aria-label="Remove item"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -180,14 +186,14 @@ const Cart = () => {
                 
                 {/* Continue Shopping */}
                 <div className="pt-6 pb-4 flex justify-between">
-                  <Link to="/products" className="text-burgundy hover:underline flex items-center" onClick={() => window.scrollTo(0, 0)}>
+                  <Link to="/products" className="text-burgundy hover:underline flex items-center" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
                     ← Continue Shopping
                   </Link>
                   <Button 
                     variant="outline" 
                     className="border-red-300 text-red-500 hover:bg-red-50"
                     onClick={() => {
-                      if (confirm("Are you sure you want to clear your cart?")) {
+                      if (window.confirm("Are you sure you want to clear your cart?")) {
                         clearCart();
                         toast.success("Cart cleared");
                       }
@@ -253,7 +259,7 @@ const Cart = () => {
                 </div>
                 
                 {/* Checkout Button */}
-                <Link to="/checkout" onClick={() => window.scrollTo(0, 0)}>
+                <Link to="/checkout" onClick={() => window.scrollTo({top: 0, behavior: 'smooth'})}>
                   <Button className="w-full bg-burgundy hover:bg-burgundy-light text-white">
                     Proceed to Checkout
                   </Button>
