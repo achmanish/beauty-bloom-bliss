@@ -1,45 +1,17 @@
 
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Check, Package, Truck, Calendar } from "lucide-react";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import Navbar from "@/components/Navbar";
-import Footer from "@/components/Footer";
 import Products from "@/components/Products";
-
-// Define interfaces to type our data
-interface OrderItem {
-  id: string; // Changed from number to string to match Supabase UUID
-  name: string;
-  price: number;
-  quantity: number;
-  size: string;
-  image: string;
-}
-
-interface ShippingAddress {
-  name: string;
-  address: string;
-  city: string;
-  state: string;
-  zip: string;
-  country: string;
-}
-
-interface OrderDetails {
-  orderNumber: string;
-  date: string;
-  expectedDelivery: string;
-  items: OrderItem[];
-  subtotal: number;
-  shipping: number;
-  tax: number;
-  total: number;
-  shippingAddress: ShippingAddress;
-  paymentMethod: string;
-}
+import OrderConfirmationLayout from "@/components/order/OrderConfirmationLayout";
+import OrderConfirmationHero from "@/components/order/OrderConfirmationHero";
+import OrderProgress from "@/components/order/OrderProgress";
+import OrderActions from "@/components/order/OrderActions";
+import OrderSummary from "@/components/order/OrderSummary";
+import OrderAddressInfo from "@/components/order/OrderAddressInfo";
+import OrderTotalCard from "@/components/order/OrderTotalCard";
+import { OrderDetails, getMockOrderDetails, calculateExpectedDelivery } from "@/utils/orderUtils";
 
 const OrderConfirmation = () => {
   const location = useLocation();
@@ -127,20 +99,8 @@ const OrderConfirmation = () => {
           day: 'numeric'
         });
         
-        // Calculate expected delivery (5-7 days from order date)
-        const deliveryDate = new Date(orderDate);
-        deliveryDate.setDate(deliveryDate.getDate() + 5);
-        const deliveryEndDate = new Date(orderDate);
-        deliveryEndDate.setDate(deliveryEndDate.getDate() + 7);
-        
-        const expectedDelivery = `${deliveryDate.toLocaleDateString('en-US', {
-          month: 'long',
-          day: 'numeric'
-        })} - ${deliveryEndDate.toLocaleDateString('en-US', {
-          month: 'long',
-          day: 'numeric',
-          year: 'numeric'
-        })}`;
+        // Calculate expected delivery
+        const expectedDelivery = calculateExpectedDelivery(orderDate);
         
         setOrderDetails({
           orderNumber: orderId.substring(0, 8),
@@ -170,46 +130,6 @@ const OrderConfirmation = () => {
     navigate('/account', { state: { activeTab: 'orders' } });
   };
   
-  // Mock order details for development or fallback
-  const getMockOrderDetails = (): OrderDetails => {
-    return {
-      orderNumber: "ORD-65432",
-      date: "April 15, 2023",
-      expectedDelivery: "April 20-23, 2023",
-      items: [
-        {
-          id: "1", // Changed from number to string to match the interface
-          name: "Rose Glow Serum",
-          price: 89,
-          quantity: 2,
-          size: "30ml",
-          image: "https://images.unsplash.com/photo-1571875257727-256c39da42af?auto=format&fit=crop&w=800&q=80"
-        },
-        {
-          id: "2", // Changed from number to string to match the interface
-          name: "Hydrating Cream",
-          price: 65,
-          quantity: 1,
-          size: "50ml",
-          image: "https://images.unsplash.com/photo-1570194065650-d707c41c4754?auto=format&fit=crop&w=800&q=80"
-        }
-      ],
-      subtotal: 243,
-      shipping: 0,
-      tax: 19.44,
-      total: 262.44,
-      shippingAddress: {
-        name: "Emma Wilson",
-        address: "123 Beauty Street",
-        city: "Los Angeles",
-        state: "CA",
-        zip: "90001",
-        country: "United States"
-      },
-      paymentMethod: "Credit Card (ending in 4242)"
-    };
-  };
-  
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
@@ -220,8 +140,7 @@ const OrderConfirmation = () => {
   
   if (!orderDetails) {
     return (
-      <div className="min-h-screen bg-white">
-        <Navbar />
+      <OrderConfirmationLayout>
         <div className="container mx-auto px-4 py-16 text-center">
           <h1 className="font-playfair text-3xl text-burgundy mb-4">Order Not Found</h1>
           <p className="text-gray-600 mb-6">
@@ -234,184 +153,45 @@ const OrderConfirmation = () => {
             Continue Shopping
           </Button>
         </div>
-        <Footer />
-      </div>
+      </OrderConfirmationLayout>
     );
   }
   
   return (
-    <div className="min-h-screen bg-white">
-      <Navbar />
-      
-      <div className="bg-cream py-16">
-        <div className="container mx-auto px-4 text-center">
-          <div className="bg-burgundy text-white rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-6">
-            <Check className="h-8 w-8" />
-          </div>
-          <h1 className="font-playfair text-4xl md:text-5xl text-burgundy mb-4">
-            Thank You for Your Order!
-          </h1>
-          <p className="text-gray-600 max-w-2xl mx-auto mb-4">
-            Your order has been received and is now being processed.
-            You will receive a confirmation email shortly.
-          </p>
-          <p className="font-medium">
-            Order Number: <span className="text-burgundy">{orderDetails.orderNumber}</span>
-          </p>
-        </div>
-      </div>
+    <OrderConfirmationLayout>
+      <OrderConfirmationHero orderNumber={orderDetails.orderNumber} />
       
       <div className="container mx-auto px-4 py-10">
         {/* Order Progress */}
         <div className="mb-12">
-          <div className="flex justify-between max-w-3xl mx-auto mb-4">
-            <div className="text-center">
-              <div className="bg-burgundy text-white rounded-full h-12 w-12 flex items-center justify-center mx-auto mb-2">
-                <Check className="h-6 w-6" />
-              </div>
-              <p className="text-sm font-medium">Order Placed</p>
-              <p className="text-xs text-gray-500">{orderDetails.date}</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="bg-burgundy text-white rounded-full h-12 w-12 flex items-center justify-center mx-auto mb-2">
-                <Package className="h-6 w-6" />
-              </div>
-              <p className="text-sm font-medium">Processing</p>
-              <p className="text-xs text-gray-500">In progress</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="bg-gray-200 text-gray-400 rounded-full h-12 w-12 flex items-center justify-center mx-auto mb-2">
-                <Truck className="h-6 w-6" />
-              </div>
-              <p className="text-sm text-gray-400">Shipped</p>
-              <p className="text-xs text-gray-500">Pending</p>
-            </div>
-            
-            <div className="text-center">
-              <div className="bg-gray-200 text-gray-400 rounded-full h-12 w-12 flex items-center justify-center mx-auto mb-2">
-                <Calendar className="h-6 w-6" />
-              </div>
-              <p className="text-sm text-gray-400">Delivered</p>
-              <p className="text-xs text-gray-500">Estimated: {orderDetails.expectedDelivery}</p>
-            </div>
-          </div>
+          <OrderProgress 
+            orderDate={orderDetails.date} 
+            expectedDelivery={orderDetails.expectedDelivery}
+          />
           
-          <div className="flex justify-center">
-            <div className="flex space-x-4 mt-6">
-              <Button 
-                variant="outline" 
-                className="border-burgundy text-burgundy hover:bg-burgundy hover:text-white"
-                onClick={handleViewOrderDetails}
-              >
-                View Order Details
-              </Button>
-              <Link to="/products">
-                <Button className="bg-burgundy hover:bg-burgundy-light text-white">
-                  Continue Shopping
-                </Button>
-              </Link>
-            </div>
-          </div>
+          <OrderActions onViewOrderDetails={handleViewOrderDetails} />
         </div>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* Order Summary */}
           <div className="lg:col-span-2">
-            <div className="bg-white p-6 rounded-lg border mb-6">
-              <h2 className="font-playfair text-2xl mb-6">Order Summary</h2>
-              
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-cream text-burgundy">
-                    <tr>
-                      <th className="px-4 py-3 text-left">Product</th>
-                      <th className="px-4 py-3 text-center">Quantity</th>
-                      <th className="px-4 py-3 text-right">Price</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {orderDetails.items.map((item) => (
-                      <tr key={item.id} className="border-b">
-                        <td className="px-4 py-4">
-                          <div className="flex items-center">
-                            <div className="w-16 h-16 rounded-md overflow-hidden flex-shrink-0 mr-4">
-                              <img 
-                                src={item.image} 
-                                alt={item.name} 
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                            <div>
-                              <h4 className="font-medium">{item.name}</h4>
-                              <p className="text-sm text-gray-500">Size: {item.size}</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-4 text-center">{item.quantity}</td>
-                        <td className="px-4 py-4 text-right">${(item.price * item.quantity).toFixed(2)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <OrderSummary items={orderDetails.items} />
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-white p-6 rounded-lg border">
-                <h3 className="font-medium text-lg mb-4">Shipping Address</h3>
-                <p className="mb-1">{orderDetails.shippingAddress.name}</p>
-                <p className="mb-1">{orderDetails.shippingAddress.address}</p>
-                <p className="mb-1">
-                  {orderDetails.shippingAddress.city}, {orderDetails.shippingAddress.state} {orderDetails.shippingAddress.zip}
-                </p>
-                <p>{orderDetails.shippingAddress.country}</p>
-              </div>
-              
-              <div className="bg-white p-6 rounded-lg border">
-                <h3 className="font-medium text-lg mb-4">Payment Information</h3>
-                <p className="mb-1">Payment Method: {orderDetails.paymentMethod}</p>
-                <p>Order Date: {orderDetails.date}</p>
-              </div>
-            </div>
+            <OrderAddressInfo 
+              shippingAddress={orderDetails.shippingAddress} 
+              paymentMethod={orderDetails.paymentMethod}
+              orderDate={orderDetails.date}
+            />
           </div>
           
           {/* Price Breakdown */}
           <div className="lg:col-span-1">
-            <div className="bg-cream p-6 rounded-lg sticky top-24">
-              <h2 className="font-playfair text-xl mb-6">Order Total</h2>
-              
-              <div className="space-y-3 mb-6">
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Subtotal</span>
-                  <span>${orderDetails.subtotal.toFixed(2)}</span>
-                </div>
-                
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Shipping</span>
-                  <span>{orderDetails.shipping === 0 ? "Free" : `$${orderDetails.shipping.toFixed(2)}`}</span>
-                </div>
-                
-                <div className="flex justify-between">
-                  <span className="text-gray-600">Tax</span>
-                  <span>${orderDetails.tax.toFixed(2)}</span>
-                </div>
-                
-                <Separator />
-                
-                <div className="flex justify-between font-medium text-lg">
-                  <span>Total</span>
-                  <span className="text-burgundy">${orderDetails.total.toFixed(2)}</span>
-                </div>
-              </div>
-              
-              <div className="text-sm text-gray-600 bg-white p-3 rounded-lg">
-                <p>
-                  Need help? <Link to="/contact" className="text-burgundy hover:underline">Contact our support team</Link> or call us at (800) 123-4567.
-                </p>
-              </div>
-            </div>
+            <OrderTotalCard 
+              subtotal={orderDetails.subtotal}
+              shipping={orderDetails.shipping}
+              tax={orderDetails.tax}
+              total={orderDetails.total}
+            />
           </div>
         </div>
         
@@ -421,9 +201,7 @@ const OrderConfirmation = () => {
           <Products />
         </section>
       </div>
-      
-      <Footer />
-    </div>
+    </OrderConfirmationLayout>
   );
 };
 
