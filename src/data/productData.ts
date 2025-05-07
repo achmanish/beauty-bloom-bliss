@@ -65,10 +65,11 @@ const skincareProducts: Product[] = [
     price: 24900,
     rating: 4.7,
     reviews: 723,
-    image: "https://images.mamaearth.in/catalog/product/t/e/tea-tree-face-wash.jpg",
+    image: "public/lovable-uploads/57d23384-b663-4f17-b091-e7c04987b7bf.png", // Updated image
     category: CATEGORIES.SKINCARE,
     isNew: false,
-    tags: ["face wash", "tea tree", TAGS.ACNE]
+    tags: ["face wash", "tea tree", TAGS.ACNE],
+    description: "This clarifying Tea Tree Face Wash helps combat acne and excess oil while refreshing the skin. Formulated with pure tea tree oil known for its antibacterial properties."
   },
   {
     id: 5,
@@ -197,10 +198,11 @@ const haircareProducts: Product[] = [
     price: 34900,
     rating: 4.6,
     reviews: 1432,
-    image: "https://images.mamaearth.in/catalog/product/r/i/rice-shampoo-1.jpg",
+    image: "public/lovable-uploads/79a758c7-5806-43ac-8be1-63521a0a680c.png", // Updated image
     category: CATEGORIES.HAIRCARE,
     isNew: false,
-    tags: ["shampoo", "rice water", "strengthening"]
+    tags: ["shampoo", "rice water", "strengthening"],
+    description: "This nourishing Rice Water Shampoo is inspired by traditional Asian hair care rituals. Helps strengthen hair, reduce breakage, and add shine with the power of fermented rice water."
   },
   {
     id: 9,
@@ -208,10 +210,11 @@ const haircareProducts: Product[] = [
     price: 39900,
     rating: 4.7,
     reviews: 1034,
-    image: "https://images.mamaearth.in/catalog/product/b/h/bhringraj-1.jpg",
+    image: "public/lovable-uploads/893856d7-52ff-4c94-98bc-a9d4215cbb56.png", // Updated image
     category: CATEGORIES.HAIRCARE,
     isNew: true,
-    tags: ["hair oil", "bhringraj", "hair growth"]
+    tags: ["hair oil", "bhringraj", "hair growth"],
+    description: "Our traditional Bhringraj Hair Oil is formulated with the powerful herb known for promoting hair growth and preventing premature graying. Regular use helps strengthen hair from the roots."
   },
   {
     id: 14,
@@ -328,6 +331,18 @@ const bodycareProducts: Product[] = [
     category: CATEGORIES.BODYCARE,
     isNew: false,
     tags: ["underarm scrub", TAGS.VITAMIN_C, TAGS.BRIGHTENING]
+  },
+  {
+    id: 26,
+    name: "Haldi Gel Indian Sunscreen SPF 50", 
+    price: 44900,
+    rating: 4.8,
+    reviews: 875,
+    image: "public/lovable-uploads/7605e756-bd8f-445e-b1b6-c3c78babb515.png", // New image 
+    category: CATEGORIES.BODYCARE, 
+    isNew: true,
+    tags: ["sunscreen", "spf 50", "turmeric"],
+    description: "Our Haldi Gel Indian Sunscreen offers broad-spectrum SPF 50 protection against harmful UVA and UVB rays. Enriched with turmeric and other natural ingredients to protect and nourish skin."
   }
 ];
 
