@@ -11,7 +11,7 @@ import Products from "@/components/Products";
 
 // Define interfaces to type our data
 interface OrderItem {
-  id: number;
+  id: string; // Changed from number to string to match Supabase UUID
   name: string;
   price: number;
   quantity: number;
@@ -96,7 +96,7 @@ const OrderConfirmation = () => {
           
         // Format the order details
         const items = orderItemsData.map(item => ({
-          id: item.id,
+          id: item.id, // This is a string from Supabase UUID
           name: item.products.name,
           price: parseFloat(item.price_at_time),
           quantity: item.quantity,
@@ -178,7 +178,7 @@ const OrderConfirmation = () => {
       expectedDelivery: "April 20-23, 2023",
       items: [
         {
-          id: 1,
+          id: "1", // Changed from number to string to match the interface
           name: "Rose Glow Serum",
           price: 89,
           quantity: 2,
@@ -186,7 +186,7 @@ const OrderConfirmation = () => {
           image: "https://images.unsplash.com/photo-1571875257727-256c39da42af?auto=format&fit=crop&w=800&q=80"
         },
         {
-          id: 2,
+          id: "2", // Changed from number to string to match the interface
           name: "Hydrating Cream",
           price: 65,
           quantity: 1,
