@@ -96,7 +96,7 @@ const OrderConfirmation = () => {
           
         // Format the order details
         const items = orderItemsData.map(item => ({
-          id: item.id, // This is a string from Supabase UUID
+          id: item.id.toString(), // Convert to string to match the OrderItem interface
           name: item.products.name,
           price: parseFloat(item.price_at_time),
           quantity: item.quantity,
@@ -106,7 +106,7 @@ const OrderConfirmation = () => {
         
         const subtotal = items.reduce((total, item) => total + (item.price * item.quantity), 0);
         const tax = subtotal * 0.08; // Assuming 8% tax
-        const total = parseFloat(orderData.total_amount);
+        const total = parseFloat(orderData.total_amount.toString()); // Convert to string and back to number to ensure it's a number
         
         // Parse shipping address (stored as a string in format "name, address, city, zipCode")
         const addressParts = (orderData.shipping_address || "").split(',');
