@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Trash2, Plus, Minus, AlertTriangle, Wifi, WifiOff } from "lucide-react";
@@ -18,6 +17,23 @@ const Cart = () => {
   const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
   const [isOffline, setIsOffline] = useState(false);
+  
+  // Helper function to normalize image paths
+  const normalizeImagePath = (imagePath: string) => {
+    if (!imagePath) return '/placeholder.svg';
+    
+    // If the path is already a URL, return it as is
+    if (imagePath.startsWith('http')) {
+      return imagePath;
+    }
+    
+    // For local paths, ensure they are formatted correctly
+    if (imagePath.startsWith('public/')) {
+      return imagePath.replace('public/', '/');
+    }
+    
+    return imagePath;
+  };
   
   const shipping = cartTotal > 100 ? 0 : 10;
   const total = cartTotal + shipping - discount;
@@ -118,9 +134,12 @@ const Cart = () => {
                       <div className="col-span-5 flex items-center">
                         <div className="w-20 h-20 rounded-md overflow-hidden flex-shrink-0 mr-4">
                           <img 
-                            src={item.product?.image_url} 
+                            src={normalizeImagePath(item.product?.image_url)} 
                             alt={item.product?.name} 
                             className="w-full h-full object-cover"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/placeholder.svg';
+                            }}
                           />
                         </div>
                         <div className="flex-1">

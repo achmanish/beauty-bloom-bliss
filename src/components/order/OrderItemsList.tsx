@@ -15,6 +15,21 @@ interface OrderItemsListProps {
 }
 
 const OrderItemsList = ({ items }: OrderItemsListProps) => {
+  // Helper function to normalize image paths
+  const normalizeImagePath = (imagePath: string) => {
+    // If the path is already a URL, return it as is
+    if (imagePath.startsWith('http')) {
+      return imagePath;
+    }
+    
+    // For local paths, ensure they are formatted correctly
+    if (imagePath.startsWith('public/')) {
+      return imagePath.replace('public/', '/');
+    }
+    
+    return imagePath;
+  };
+  
   return (
     <div className="overflow-x-auto">
       <Table>
@@ -32,7 +47,7 @@ const OrderItemsList = ({ items }: OrderItemsListProps) => {
                 <div className="flex items-center">
                   <div className="w-16 h-16 rounded-md overflow-hidden flex-shrink-0 mr-4">
                     <img 
-                      src={item.image} 
+                      src={normalizeImagePath(item.image)} 
                       alt={item.name} 
                       className="w-full h-full object-cover"
                       onError={(e) => {

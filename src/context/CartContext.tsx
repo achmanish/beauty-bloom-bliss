@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "./AuthContext";
@@ -23,7 +22,9 @@ export interface CartItem {
 
 interface CartContextType {
   cartItems: CartItem[];
+  cart: CartItem[];
   cartCount: number;
+  cartTotal: number;
   addToCart: (product: CartProduct) => Promise<void>;
   removeFromCart: (productId: string) => Promise<void>;
   updateQuantity: (productId: string, quantity: number) => Promise<void>;
@@ -31,8 +32,6 @@ interface CartContextType {
   isLoading: boolean;
   syncCart: () => Promise<void>;
   updateCartCount: (count: number) => void;
-  cart: CartItem[];
-  cartTotal: number;
 }
 
 const CartContext = createContext<CartContextType>({
@@ -67,6 +66,23 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
   const cartTotal = cartItems.reduce((total, item) => {
     return total + ((item.product?.price || 0) * item.quantity);
   }, 0);
+
+  // Helper function to normalize image paths
+  const normalizeImagePath = (imagePath: string) => {
+    if (!imagePath) return '/placeholder.svg';
+    
+    // If the path is already a URL, return it as is
+    if (imagePath.startsWith('http')) {
+      return imagePath;
+    }
+    
+    // For local paths, ensure they are formatted correctly
+    if (imagePath.startsWith('public/')) {
+      return imagePath.replace('public/', '/');
+    }
+    
+    return imagePath;
+  };
 
   // Check network status
   useEffect(() => {
@@ -157,6 +173,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
         quantity: item.quantity,
         product: item.product ? {
           ...item.product,
+          image_url: normalizeImagePath(item.product.image_url),
           quantity: item.quantity
         } : {
           id: item.product_id,

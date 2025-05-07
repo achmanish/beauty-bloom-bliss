@@ -13,6 +13,23 @@ import OrderAddressInfo from "@/components/order/OrderAddressInfo";
 import OrderTotalCard from "@/components/order/OrderTotalCard";
 import { OrderDetails, getMockOrderDetails, calculateExpectedDelivery } from "@/utils/orderUtils";
 
+// Helper function to normalize image paths
+const normalizeImagePath = (imagePath: string) => {
+  if (!imagePath) return 'https://images.unsplash.com/photo-1571875257727-256c39da42af?auto=format&fit=crop&w=800&q=80';
+  
+  // If the path is already a URL, return it as is
+  if (imagePath.startsWith('http')) {
+    return imagePath;
+  }
+  
+  // For local paths, ensure they are formatted correctly
+  if (imagePath.startsWith('public/')) {
+    return imagePath.replace('public/', '/');
+  }
+  
+  return imagePath;
+};
+
 const OrderConfirmation = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -68,17 +85,17 @@ const OrderConfirmation = () => {
           
         // Format the order details
         const items = orderItemsData.map(item => ({
-          id: item.id.toString(), // Convert to string to match the OrderItem interface
+          id: String(item.id), // Convert to string to match the OrderItem interface
           name: item.products.name,
           price: parseFloat(item.price_at_time),
           quantity: item.quantity,
           size: '30ml', // Default size as it's not stored in DB
-          image: item.products.image_url || 'https://images.unsplash.com/photo-1571875257727-256c39da42af?auto=format&fit=crop&w=800&q=80'
+          image: normalizeImagePath(item.products.image_url || 'https://images.unsplash.com/photo-1571875257727-256c39da42af?auto=format&fit=crop&w=800&q=80')
         }));
         
         const subtotal = items.reduce((total, item) => total + (item.price * item.quantity), 0);
         const tax = subtotal * 0.08; // Assuming 8% tax
-        const total = parseFloat(orderData.total_amount.toString()); // Convert to string and back to number to ensure it's a number
+        const total = parseFloat(String(orderData.total_amount)); // Convert to string and back to number to ensure it's a number
         
         // Parse shipping address (stored as a string in format "name, address, city, zipCode")
         const addressParts = (orderData.shipping_address || "").split(',');
@@ -103,7 +120,7 @@ const OrderConfirmation = () => {
         const expectedDelivery = calculateExpectedDelivery(orderDate);
         
         setOrderDetails({
-          orderNumber: orderId.substring(0, 8),
+          orderNumber: String(orderId).substring(0, 8),
           date: formattedDate,
           expectedDelivery,
           items,
@@ -159,14 +176,14 @@ const OrderConfirmation = () => {
   
   return (
     <OrderConfirmationLayout>
-      <OrderConfirmationHero orderNumber={orderDetails.orderNumber} />
+      <OrderConfirmationHero orderNumber={orderDetails?.orderNumber || ''} />
       
       <div className="container mx-auto px-4 py-10">
         {/* Order Progress */}
         <div className="mb-12">
           <OrderProgress 
-            orderDate={orderDetails.date} 
-            expectedDelivery={orderDetails.expectedDelivery}
+            orderDate={orderDetails?.date || ''} 
+            expectedDelivery={orderDetails?.expectedDelivery || ''}
           />
           
           <OrderActions onViewOrderDetails={handleViewOrderDetails} />
@@ -175,23 +192,27 @@ const OrderConfirmation = () => {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
           {/* Order Summary */}
           <div className="lg:col-span-2">
-            <OrderSummary items={orderDetails.items} />
+            {orderDetails && <OrderSummary items={orderDetails.items} />}
             
-            <OrderAddressInfo 
-              shippingAddress={orderDetails.shippingAddress} 
-              paymentMethod={orderDetails.paymentMethod}
-              orderDate={orderDetails.date}
-            />
+            {orderDetails && (
+              <OrderAddressInfo 
+                shippingAddress={orderDetails.shippingAddress} 
+                paymentMethod={orderDetails.paymentMethod}
+                orderDate={orderDetails.date}
+              />
+            )}
           </div>
           
           {/* Price Breakdown */}
           <div className="lg:col-span-1">
-            <OrderTotalCard 
-              subtotal={orderDetails.subtotal}
-              shipping={orderDetails.shipping}
-              tax={orderDetails.tax}
-              total={orderDetails.total}
-            />
+            {orderDetails && (
+              <OrderTotalCard 
+                subtotal={orderDetails.subtotal}
+                shipping={orderDetails.shipping}
+                tax={orderDetails.tax}
+                total={orderDetails.total}
+              />
+            )}
           </div>
         </div>
         

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/context/CartContext';
@@ -148,6 +147,23 @@ const Checkout = () => {
         });
       }
     }
+  };
+
+  // Helper function to normalize image paths
+  const normalizeImagePath = (imagePath: string) => {
+    if (!imagePath) return '/placeholder.svg';
+    
+    // If the path is already a URL, return it as is
+    if (imagePath.startsWith('http')) {
+      return imagePath;
+    }
+    
+    // For local paths, ensure they are formatted correctly
+    if (imagePath.startsWith('public/')) {
+      return imagePath.replace('public/', '/');
+    }
+    
+    return imagePath;
   };
 
   if (cart.length === 0) {
@@ -322,9 +338,21 @@ const Checkout = () => {
               <div className="space-y-4">
                 {cart.map((item) => (
                   <div key={item.product.id} className="flex justify-between">
-                    <div>
-                      <p className="font-medium">{item.product.name}</p>
-                      <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                    <div className="flex items-center">
+                      <div className="w-12 h-12 rounded-md overflow-hidden flex-shrink-0 mr-3">
+                        <img 
+                          src={normalizeImagePath(item.product?.image_url)} 
+                          alt={item.product?.name} 
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/placeholder.svg';
+                          }}
+                        />
+                      </div>
+                      <div>
+                        <p className="font-medium">{item.product.name}</p>
+                        <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                      </div>
                     </div>
                     <p className="font-medium">
                       ₹{(Number(item.product.price) * item.quantity).toLocaleString('ne-NP')}
