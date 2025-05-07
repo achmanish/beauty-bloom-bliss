@@ -35,6 +35,9 @@ const OrderItemsList = ({ items }: OrderItemsListProps) => {
                       src={item.image} 
                       alt={item.name} 
                       className="w-full h-full object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1571875257727-256c39da42af?auto=format&fit=crop&w=800&q=80';
+                      }}
                     />
                   </div>
                   <div>

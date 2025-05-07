@@ -1,6 +1,7 @@
 
 import { Button } from "@/components/ui/button";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { ShoppingBag, FileText } from "lucide-react";
 
 interface OrderActionsProps {
   onViewOrderDetails: () => void;
@@ -15,10 +16,12 @@ const OrderActions = ({ onViewOrderDetails }: OrderActionsProps) => {
           className="border-burgundy text-burgundy hover:bg-burgundy hover:text-white transition-colors"
           onClick={onViewOrderDetails}
         >
+          <FileText className="mr-2 h-4 w-4" />
           View Order Details
         </Button>
         <Link to="/products">
           <Button className="bg-burgundy hover:bg-burgundy-light text-white transition-colors w-full sm:w-auto">
+            <ShoppingBag className="mr-2 h-4 w-4" />
             Continue Shopping
           </Button>
         </Link>

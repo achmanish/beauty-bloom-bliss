@@ -9,8 +9,8 @@ interface OrderSummaryProps {
 
 const OrderSummary = ({ items }: OrderSummaryProps) => {
   return (
-    <Card className="mb-6">
-      <CardHeader>
+    <Card className="mb-6 shadow-sm">
+      <CardHeader className="bg-cream/30">
         <CardTitle className="font-playfair text-2xl">Order Summary</CardTitle>
       </CardHeader>
       <CardContent>

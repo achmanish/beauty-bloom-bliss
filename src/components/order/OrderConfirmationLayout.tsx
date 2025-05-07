@@ -9,9 +9,9 @@ interface OrderConfirmationLayoutProps {
 
 const OrderConfirmationLayout = ({ children }: OrderConfirmationLayoutProps) => {
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white flex flex-col">
       <Navbar />
-      <div className="pt-4 pb-16">
+      <div className="flex-grow pt-4 pb-16">
         {children}
       </div>
       <Footer />
