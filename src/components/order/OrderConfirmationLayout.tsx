@@ -11,7 +11,9 @@ const OrderConfirmationLayout = ({ children }: OrderConfirmationLayoutProps) => 
   return (
     <div className="min-h-screen bg-white">
       <Navbar />
-      {children}
+      <div className="pt-4 pb-16">
+        {children}
+      </div>
       <Footer />
     </div>
   );

@@ -1,4 +1,3 @@
-
 export interface Product {
   id: number;
   name: string;
@@ -40,12 +39,13 @@ const skincareProducts: Product[] = [
     price: 59900,
     rating: 4.8,
     reviews: 1244,
-    image: "https://images.mamaearth.in/catalog/product/v/i/vit-c-serum-1.jpg",
+    image: "public/lovable-uploads/7d9f1d74-dfc5-43d3-a3e6-3f4ec560c23c.png",
     badgeText: "Bestseller",
     category: CATEGORIES.SKINCARE,
     isNew: false,
     isBestseller: true,
-    tags: [TAGS.VITAMIN_C, "serum", TAGS.BRIGHTENING]
+    tags: [TAGS.VITAMIN_C, "serum", TAGS.BRIGHTENING],
+    description: "Our potent Vitamin C Face Serum brightens skin, reduces dark spots, and boosts collagen production for a radiant complexion. Formulated with 10% pure Vitamin C to target hyperpigmentation and fine lines."
   },
   {
     id: 2,
@@ -53,10 +53,11 @@ const skincareProducts: Product[] = [
     price: 25900,
     rating: 4.7,
     reviews: 892,
-    image: "https://images.mamaearth.in/catalog/product/u/b/ubtan-face-wash_1.jpg",
+    image: "public/lovable-uploads/038a603f-3890-46c9-9c06-b2895650ba74.png",
     category: CATEGORIES.SKINCARE,
     isNew: true,
-    tags: ["face wash", "ubtan", TAGS.BRIGHTENING]
+    tags: ["face wash", "ubtan", TAGS.BRIGHTENING],
+    description: "Our traditional Ubtan Face Wash combines turmeric, saffron and other natural ingredients to brighten skin, remove tan, and provide a natural glow. Gentle enough for daily use."
   },
   {
     id: 4,
@@ -75,12 +76,13 @@ const skincareProducts: Product[] = [
     price: 29900,
     rating: 4.8,
     reviews: 1876,
-    image: "https://images.mamaearth.in/catalog/product/a/l/aloe-vera-gel-web-1.jpg",
+    image: "public/lovable-uploads/ddb12953-f6b2-4588-9c5d-6703ddc260e8.png",
     badgeText: "Bestseller",
-    category: CATEGORIES.SKINCARE,
+    category: CATEGORIES.BODYCARE,
     isNew: false,
     isBestseller: true,
-    tags: ["aloe vera", "gel", TAGS.HYDRATION]
+    tags: ["aloe vera", "gel", TAGS.HYDRATION],
+    description: "Our pure Aloe Vera Gel is a versatile hydrator perfect for skin, hair, and body. Soothes sunburns, moisturizes skin, and conditions hair. Contains 99% pure aloe vera for maximum benefits."
   },
   {
     id: 8,
@@ -182,11 +184,12 @@ const haircareProducts: Product[] = [
     price: 39900,
     rating: 4.9,
     reviews: 2156,
-    image: "https://images.mamaearth.in/catalog/product/o/n/onion-hair-oil-250ml.jpg",
+    image: "public/lovable-uploads/dfff6eca-b332-4c3d-b84f-42e46526f6c2.png",
     badgeText: "Limited",
     category: CATEGORIES.HAIRCARE,
     isNew: false,
-    tags: ["hair oil", "onion", "hair growth"]
+    tags: ["hair oil", "onion", "hair growth"],
+    description: "Our potent Onion Hair Oil strengthens hair from the roots, reduces hair fall, and promotes new growth. Enriched with onion extract, vitamins, and essential oils for healthier, fuller hair."
   },
   {
     id: 7,

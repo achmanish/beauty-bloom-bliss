@@ -204,6 +204,11 @@ const ProductDetail = () => {
                 src={product.image_url || 'https://via.placeholder.com/500'} 
                 alt={product.name} 
                 className="w-full h-full object-cover"
+                onError={(e) => {
+                  // If image fails to load, set a placeholder
+                  const target = e.target as HTMLImageElement;
+                  target.src = 'https://via.placeholder.com/500?text=Image+Not+Found';
+                }}
               />
             </div>
           </div>
