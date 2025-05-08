@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 export interface PaymentDetails {
   orderId: string;
   amount: number;
-  paymentMethod: 'esewa' | 'khalti';
+  paymentMethod: 'esewa' | 'khalti' | 'cod';
   paymentData: any;
 }
 
@@ -55,14 +55,27 @@ export class PaymentService {
         throw new Error("Missing payment details");
       }
 
+      // Determine payment status based on method
+      const status = paymentMethod === 'cod' ? 'pending' : 'successful';
+      
+      // Determine transaction ID based on payment method
+      let transactionId;
+      if (paymentMethod === 'khalti') {
+        transactionId = paymentData.idx;
+      } else if (paymentMethod === 'esewa') {
+        transactionId = paymentData.rid;
+      } else {
+        transactionId = `COD-${Date.now()}`;
+      }
+
       const { data, error } = await supabase
         .from('payments')
         .insert({
           order_id: orderId,
           amount,
           payment_method: paymentMethod,
-          status: 'successful',
-          transaction_id: paymentMethod === 'khalti' ? paymentData.idx : paymentData.rid,
+          status,
+          transaction_id: transactionId,
         })
         .select();
 

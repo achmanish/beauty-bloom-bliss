@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Select,
@@ -19,7 +18,7 @@ const PhoneInput = ({ value, onChange, required = false }: PhoneInputProps) => {
   const [countryCode, setCountryCode] = useState("+977"); // Default to Nepal
   const [phoneNumber, setPhoneNumber] = useState(value.replace(/^\+\d+\s/, ""));
 
-  // Sort country codes to prioritize Nepal at the top
+  // Sort country codes alphabetically but keep Nepal at top
   const sortedCountryCodes = [...countryCodes].sort((a, b) => {
     if (a.code === "NP") return -1; // Nepal first
     if (b.code === "NP") return 1;
