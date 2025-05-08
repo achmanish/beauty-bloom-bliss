@@ -1,4 +1,5 @@
-import { useState } from 'react';
+
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/context/CartContext';
 import { useToast } from '@/components/ui/use-toast';
@@ -10,7 +11,28 @@ import { Separator } from "@/components/ui/separator";
 import { useLanguage } from '@/components/LanguageSelector';
 import PaymentOptions from '@/components/checkout/PaymentOptions';
 import PhoneInput from '@/components/checkout/PhoneInput';
-import { Loader2 } from 'lucide-react';
+import { Loader2, AlertTriangle, CheckCircle } from 'lucide-react';
+import { isApprovedEmailProvider, getAllowedEmailProviders } from '@/utils/formValidation';
+import { Input } from "@/components/ui/input";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useForm } from 'react-hook-form';
+
+interface CheckoutFormData {
+  name: string;
+  email: string;
+  phone: string;
+  address: string;
+  city: string;
+  zipCode: string;
+  notes: string;
+}
 
 const Checkout = () => {
   const { cart, cartTotal, clearCart } = useCart();
@@ -21,29 +43,53 @@ const Checkout = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [currentStep, setCurrentStep] = useState<'details' | 'payment'>('details');
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [emailError, setEmailError] = useState("");
   
-  // Form state
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    address: '',
-    city: '',
-    zipCode: '',
-    notes: '',
+  // Initialize form with default values
+  const form = useForm<CheckoutFormData>({
+    defaultValues: {
+      name: '',
+      email: '',
+      phone: '+977 ',
+      address: '',
+      city: '',
+      zipCode: '',
+      notes: '',
+    },
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+  // Pre-fill form with user data if available
+  useEffect(() => {
+    if (user?.email) {
+      form.setValue('email', user.email);
+      validateEmail(user.email);
+    }
+  }, [user]);
+
+  const validateEmail = (email: string) => {
+    if (!email) {
+      setEmailError("Email is required");
+      return false;
+    }
+    
+    if (!isApprovedEmailProvider(email)) {
+      setEmailError(`Only ${getAllowedEmailProviders()} email addresses are allowed`);
+      return false;
+    }
+    
+    setEmailError("");
+    return true;
   };
 
   const handlePhoneChange = (value: string) => {
-    setFormData(prev => ({ ...prev, phone: value }));
+    form.setValue('phone', value);
   };
 
-  const handleSubmitDetails = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmitDetails = async (data: CheckoutFormData) => {
+    // Validate email again as a final check
+    if (!validateEmail(data.email)) {
+      return;
+    }
     
     if (!user) {
       toast({
@@ -69,7 +115,7 @@ const Checkout = () => {
     
     try {
       // Create a new order
-      const shippingAddress = `${formData.name}, ${formData.address}, ${formData.city}, ${formData.zipCode}`;
+      const shippingAddress = `${data.name}, ${data.address}, ${data.city}, ${data.zipCode}`;
       
       const { data: orderData, error: orderError } = await supabase
         .from('orders')
@@ -98,7 +144,8 @@ const Checkout = () => {
       
       if (itemsError) throw itemsError;
       
-      setOrderId(orderData.id);
+      // Convert orderId to string to avoid type error
+      setOrderId(String(orderData.id));
       setCurrentStep('payment');
       
       toast({
@@ -187,136 +234,146 @@ const Checkout = () => {
         {/* Main Content */}
         <div className="lg:col-span-2 space-y-8">
           {currentStep === 'details' ? (
-            <Card>
+            <Card className="shadow-md">
               <CardContent className="pt-6">
-                <h2 className="text-xl font-semibold mb-4">{translate('shippingDetails')}</h2>
+                <h2 className="text-xl font-semibold mb-6 flex items-center">
+                  <span className="bg-burgundy text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">1</span>
+                  {translate('shippingDetails')}
+                </h2>
                 
-                <form onSubmit={handleSubmitDetails} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(handleSubmitDetails)} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormItem>
+                        <FormLabel>
+                          {translate('fullName')}*
+                        </FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Enter your full name"
+                            {...form.register('name', { required: true })}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                      
+                      <div className="space-y-2">
+                        <FormItem className="space-y-1">
+                          <FormLabel>
+                            {translate('email')}*
+                          </FormLabel>
+                          <Input
+                            type="email" 
+                            placeholder="yourname@example.com"
+                            {...form.register('email')}
+                            onChange={(e) => {
+                              form.setValue('email', e.target.value);
+                              validateEmail(e.target.value);
+                            }}
+                            className={emailError ? "border-red-500" : ""}
+                          />
+                          {emailError ? (
+                            <div className="text-red-500 text-sm mt-1 flex items-center">
+                              <AlertTriangle className="h-4 w-4 mr-1" />
+                              {emailError}
+                            </div>
+                          ) : form.watch('email') && !emailError ? (
+                            <div className="text-green-600 text-sm mt-1 flex items-center">
+                              <CheckCircle className="h-4 w-4 mr-1" />
+                              Valid email
+                            </div>
+                          ) : null}
+                          <div className="text-xs text-gray-500">
+                            Only Gmail, Yahoo, Microsoft or Apple email addresses are allowed
+                          </div>
+                        </FormItem>
+                      </div>
+                    </div>
+                    
                     <div className="space-y-2">
-                      <label htmlFor="name" className="block text-sm font-medium">
-                        {translate('fullName')}*
+                      <label className="block text-sm font-medium mb-1">
+                        {translate('phone')}*
                       </label>
-                      <input
-                        id="name"
-                        name="name"
-                        type="text"
-                        required
-                        className="w-full p-2 border rounded-md"
-                        value={formData.name}
-                        onChange={handleInputChange}
+                      <PhoneInput 
+                        value={form.watch('phone')}
+                        onChange={handlePhoneChange}
+                        required 
                       />
                     </div>
                     
                     <div className="space-y-2">
-                      <label htmlFor="email" className="block text-sm font-medium">
-                        {translate('email')}*
-                      </label>
-                      <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        required
-                        className="w-full p-2 border rounded-md"
-                        value={formData.email}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label htmlFor="phone" className="block text-sm font-medium">
-                      {translate('phone')}*
-                    </label>
-                    <PhoneInput 
-                      value={formData.phone}
-                      onChange={handlePhoneChange}
-                      required 
-                    />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label htmlFor="address" className="block text-sm font-medium">
-                      {translate('address')}*
-                    </label>
-                    <input
-                      id="address"
-                      name="address"
-                      type="text"
-                      required
-                      className="w-full p-2 border rounded-md"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <label htmlFor="city" className="block text-sm font-medium">
-                        {translate('city')}*
-                      </label>
-                      <input
-                        id="city"
-                        name="city"
-                        type="text"
-                        required
-                        className="w-full p-2 border rounded-md"
-                        value={formData.city}
-                        onChange={handleInputChange}
+                      <FormLabel htmlFor="address" className="block text-sm font-medium">
+                        {translate('address')}*
+                      </FormLabel>
+                      <Input
+                        id="address"
+                        placeholder="Street address, apartment, suite"
+                        {...form.register('address', { required: true })}
                       />
                     </div>
                     
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <FormLabel htmlFor="city" className="block text-sm font-medium">
+                          {translate('city')}*
+                        </FormLabel>
+                        <Input
+                          id="city"
+                          placeholder="City name"
+                          {...form.register('city', { required: true })}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <FormLabel htmlFor="zipCode" className="block text-sm font-medium">
+                          {translate('zipCode')}*
+                        </FormLabel>
+                        <Input
+                          id="zipCode"
+                          placeholder="Postal/ZIP code"
+                          {...form.register('zipCode', { required: true })}
+                        />
+                      </div>
+                    </div>
+                    
                     <div className="space-y-2">
-                      <label htmlFor="zipCode" className="block text-sm font-medium">
-                        {translate('zipCode')}*
-                      </label>
-                      <input
-                        id="zipCode"
-                        name="zipCode"
-                        type="text"
-                        required
+                      <FormLabel htmlFor="notes" className="block text-sm font-medium">
+                        {translate('orderNotes')}
+                      </FormLabel>
+                      <textarea
+                        id="notes"
+                        rows={3}
                         className="w-full p-2 border rounded-md"
-                        value={formData.zipCode}
-                        onChange={handleInputChange}
+                        placeholder="Special instructions for delivery"
+                        {...form.register('notes')}
                       />
                     </div>
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <label htmlFor="notes" className="block text-sm font-medium">
-                      {translate('orderNotes')}
-                    </label>
-                    <textarea
-                      id="notes"
-                      name="notes"
-                      rows={3}
-                      className="w-full p-2 border rounded-md"
-                      value={formData.notes}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-                  
-                  <Button 
-                    type="submit" 
-                    className="w-full mt-6 bg-burgundy hover:bg-burgundy-light"
-                    disabled={isProcessing}
-                  >
-                    {isProcessing ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {translate('processing')}
-                      </>
-                    ) : (
-                      translate('continueToPayment')
-                    )}
-                  </Button>
-                </form>
+                    
+                    <Button 
+                      type="submit" 
+                      className="w-full mt-6 bg-burgundy hover:bg-burgundy-light"
+                      disabled={isProcessing || !!emailError}
+                    >
+                      {isProcessing ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          {translate('processing')}
+                        </>
+                      ) : (
+                        translate('continueToPayment')
+                      )}
+                    </Button>
+                  </form>
+                </Form>
               </CardContent>
             </Card>
           ) : (
-            <Card>
+            <Card className="shadow-md">
               <CardContent className="pt-6">
-                <h2 className="text-xl font-semibold mb-4">{translate('payment')}</h2>
+                <h2 className="text-xl font-semibold mb-4 flex items-center">
+                  <span className="bg-burgundy text-white rounded-full w-6 h-6 inline-flex items-center justify-center mr-2">2</span>
+                  {translate('payment')}
+                </h2>
                 {orderId && (
                   <PaymentOptions 
                     orderId={orderId} 
@@ -331,7 +388,7 @@ const Checkout = () => {
         
         {/* Order Summary */}
         <div className="lg:col-span-1">
-          <Card>
+          <Card className="shadow-md sticky top-4">
             <CardContent className="pt-6">
               <h2 className="text-xl font-semibold mb-4">{translate('orderSummary')}</h2>
               

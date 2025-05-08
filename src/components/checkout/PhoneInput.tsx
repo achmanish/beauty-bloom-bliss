@@ -16,8 +16,15 @@ interface PhoneInputProps {
 }
 
 const PhoneInput = ({ value, onChange, required = false }: PhoneInputProps) => {
-  const [countryCode, setCountryCode] = useState("+1"); // Default to US
+  const [countryCode, setCountryCode] = useState("+977"); // Default to Nepal
   const [phoneNumber, setPhoneNumber] = useState(value.replace(/^\+\d+\s/, ""));
+
+  // Sort country codes to prioritize Nepal at the top
+  const sortedCountryCodes = [...countryCodes].sort((a, b) => {
+    if (a.code === "NP") return -1; // Nepal first
+    if (b.code === "NP") return 1;
+    return a.name.localeCompare(b.name); // Alphabetical for the rest
+  });
 
   const handleCountryCodeChange = (newCode: string) => {
     setCountryCode(newCode);
@@ -35,15 +42,18 @@ const PhoneInput = ({ value, onChange, required = false }: PhoneInputProps) => {
 
   return (
     <div className="flex gap-2">
-      <div className="w-24 flex-shrink-0">
+      <div className="w-28 flex-shrink-0">
         <Select value={countryCode} onValueChange={handleCountryCodeChange}>
           <SelectTrigger className="w-full">
             <SelectValue placeholder={countryCode} />
           </SelectTrigger>
-          <SelectContent className="max-h-[200px]">
-            {countryCodes.map((country) => (
+          <SelectContent className="max-h-[200px] overflow-y-auto">
+            {sortedCountryCodes.map((country) => (
               <SelectItem key={country.code} value={country.dial_code}>
-                {country.dial_code}
+                <div className="flex items-center gap-2">
+                  <span>{country.dial_code}</span>
+                  <span className="text-gray-500 text-xs">({country.name})</span>
+                </div>
               </SelectItem>
             ))}
           </SelectContent>

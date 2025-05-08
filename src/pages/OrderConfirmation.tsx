@@ -17,6 +17,7 @@ const OrderConfirmation = () => {
   const navigate = useNavigate();
   
   // Extract orderId from location state or fall back to mock data
+  // Ensure orderId is a string to avoid type errors
   const orderId = location.state?.orderId ? String(location.state.orderId) : undefined;
   
   // Use our custom hook to fetch and manage order details

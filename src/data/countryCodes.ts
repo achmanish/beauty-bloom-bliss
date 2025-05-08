@@ -1,5 +1,6 @@
 
 export const countryCodes = [
+  { name: "Nepal", code: "NP", dial_code: "+977" }, // Added Nepal at the top
   { name: "United States", code: "US", dial_code: "+1" },
   { name: "United Kingdom", code: "GB", dial_code: "+44" },
   { name: "India", code: "IN", dial_code: "+91" },
