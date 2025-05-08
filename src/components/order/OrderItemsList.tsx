@@ -1,12 +1,13 @@
 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { formatNepaliCurrency } from "@/utils/currencyUtils";
 
 export interface OrderItem {
   id: string;
   name: string;
   price: number;
   quantity: number;
-  size: string;
+  size?: string;
   image: string;
 }
 
@@ -57,12 +58,12 @@ const OrderItemsList = ({ items }: OrderItemsListProps) => {
                   </div>
                   <div>
                     <h4 className="font-medium">{item.name}</h4>
-                    <p className="text-sm text-gray-500">Size: {item.size}</p>
+                    {item.size && <p className="text-sm text-gray-500">Size: {item.size}</p>}
                   </div>
                 </div>
               </TableCell>
               <TableCell className="px-4 py-4 text-center">{item.quantity}</TableCell>
-              <TableCell className="px-4 py-4 text-right">${(item.price * item.quantity).toFixed(2)}</TableCell>
+              <TableCell className="px-4 py-4 text-right">{formatNepaliCurrency(item.price * item.quantity)}</TableCell>
             </TableRow>
           ))}
         </TableBody>

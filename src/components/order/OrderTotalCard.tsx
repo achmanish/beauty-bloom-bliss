@@ -2,6 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Link } from "react-router-dom";
+import { formatNepaliCurrency } from "@/utils/currencyUtils";
 
 interface OrderTotalProps {
   subtotal: number;
@@ -20,24 +21,24 @@ const OrderTotalCard = ({ subtotal, shipping, tax, total }: OrderTotalProps) => 
         <div className="space-y-3 mb-6">
           <div className="flex justify-between">
             <span className="text-gray-600">Subtotal</span>
-            <span>₹{subtotal.toLocaleString('ne-NP')}</span>
+            <span>{formatNepaliCurrency(subtotal)}</span>
           </div>
           
           <div className="flex justify-between">
             <span className="text-gray-600">Shipping</span>
-            <span>{shipping === 0 ? "Free" : `₹${shipping.toLocaleString('ne-NP')}`}</span>
+            <span>{shipping === 0 ? "Free" : formatNepaliCurrency(shipping)}</span>
           </div>
           
           <div className="flex justify-between">
             <span className="text-gray-600">Tax</span>
-            <span>₹{tax.toLocaleString('ne-NP')}</span>
+            <span>{formatNepaliCurrency(tax)}</span>
           </div>
           
           <Separator />
           
           <div className="flex justify-between font-medium text-lg">
             <span>Total</span>
-            <span className="text-burgundy">₹{total.toLocaleString('ne-NP')}</span>
+            <span className="text-burgundy">{formatNepaliCurrency(total)}</span>
           </div>
         </div>
         
