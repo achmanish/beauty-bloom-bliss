@@ -120,7 +120,7 @@ const OrderConfirmation = () => {
         const expectedDelivery = calculateExpectedDelivery(orderDate);
         
         setOrderDetails({
-          orderNumber: String(orderId), // Convert to string - This fixes the TypeScript error
+          orderNumber: String(orderId), // Convert orderId to string - This fixes the TypeScript error
           date: formattedDate,
           expectedDelivery,
           items,
