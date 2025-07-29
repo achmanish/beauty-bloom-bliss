@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { toast } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,7 @@ import {
   TabsList, 
   TabsTrigger 
 } from "@/components/ui/tabs";
+import { Mail, Lock, User, Eye, EyeOff, Sparkles, CheckCircle } from "lucide-react";
 
 interface AuthFormsProps {
   activeTab: string;
@@ -22,6 +23,7 @@ const AuthForms = ({ activeTab, setActiveTab }: AuthFormsProps) => {
   // Login form state
   const [loginEmail, setLoginEmail] = useState("");
   const [loginPassword, setLoginPassword] = useState("");
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   
   // Register form state
@@ -29,6 +31,7 @@ const AuthForms = ({ activeTab, setActiveTab }: AuthFormsProps) => {
   const [registerPassword, setRegisterPassword] = useState("");
   const [registerFirstName, setRegisterFirstName] = useState("");
   const [registerLastName, setRegisterLastName] = useState("");
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -49,8 +52,8 @@ const AuthForms = ({ activeTab, setActiveTab }: AuthFormsProps) => {
       
       if (error) throw error;
       
-      toast.success("Successfully logged in");
-      setActiveTab("account");
+      toast.success("Successfully logged in! Welcome back!");
+      window.location.href = '/';
     } catch (error: any) {
       console.error("Login error:", error);
       toast.error(error.message || "Failed to log in");
@@ -70,10 +73,13 @@ const AuthForms = ({ activeTab, setActiveTab }: AuthFormsProps) => {
     setIsRegistering(true);
     
     try {
+      const redirectUrl = `${window.location.origin}/`;
+      
       const { data, error } = await supabase.auth.signUp({
         email: registerEmail,
         password: registerPassword,
         options: {
+          emailRedirectTo: redirectUrl,
           data: {
             first_name: registerFirstName,
             last_name: registerLastName
@@ -83,7 +89,7 @@ const AuthForms = ({ activeTab, setActiveTab }: AuthFormsProps) => {
       
       if (error) throw error;
       
-      toast.success("Account created successfully. Please check your email for verification.");
+      toast.success("Account created successfully! Please check your email for verification.");
       setActiveTab("login");
     } catch (error: any) {
       console.error("Registration error:", error);
@@ -94,141 +100,228 @@ const AuthForms = ({ activeTab, setActiveTab }: AuthFormsProps) => {
   };
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="w-full">
       <Tabs defaultValue="login" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-2 mb-8">
-          <TabsTrigger value="login">Login</TabsTrigger>
-          <TabsTrigger value="register">Register</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 mb-8 bg-accent/50 backdrop-blur-sm border border-burgundy/10">
+          <TabsTrigger 
+            value="login" 
+            className="data-[state=active]:bg-burgundy data-[state=active]:text-white transition-all duration-300"
+          >
+            Sign In
+          </TabsTrigger>
+          <TabsTrigger 
+            value="register"
+            className="data-[state=active]:bg-burgundy data-[state=active]:text-white transition-all duration-300"
+          >
+            Create Account
+          </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="login">
-          <div className="bg-white p-8 rounded-lg border">
-            <form onSubmit={handleLogin}>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input 
-                    id="email" 
-                    type="email" 
-                    value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <div className="flex justify-between items-center">
-                    <Label htmlFor="password">Password</Label>
-                    <Link to="/forgot-password" className="text-sm text-burgundy hover:underline">
-                      Forgot Password?
-                    </Link>
-                  </div>
-                  <Input 
-                    id="password" 
-                    type="password" 
-                    value={loginPassword}
-                    onChange={(e) => setLoginPassword(e.target.value)}
-                    required
-                  />
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="remember" />
-                  <label
-                    htmlFor="remember"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    Remember me
-                  </label>
-                </div>
-                
-                <Button 
-                  type="submit" 
-                  className="w-full bg-burgundy hover:bg-burgundy-light text-white"
-                  disabled={isLoggingIn}
-                >
-                  {isLoggingIn ? "Signing in..." : "Sign In"}
-                </Button>
+        <TabsContent value="login" className="mt-0">
+          <form onSubmit={handleLogin} className="space-y-6">
+            {/* Email Field */}
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-sm font-medium text-burgundy">
+                Email Address
+              </Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  id="email" 
+                  type="email" 
+                  placeholder="Enter your email"
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  className="pl-10 h-12 border-burgundy/20 focus:border-burgundy focus:ring-burgundy/20 transition-all duration-300"
+                  required
+                />
               </div>
-            </form>
-          </div>
+            </div>
+            
+            {/* Password Field */}
+            <div className="space-y-2">
+              <div className="flex justify-between items-center">
+                <Label htmlFor="password" className="text-sm font-medium text-burgundy">
+                  Password
+                </Label>
+                <Link 
+                  to="/forgot-password" 
+                  className="text-xs text-burgundy hover:text-burgundy-light transition-colors hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  id="password" 
+                  type={showLoginPassword ? "text" : "password"}
+                  placeholder="Enter your password"
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  className="pl-10 pr-10 h-12 border-burgundy/20 focus:border-burgundy focus:ring-burgundy/20 transition-all duration-300"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowLoginPassword(!showLoginPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-burgundy transition-colors"
+                >
+                  {showLoginPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+            </div>
+            
+            {/* Remember Me */}
+            <div className="flex items-center space-x-2">
+              <Checkbox id="remember" className="border-burgundy/30 data-[state=checked]:bg-burgundy" />
+              <label htmlFor="remember" className="text-sm text-muted-foreground select-none">
+                Keep me signed in
+              </label>
+            </div>
+            
+            {/* Sign In Button */}
+            <Button 
+              type="submit" 
+              disabled={isLoggingIn}
+              className="w-full h-12 bg-gradient-to-r from-burgundy to-burgundy-light hover:from-burgundy-light hover:to-burgundy text-white font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              {isLoggingIn ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Signing you in...
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" />
+                  Sign In to Élégance
+                </div>
+              )}
+            </Button>
+          </form>
         </TabsContent>
         
-        <TabsContent value="register">
-          <div className="bg-white p-8 rounded-lg border">
-            <form onSubmit={handleRegister}>
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="firstName">First Name</Label>
+        <TabsContent value="register" className="mt-0">
+          <form onSubmit={handleRegister} className="space-y-6">
+            {/* Name Fields */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName" className="text-sm font-medium text-burgundy">
+                  First Name*
+                </Label>
+                <div className="relative">
+                  <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input 
                     id="firstName" 
+                    placeholder="First name"
                     value={registerFirstName}
                     onChange={(e) => setRegisterFirstName(e.target.value)}
+                    className="pl-10 h-12 border-burgundy/20 focus:border-burgundy focus:ring-burgundy/20 transition-all duration-300"
                     required
                   />
                 </div>
-                
-                <div>
-                  <Label htmlFor="lastName">Last Name</Label>
-                  <Input 
-                    id="lastName" 
-                    value={registerLastName}
-                    onChange={(e) => setRegisterLastName(e.target.value)}
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="registerEmail">Email</Label>
-                  <Input 
-                    id="registerEmail" 
-                    type="email" 
-                    value={registerEmail}
-                    onChange={(e) => setRegisterEmail(e.target.value)}
-                    required
-                  />
-                </div>
-                
-                <div>
-                  <Label htmlFor="registerPassword">Password</Label>
-                  <Input 
-                    id="registerPassword" 
-                    type="password" 
-                    value={registerPassword}
-                    onChange={(e) => setRegisterPassword(e.target.value)}
-                    required
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Password must be at least 8 characters long with a number and special character.
-                  </p>
-                </div>
-                
-                <div className="flex items-center space-x-2">
-                  <Checkbox id="terms" required />
-                  <label
-                    htmlFor="terms"
-                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    I agree to the{" "}
-                    <Link to="/terms" className="text-burgundy hover:underline">
-                      Terms of Service
-                    </Link>
-                    {" "}and{" "}
-                    <Link to="/privacy" className="text-burgundy hover:underline">
-                      Privacy Policy
-                    </Link>
-                  </label>
-                </div>
-                
-                <Button 
-                  type="submit" 
-                  className="w-full bg-burgundy hover:bg-burgundy-light text-white"
-                  disabled={isRegistering}
-                >
-                  {isRegistering ? "Creating Account..." : "Create Account"}
-                </Button>
               </div>
-            </form>
-          </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="lastName" className="text-sm font-medium text-burgundy">
+                  Last Name
+                </Label>
+                <Input 
+                  id="lastName" 
+                  placeholder="Last name"
+                  value={registerLastName}
+                  onChange={(e) => setRegisterLastName(e.target.value)}
+                  className="h-12 border-burgundy/20 focus:border-burgundy focus:ring-burgundy/20 transition-all duration-300"
+                />
+              </div>
+            </div>
+            
+            {/* Email Field */}
+            <div className="space-y-2">
+              <Label htmlFor="registerEmail" className="text-sm font-medium text-burgundy">
+                Email Address*
+              </Label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  id="registerEmail" 
+                  type="email" 
+                  placeholder="Enter your email"
+                  value={registerEmail}
+                  onChange={(e) => setRegisterEmail(e.target.value)}
+                  className="pl-10 h-12 border-burgundy/20 focus:border-burgundy focus:ring-burgundy/20 transition-all duration-300"
+                  required
+                />
+              </div>
+            </div>
+            
+            {/* Password Field */}
+            <div className="space-y-2">
+              <Label htmlFor="registerPassword" className="text-sm font-medium text-burgundy">
+                Password*
+              </Label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input 
+                  id="registerPassword" 
+                  type={showRegisterPassword ? "text" : "password"}
+                  placeholder="Create a secure password"
+                  value={registerPassword}
+                  onChange={(e) => setRegisterPassword(e.target.value)}
+                  className="pl-10 pr-10 h-12 border-burgundy/20 focus:border-burgundy focus:ring-burgundy/20 transition-all duration-300"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-burgundy transition-colors"
+                >
+                  {showRegisterPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                Minimum 8 characters with numbers and special characters
+              </p>
+            </div>
+            
+            {/* Terms Agreement */}
+            <div className="flex items-start space-x-3">
+              <Checkbox 
+                id="terms" 
+                required 
+                className="border-burgundy/30 data-[state=checked]:bg-burgundy mt-1" 
+              />
+              <label htmlFor="terms" className="text-sm text-muted-foreground leading-relaxed select-none">
+                I agree to the{" "}
+                <Link to="/terms" className="text-burgundy hover:underline font-medium">
+                  Terms of Service
+                </Link>
+                {" "}and{" "}
+                <Link to="/privacy" className="text-burgundy hover:underline font-medium">
+                  Privacy Policy
+                </Link>
+              </label>
+            </div>
+            
+            {/* Create Account Button */}
+            <Button 
+              type="submit" 
+              disabled={isRegistering}
+              className="w-full h-12 bg-gradient-to-r from-burgundy to-burgundy-light hover:from-burgundy-light hover:to-burgundy text-white font-medium transition-all duration-300 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+            >
+              {isRegistering ? (
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  Creating your account...
+                </div>
+              ) : (
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4" />
+                  Join Élégance Today
+                </div>
+              )}
+            </Button>
+          </form>
         </TabsContent>
       </Tabs>
     </div>

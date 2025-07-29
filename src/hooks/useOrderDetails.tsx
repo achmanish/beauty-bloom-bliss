@@ -48,7 +48,6 @@ export const useOrderDetails = ({ orderId }: UseOrderDetailsProps) => {
           name: item.product.name,
           price: item.price_at_time,
           quantity: item.quantity,
-          size: item.product.size || 'Default',
           image: item.product.image_url
         }));
 
