@@ -1,73 +1,143 @@
-# Welcome to your Lovable project
+# Élégance - Luxury Beauty & Skincare E-commerce Platform
 
-## Project info
+A modern, responsive e-commerce platform for beauty and skincare products, built with React, TypeScript, and Supabase.
 
-**URL**: https://lovable.dev/projects/ee5500b1-ea0c-4e7d-a947-9330eefdaf00
+## Features
 
-## How can I edit this code?
+- **Product Catalog**: Browse luxury beauty and skincare products with advanced filtering
+- **User Authentication**: Secure login/registration system
+- **Shopping Cart**: Smart cart management with quantity controls
+- **Checkout System**: Multiple payment options including Cash on Delivery
+- **Admin Dashboard**: Complete store management interface
+- **Order Management**: Track orders and delivery status
+- **Wishlist**: Save favorite products for later
+- **Search**: Real-time product search functionality
+- **Responsive Design**: Mobile-first responsive design
 
-There are several ways of editing your application.
+## Tech Stack
 
-**Use Lovable**
+- **Frontend**: React 18, TypeScript, Tailwind CSS
+- **Backend**: Supabase (PostgreSQL, Authentication, Storage)
+- **Build Tool**: Vite
+- **UI Components**: shadcn/ui
+- **State Management**: React Context API
+- **Routing**: React Router DOM
+- **Forms**: React Hook Form with validation
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/ee5500b1-ea0c-4e7d-a947-9330eefdaf00) and start prompting.
+## Getting Started
 
-Changes made via Lovable will be committed automatically to this repo.
+### Prerequisites
 
-**Use your preferred IDE**
+- Node.js (version 18 or higher)
+- npm or yarn package manager
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+### Installation
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+1. Clone the repository:
+```bash
+git clone <your-repository-url>
+cd elegance-ecommerce
+```
 
-Follow these steps:
+2. Install dependencies:
+```bash
+npm install
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+3. Set up environment variables:
+Create a `.env.local` file in the root directory and add your Supabase credentials:
+```
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+```
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
+4. Start the development server:
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+The application will be available at `http://localhost:8080`
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## Project Structure
 
-**Use GitHub Codespaces**
+```
+src/
+├── components/          # Reusable UI components
+│   ├── ui/             # shadcn/ui components
+│   ├── account/        # User account components
+│   ├── admin/          # Admin dashboard components
+│   ├── checkout/       # Checkout process components
+│   └── ...
+├── pages/              # Route components
+├── context/            # React Context providers
+├── hooks/              # Custom React hooks
+├── services/           # API services
+├── utils/              # Utility functions
+└── types/              # TypeScript type definitions
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## Key Features
 
-## What technologies are used for this project?
+### User Experience
+- Multi-language support (English/Nepali)
+- Nepal-centric design with local currency (NPR)
+- Mobile-responsive interface
+- Real-time search and filtering
 
-This project is built with:
+### E-commerce Functionality
+- Product catalog with categories
+- Shopping cart with quantity management
+- Secure checkout process
+- Order tracking and history
+- Wishlist management
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+### Admin Features
+- Product management
+- Order processing
+- Customer management
+- Sales analytics
+- Coupon management
 
-## How can I deploy this project?
+### Payment & Shipping
+- Multiple payment gateways
+- Cash on Delivery option
+- Flexible shipping options
+- Real-time cost calculation
 
-Simply open [Lovable](https://lovable.dev/projects/ee5500b1-ea0c-4e7d-a947-9330eefdaf00) and click on Share -> Publish.
+## Deployment
 
-## Can I connect a custom domain to my Lovable project?
+### Build for Production
 
-Yes, you can!
+```bash
+npm run build
+```
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+### Deploy to Vercel
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+```bash
+npm install -g vercel
+vercel --prod
+```
+
+### Deploy to Netlify
+
+```bash
+npm run build
+# Upload the dist/ folder to Netlify
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Support
+
+For support and questions, please contact [your-email@example.com]
