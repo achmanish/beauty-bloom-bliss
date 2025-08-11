@@ -9,7 +9,9 @@ import {
   Settings,
   Tags,
   Ticket,
-  Zap
+  Zap,
+  Star,
+  Mail
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -106,6 +108,30 @@ const AdminSidebar = ({ activeTab, setActiveTab, user, onLogout }: AdminSidebarP
             >
               <Zap className="h-5 w-5 mr-3" />
               Flash Sales
+            </Button>
+            <Button 
+              variant={activeTab === "reviews" ? "default" : "ghost"} 
+              className={`w-full justify-start transition-all duration-200 ${
+                activeTab === "reviews" 
+                  ? "bg-burgundy text-white hover:bg-burgundy/90" 
+                  : "hover:bg-gray-100"
+              }`}
+              onClick={() => setActiveTab("reviews")}
+            >
+              <Star className="h-5 w-5 mr-3" />
+              Reviews
+            </Button>
+            <Button 
+              variant={activeTab === "newsletter" ? "default" : "ghost"} 
+              className={`w-full justify-start transition-all duration-200 ${
+                activeTab === "newsletter" 
+                  ? "bg-burgundy text-white hover:bg-burgundy/90" 
+                  : "hover:bg-gray-100"
+              }`}
+              onClick={() => setActiveTab("newsletter")}
+            >
+              <Mail className="h-5 w-5 mr-3" />
+              Newsletter
             </Button>
             <Button 
               variant={activeTab === "customers" ? "default" : "ghost"} 

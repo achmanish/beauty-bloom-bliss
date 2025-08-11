@@ -6,6 +6,8 @@ import ProductsTab from "@/components/admin/ProductsTab";
 import CategoriesTab from "@/components/admin/CategoriesTab";
 import CouponsTab from "@/components/admin/CouponsTab";
 import FlashSalesTab from "@/components/admin/FlashSalesTab";
+import ReviewsTab from "@/components/admin/ReviewsTab";
+import NewsletterTab from "@/components/admin/NewsletterTab";
 import { Order, Product, Payment, Category, Coupon, FlashSale } from "@/types/admin";
 import { RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -139,6 +141,10 @@ const AdminDashboardContent = ({
         return <CouponsTab coupons={coupons} refreshData={refreshData} />;
       case "flash-sales":
         return <FlashSalesTab flashSales={flashSales} refreshData={refreshData} />;
+      case "reviews":
+        return <ReviewsTab />;
+      case "newsletter":
+        return <NewsletterTab />;
       case "customers":
         return <CustomersTab />;
       case "settings":

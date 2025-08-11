@@ -12,6 +12,9 @@ import { useCartContext } from '@/context/CartContext';
 import { useWishlist } from '@/context/WishlistContext';
 import { useAuth } from '@/context/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import ProductReviews from '@/components/reviews/ProductReviews';
+import ProductImageGallery from '@/components/ProductImageGallery';
+import ProductSaleBadge from '@/components/ProductSaleBadge';
 
 interface Product {
   id: string;
@@ -197,20 +200,17 @@ const ProductDetail = () => {
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          {/* Product Image */}
-          <div>
-            <div className="aspect-square rounded-lg overflow-hidden bg-gray-100">
-              <img 
-                src={product.image_url || 'https://via.placeholder.com/500'} 
-                alt={product.name} 
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  // If image fails to load, set a placeholder
-                  const target = e.target as HTMLImageElement;
-                  target.src = 'https://via.placeholder.com/500?text=Image+Not+Found';
-                }}
-              />
-            </div>
+          {/* Product Images */}
+          <div className="relative">
+            <ProductImageGallery 
+              images={[{ id: '1', image_url: product.image_url || 'https://via.placeholder.com/500', alt_text: product.name }]}
+              productName={product.name}
+            />
+            <ProductSaleBadge 
+              originalPrice={product.price * 1.2} 
+              salePrice={product.price}
+              className="z-20"
+            />
           </div>
           
           {/* Product Info */}
@@ -342,6 +342,11 @@ const ProductDetail = () => {
               )}
             </TabsContent>
           </Tabs>
+        </div>
+        
+        {/* Reviews Section */}
+        <div className="mt-16">
+          <ProductReviews productId={productId || ''} />
         </div>
         
         {/* Related Products */}

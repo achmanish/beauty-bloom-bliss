@@ -1,24 +1,18 @@
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import NewsletterSignup from './NewsletterSignup';
 
 const Newsletter = () => {
   return (
     <section className="py-20 bg-rose">
-      <div className="container mx-auto px-4 text-center">
-        <h2 className="font-playfair text-4xl mb-6 text-burgundy">Join Our Beauty Community</h2>
-        <p className="text-gray-600 mb-8 max-w-md mx-auto">
-          Subscribe to receive exclusive offers, beauty tips, and new product announcements.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-          <Input
-            type="email"
-            placeholder="Enter your email"
-            className="bg-white/80 border-burgundy/20"
-          />
-          <Button className="bg-burgundy hover:bg-burgundy-light text-white">
-            Subscribe
-          </Button>
+      <div className="container mx-auto px-4">
+        <div className="max-w-2xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="font-playfair text-4xl mb-6 text-burgundy">Join Our Beauty Community</h2>
+            <p className="text-gray-600 mb-8">
+              Subscribe to receive exclusive offers, beauty tips, and new product announcements.
+            </p>
+          </div>
+          <NewsletterSignup />
         </div>
       </div>
     </section>

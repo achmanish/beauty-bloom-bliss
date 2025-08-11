@@ -2,9 +2,11 @@
 import { useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Eye, X, ShoppingBag } from "lucide-react";
+import { Eye, X, ShoppingBag, Package } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Order } from "@/types/admin";
+import OrderTracking from "@/components/order/OrderTracking";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 
 interface OrdersListProps {
   orders: Order[];
@@ -75,6 +77,21 @@ const OrdersList = ({
                           <Eye className="w-4 h-4 mr-2" />
                           View
                         </Button>
+                        
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Package className="w-4 h-4 mr-2" />
+                              Track
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-2xl">
+                            <DialogHeader>
+                              <DialogTitle>Order Tracking - #{order.id.slice(0, 8)}</DialogTitle>
+                            </DialogHeader>
+                            <OrderTracking orderId={order.id} />
+                          </DialogContent>
+                        </Dialog>
                         
                         {order.status !== 'Cancelled' && order.status !== 'Delivered' && (
                           <Button 
